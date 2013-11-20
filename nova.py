@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# coding: latin_1
+
 import libtcodpy as libtcod
 from random import randrange, choice
 
@@ -19,9 +22,11 @@ libtcod.console_set_custom_font('12x12.png', libtcod.FONT_TYPE_GREYSCALE | libtc
 libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'python/libtcod tutorial', False)
 libtcod.sys_set_fps(LIMIT_FPS)
 
-panel = libtcod.console_new(HUD_WIDTH, HUD_HEIGHT)
+panel_console = libtcod.console_new(HUD_WIDTH, HUD_HEIGHT)
+panel_buffer  = libtcod.ConsoleBuffer(HUD_WIDTH, HUD_HEIGHT)
+
+buffer = libtcod.ConsoleBuffer(SCREEN_WIDTH, SCREEN_HEIGHT)
 con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
-buffer = libtcod.ConsoleBuffer(SCREEN_WIDTH, SCREEN_HEIGHT, 50, 50, 150)
 
 mouse = libtcod.Mouse()
 key = libtcod.Key()
@@ -74,9 +79,30 @@ class Ship:
         self.y = SCREEN_HEIGHT / 2
         self.heading = 0
         self.velocity = 0
+        self.ship = [
+            # r'  ^   ',
+            # r' /#\  ',
+            # r' ###  ',
+            # r'/#V#\ ',
+            # r'\/ \/ ',]
+            r'  ª   ',
+            r' ûÛú  ',
+            r' ÛÛÛ  ',
+            r'ûÛVÛú ',
+            r'üý üý ',]
 
     def draw(self):
-        buffer.set_fore(self.x, self.y, 255, 255, 255, '@')
+        for y, line in enumerate(self.ship):
+            for x, char in enumerate(line):
+                if char != " ":
+                    # if char == "\\":
+                    #     code = 252
+                    # else:
+                    code = ord(char)
+
+                    buffer.set_fore(self.x + x, self.y + y, 255, 255, 255, code)
+
+        # buffer.set_fore(self.x, self.y, 255, 255, 255, ord('@'))
 
 
 player_ship = Ship()
@@ -90,7 +116,7 @@ def render_all():
             color = 170
         elif star[2] == 1:
             color = 85
-        buffer.set_fore(star[0], star[1], color, color, color, chr(15))
+        buffer.set_fore(star[0], star[1], color, color, color, 15)
 
     for object in objects:
         object.draw()
@@ -98,11 +124,14 @@ def render_all():
     buffer.blit(con)
     libtcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
 
-    libtcod.console_set_default_foreground(panel, libtcod.white)
-    libtcod.console_print_ex(panel, 0, 0, libtcod.BKGND_NONE, libtcod.LEFT,
+    libtcod.console_set_default_foreground(panel_console, libtcod.white)
+    libtcod.console_print_ex(panel_console, 0, 0, libtcod.BKGND_NONE, libtcod.LEFT,
         "Ship [Heading: {}]  [Velocity: {}]  [Position: {}, {}]".format(
             player_ship.heading, player_ship.velocity, player_ship.x, player_ship.y) )
-    libtcod.console_blit(panel, 0, 0, HUD_WIDTH, HUD_HEIGHT, 0, 0, 0)
+
+    # panel_buffer.blit( panel_console )
+    libtcod.console_blit(panel_console, 0, 0, HUD_WIDTH, HUD_HEIGHT, 0, 0, 0)
+
     buffer.clear()
 
 
