@@ -8,8 +8,8 @@ from random import randrange, choice
 SCREEN_WIDTH = 180
 SCREEN_HEIGHT = 106
 
-HUD_WIDTH = SCREEN_WIDTH
 HUD_HEIGHT = 1
+HUD_WIDTH = SCREEN_WIDTH
 LIMIT_FPS = 30
 MAX_STARS = 250
 
@@ -18,7 +18,8 @@ MAX_STARS = 250
 # for x in range(0, 10):
 #     print(repr([libtcod.heightmap_get_value(hm, x, y) for y in range(0, 10)]))
 
-libtcod.console_set_custom_font('8x8.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)
+# libtcod.console_set_custom_font('8x8.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)
+libtcod.console_set_custom_font('data/fonts/terminal8x8_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 
 libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'python/libtcod tutorial', False)
 libtcod.sys_set_fps(LIMIT_FPS)
@@ -35,28 +36,18 @@ key = libtcod.Key()
 class Starfield:
     def __init__(self):
         self.parallax_speeds = [0.3, 0.6, 1.0]
+        # self.star_characters = [7, ord('*'), 15]
+        self.star_characters = [7, ord('*')]
         self.stars = [
-            [float(randrange(0, SCREEN_WIDTH)), float(randrange(0, SCREEN_HEIGHT)), choice(self.parallax_speeds)]
-                for i in range(0, MAX_STARS) ]
+            [float(randrange(0, SCREEN_WIDTH)), float(randrange(0, SCREEN_HEIGHT)),
+                choice(self.parallax_speeds), choice(self.star_characters)]
+                    for i in range(0, MAX_STARS) ]
 
     def __getitem__(self, index):
         return self.stars[index]
 
     def scroll(self, heading=0.0, velocity=0.0):
-        # if heading == 0:
-        #     deltax = 1.0
-        #     deltay = 0.0
-        # elif heading == 90:
-        #     deltax = 0.0
-        #     deltay = 1.0
-        # elif heading == 180:
-        #     deltax = -1.0
-        #     deltay = 0.0
-        # elif heading == 270:
-        #     deltax = 0.0
-        #     deltay = -1.0
-
-        deltax = math.cos(heading) * velocity
+        deltax = math.cos(heading) * velocity * -1
         deltay = math.sin(heading) * velocity
 
         for star in self.stars:
@@ -86,33 +77,101 @@ class Ship:
         self.x = SCREEN_WIDTH / 2
         self.y = SCREEN_HEIGHT / 2
 
-        self.deltav = 1.0
+        self.deltav = 0.25
         self.turn_rate = math.radians(1.0)
         self.twopi = 2 * math.pi
+        self.max_heading = self.twopi - self.turn_rate
 
         self.heading = 0.0
         self.velocity = 0.0
         self.ship = [
+            [r'    ',
+             r'####',
+             r'    ',
+             r'    ',],
+            [r'    ',
+             r'  ##',
+             r'##  ',
+             r'    ',],
+            [r'   #',
+             r'  # ',
+             r' #  ',
+             r'#   ',],
+            [r'  # ',
+             r'  # ',
+             r' #  ',
+             r' #  ',],
+            [r' #  ',
+             r' #  ',
+             r' #  ',
+             r' #  ',],
+
+            # [
+            #     r'####     ',
+            #     r' #####   ',
+            #     r'  #####  ',
+            #     r'  ###### ',
+            #     r'  #####  ',
+            #     r' #####   ',
+            #     r'####     ',
+            #     r'         ',],
+            # [
+            #     r'  #### # ',
+            #     r'#########',
+            #     r'   ##### ',
+            #     r'   ##### ',
+            #     r'    #### ',
+            #     r'   ###   ',
+            #     r'   ###   ',
+            #     r'         ',],
+            # [
+            #     r'      #  ',
+            #     r'  # #### ',
+            #     r' ####### ',
+            #     r'######## ',
+            #     r'   ##### ',
+            #     r'    ###  ',
+            #     r'     #   ',],
+            # [
+            #     r'    ##   ',
+            #     r'   ####  ',
+            #     r' ######  ',
+            #     r' ######  ',
+            #     r'#######  ',
+            #     r'##  ###  ',
+            #     r'     ##  ',
+            #     r'     ##  ',],
+            # [
+            #     r'   #     ',
+            #     r'  ###    ',
+            #     r' #####   ',
+            #     r' #####   ',
+            #     r'#######  ',
+            #     r'#######  ',
+            #     r'##   ##  ',
+            #     r'#     #  ',],
+
             # r'  ^   ',
             # r' /#\  ',
             # r' ###  ',
             # r'/#V#\ ',
             # r'\/ \/ ',]
-            r'  ª   ',
-            r' ûÛú  ',
-            r' ÛÛÛ  ',
-            r'ûÛVÛú ',
-            r'üı üı ',]
+            # r'  ª   ',
+            # r' ûÛú  ',
+            # r' ÛÛÛ  ',
+            # r'ûÛVÛú ',
+            # r'üı üı ',]
+            ]
 
     def turn_left(self):
         self.heading += self.turn_rate
-        if self.heading > self.twopi:
+        if self.heading > self.max_heading:
             self.heading = 0.0
 
     def turn_right(self):
         self.heading -= self.turn_rate
         if self.heading < 0.0:
-            self.heading = self.twopi
+            self.heading = self.max_heading
 
     def increase_throttle(self):
         self.velocity += self.deltav
@@ -123,7 +182,20 @@ class Ship:
             self.velocity = 0.0
 
     def draw(self):
-        for y, line in enumerate(self.ship):
+        heading = math.degrees(self.heading)
+        if heading >= 348.75 or heading < 11.25:
+            ship = self.ship[0]
+        elif 11.25 <= heading < 33.75:
+            ship = self.ship[1]
+        elif 33.75 <= heading < 56.25:
+            ship = self.ship[2]
+        elif 56.25 <= heading < 78.75:
+            ship = self.ship[3]
+        elif 78.75 <= heading < 101.25:
+            ship = self.ship[4]
+        else:
+            ship = self.ship[0]
+        for y, line in enumerate(ship):
             for x, char in enumerate(line):
                 if char != " ":
                     # if char == "\\":
@@ -148,7 +220,7 @@ def render_all():
             color = 170
         elif 0.2 < star[2] < 0.4:
             color = 85
-        buffer.set_fore(int(round(star[0])), int(round(star[1])), color, color, color, 15)
+        buffer.set_fore(int(round(star[0])), int(round(star[1])), color, color, color, star[3])
 
     for object in objects:
         object.draw()
