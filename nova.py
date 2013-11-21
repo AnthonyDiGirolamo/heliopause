@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding: latin_1
+# coding: utf-8
 
 import libtcodpy as libtcod
 import math
