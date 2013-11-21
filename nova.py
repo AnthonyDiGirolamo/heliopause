@@ -42,6 +42,8 @@ libtcod.console_set_key_color(ship_console, libtcod.blue)
 mouse = libtcod.Mouse()
 key = libtcod.Key()
 
+libtcod.console_set_keyboard_repeat(1, 10)
+
 class Particle:
     def __init__(self, x, y, r, g, b, c=219):
         self.x = x
@@ -121,6 +123,11 @@ class Ship:
         self.velocity = 0.0
 
         self.ship = [libtcod.image_load('ship_{}.png'.format(str(angle).zfill(3))) for angle in range(0, 360, 10)]
+
+        self.throttle_open = False
+        self.turning_left  = False
+        self.turning_right = False
+        self.reversing     = False
 
     def turn_left(self):
         self.heading += self.turn_rate
@@ -250,20 +257,19 @@ def handle_keys():
     global key;
 
     if key.vk == libtcod.KEY_ENTER and key.lalt:
-        #Alt+Enter: toggle fullscreen
         libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
     elif key.vk == libtcod.KEY_ESCAPE:
         return 'exit'  #exit game
-    # if game_state == 'playing':
-    #     #movement keys
+
     if key.vk == libtcod.KEY_UP:
-        player_ship.apply_thrust()
-    elif key.vk == libtcod.KEY_DOWN:
-        player_ship.reverse_direction()
-    elif key.vk == libtcod.KEY_LEFT:
-        player_ship.turn_left()
-    elif key.vk == libtcod.KEY_RIGHT:
-        player_ship.turn_right()
+        player_ship.throttle_open = key.pressed
+    if key.vk == libtcod.KEY_DOWN:
+        player_ship.reversing = key.pressed
+    if key.vk == libtcod.KEY_LEFT:
+        player_ship.turning_left = key.pressed
+    if key.vk == libtcod.KEY_RIGHT:
+        player_ship.turning_right = key.pressed
+
     #     else:
     #         #test for other keys
     #         key_char = chr(key.c)
@@ -286,7 +292,7 @@ def handle_keys():
     #         return 'didnt-take-turn'
 
 while not libtcod.console_is_window_closed():
-    libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS|libtcod.EVENT_MOUSE,key,mouse)
+    libtcod.sys_check_for_event(libtcod.KEY_PRESSED|libtcod.KEY_RELEASED|libtcod.EVENT_MOUSE,key,mouse)
 
     if player_ship.velocity > 0.0:
         starfield.scroll( player_ship.velocity_angle, player_ship.velocity )
@@ -298,4 +304,14 @@ while not libtcod.console_is_window_closed():
     player_action = handle_keys()
     if player_action == 'exit':
         break
+
+    if player_ship.throttle_open:
+        player_ship.apply_thrust()
+
+    if player_ship.reversing:
+        player_ship.reverse_direction()
+    elif player_ship.turning_left:
+        player_ship.turn_left()
+    elif player_ship.turning_right:
+        player_ship.turn_right()
 
