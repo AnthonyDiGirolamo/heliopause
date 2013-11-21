@@ -42,6 +42,15 @@ libtcod.console_set_key_color(ship_console, libtcod.blue)
 mouse = libtcod.Mouse()
 key = libtcod.Key()
 
+class Particle:
+    def __init__(self, x, y, r, g, b, c=219):
+        self.x = x
+        self.y = y
+        self.character = c
+        self.color_index = 20
+        self.colormap = libtcod.color_gen_map([ libtcod.Color( 0,0,0 ), libtcod.Color(r,g,b) ], [ 0, self.color_index ])
+        self.valid = True
+
 class Starfield:
     def __init__(self):
         self.parallax_speeds = [0.3, 0.6, 1.0]
@@ -51,9 +60,13 @@ class Starfield:
             [float(randrange(0, SCREEN_WIDTH)), float(randrange(0, SCREEN_HEIGHT)),
                 choice(self.parallax_speeds), choice(self.star_characters)]
                     for i in range(0, MAX_STARS) ]
+        self.particles = []
 
     def __getitem__(self, index):
         return self.stars[index]
+
+    def add_particle(self, x, y, r, g, b):
+        self.particles.append( Particle(x, y, r, g, b) )
 
     def scroll(self, heading=0.0, velocity=0.0):
         deltax = math.cos(heading) * velocity * -1
@@ -78,6 +91,17 @@ class Starfield:
                 star[0] = randrange(0, SCREEN_WIDTH-1)
                 star[1] = SCREEN_HEIGHT-1
                 star[2] = choice(self.parallax_speeds)
+
+    def update_particles(self, heading=0.0, velocity=0.0):
+        deltax = math.cos(heading) * velocity * -1
+        deltay = math.sin(heading) * velocity
+        for particle in self.particles:
+            if particle.valid:
+                particle.x += deltax
+                particle.y += deltay
+                particle.color_index -= 1
+                if particle.color_index < 0:
+                    particle.valid = False
 
 starfield = Starfield()
 
@@ -214,34 +238,14 @@ class Ship:
         if self.velocity < 0.15:
             self.velocity = 0.0
 
+        starfield.add_particle(self.x+3, self.y+3, 255, 0, 0)
+
     def reverse_direction(self):
         if self.velocity > 0.0:
             if not (self.velocity_angle_opposite - self.turn_rate) < self.heading < (self.velocity_angle_opposite + self.turn_rate):
                 self.turn_left()
 
-
-    # def increase_throttle(self):
-    #     self.velocity += self.deltav
-
-    # def decrease_throttle(self):
-    #     self.velocity -= self.deltav
-    #     if self.velocity < 0:
-    #         self.velocity = 0.0
-
     def draw(self):
-        # heading = math.degrees(self.heading)
-        # if heading >= 348.75 or heading < 11.25:
-        #     ship = self.ship[0]
-        # elif 11.25 <= heading < 33.75:
-        #     ship = self.ship[1]
-        # elif 33.75 <= heading < 56.25:
-        #     ship = self.ship[2]
-        # elif 56.25 <= heading < 78.75:
-        #     ship = self.ship[3]
-        # elif 78.75 <= heading < 101.25:
-        #     ship = self.ship[4]
-        # else:
-        #     ship = self.ship[0]
 
         sprite_index = int(round(math.degrees(self.heading), -1)/10)
         if sprite_index > 35:
@@ -282,6 +286,21 @@ def render_all():
         elif 0.2 < star[2] < 0.4:
             color = 85
         buffer.set_fore(int(round(star[0])), int(round(star[1])), color, color, color, star[3])
+
+    for p in starfield.particles:
+        if p.valid:
+            color = p.colormap[p.color_index]
+            x = int(round(p.x))
+            y = int(round(p.y))
+            if x < 2 or x > SCREEN_WIDTH-2 or y < 2 or y > SCREEN_HEIGHT-3:
+                p.valid = False
+                continue
+
+            buffer.set_fore(x,   y, color[0], color[1], color[2], p.character)
+            buffer.set_fore(x+1, y,   color[0], color[1], color[2], p.character)
+            buffer.set_fore(x-1, y,   color[0], color[1], color[2], p.character)
+            buffer.set_fore(x,   y+1, color[0], color[1], color[2], p.character)
+            buffer.set_fore(x,   y-1, color[0], color[1], color[2], p.character)
 
     for object in objects:
         object.draw()
@@ -348,6 +367,7 @@ while not libtcod.console_is_window_closed():
 
     if player_ship.velocity > 0.0:
         starfield.scroll( player_ship.velocity_angle, player_ship.velocity )
+    starfield.update_particles( player_ship.velocity_angle, player_ship.velocity )
 
     render_all()
     libtcod.console_flush()
