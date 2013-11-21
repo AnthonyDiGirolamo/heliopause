@@ -5,8 +5,8 @@ import libtcodpy as libtcod
 import math
 from random import randrange, choice
 
-SCREEN_WIDTH = 118
-SCREEN_HEIGHT = 70
+SCREEN_WIDTH = 180
+SCREEN_HEIGHT = 106
 
 HUD_WIDTH = SCREEN_WIDTH
 HUD_HEIGHT = 1
@@ -18,7 +18,7 @@ MAX_STARS = 250
 # for x in range(0, 10):
 #     print(repr([libtcod.heightmap_get_value(hm, x, y) for y in range(0, 10)]))
 
-libtcod.console_set_custom_font('12x12.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)
+libtcod.console_set_custom_font('8x8.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)
 
 libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'python/libtcod tutorial', False)
 libtcod.sys_set_fps(LIMIT_FPS)
