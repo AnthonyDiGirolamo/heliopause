@@ -438,7 +438,8 @@ class ConsoleBuffer:
         self.fore_r[i] = r
         self.fore_g[i] = g
         self.fore_b[i] = b
-        self.char[i] = ord(char)
+        # self.char[i] = ord(char)
+        self.char[i] = char
 
     def set_back(self, x, y, r, g, b):
         # set the background color of one cell.
@@ -456,7 +457,8 @@ class ConsoleBuffer:
         self.fore_r[i] = fore_r
         self.fore_g[i] = fore_g
         self.fore_b[i] = fore_b
-        self.char[i] = ord(char)
+        # self.char[i] = ord(char)
+        self.char[i] = char
 
     def blit(self, dest, fill_fore=True, fill_back=True):
         # use libtcod's "fill" functions to write the buffer to a console.
