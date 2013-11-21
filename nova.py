@@ -211,10 +211,11 @@ class Ship:
         #     ship = self.ship[0]
 
         ship = self.ship[int(round(math.degrees(self.heading), -1)/10)]
-        # libtcod.image_set_key_color(ship, libtcod.black)
+        libtcod.image_set_key_color(ship, libtcod.blue)
+        libtcod.image_blit(ship, con, self.x+4, self.y+4, libtcod.BKGND_SET, 1.0, 1.0, 0)
+
         # libtcod.image_blit_2x(ship, con, self.x, self.y)
-        libtcod.image_blit_2x(ship, ship_console, 0, 0)
-        # libtcod.image_blit(ship, con, self.x+4, self.y+4, libtcod.BKGND_SET, 1.0, 1.0, 0)
+        # libtcod.image_blit_2x(ship, ship_console, 0, 0)
 
         # for y, line in enumerate(ship):
         #     for x, char in enumerate(line):
@@ -247,10 +248,10 @@ def render_all():
         object.draw()
 
     buffer.blit(con)
+    player_ship.draw()
     libtcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
 
-    player_ship.draw()
-    libtcod.console_blit(ship_console, 0, 0, 0, 0, 0, player_ship.x, player_ship.y, 1.0, 1.0)
+    # libtcod.console_blit(ship_console, 0, 0, 0, 0, 0, player_ship.x, player_ship.y, 1.0, 1.0)
 
     libtcod.console_print_ex(panel_console, 0, 0, libtcod.BKGND_NONE, libtcod.LEFT,
         "Ship [Heading: {}]  [Velocity: {}]  [Position: {}, {}]".format(
