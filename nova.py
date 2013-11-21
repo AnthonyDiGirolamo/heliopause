@@ -211,9 +211,14 @@ class Ship:
         else:
             self.velocity_angle_opposite = self.velocity_angle + math.pi
 
+        if self.velocity < 0.15:
+            self.velocity = 0.0
+
     def reverse_direction(self):
-        if not (self.velocity_angle_opposite - self.turn_rate) < self.heading < (self.velocity_angle_opposite + self.turn_rate):
-            self.heading += self.turn_rate
+        if self.velocity > 0.0:
+            if not (self.velocity_angle_opposite - self.turn_rate) < self.heading < (self.velocity_angle_opposite + self.turn_rate):
+                self.turn_left()
+
 
     # def increase_throttle(self):
     #     self.velocity += self.deltav
@@ -238,7 +243,13 @@ class Ship:
         # else:
         #     ship = self.ship[0]
 
-        ship = self.ship[int(round(math.degrees(self.heading), -1)/10)]
+        sprite_index = int(round(math.degrees(self.heading), -1)/10)
+        if sprite_index > 35:
+            sprite_index = 0
+        if sprite_index < 0:
+            sprite_index = 0
+
+        ship = self.ship[sprite_index]
         libtcod.image_set_key_color(ship, libtcod.blue)
         libtcod.image_blit(ship, con, self.x+4, self.y+4, libtcod.BKGND_SET, 1.0, 1.0, 0)
 
