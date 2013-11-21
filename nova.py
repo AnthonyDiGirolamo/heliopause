@@ -47,7 +47,7 @@ class Particle:
         self.x = x
         self.y = y
         self.character = c
-        self.color_index = 20
+        self.color_index = 10
         self.colormap = libtcod.color_gen_map([ libtcod.Color( 0,0,0 ), libtcod.Color(r,g,b) ], [ 0, self.color_index ])
         self.valid = True
 
@@ -97,8 +97,8 @@ class Starfield:
         deltay = math.sin(heading) * velocity
         for particle in self.particles:
             if particle.valid:
-                particle.x += deltax
-                particle.y += deltay
+                particle.x += deltax * self.parallax_speeds[0]
+                particle.y += deltay * self.parallax_speeds[0]
                 particle.color_index -= 1
                 if particle.color_index < 0:
                     particle.valid = False
@@ -121,87 +121,6 @@ class Ship:
         self.velocity = 0.0
 
         self.ship = [libtcod.image_load('ship_{}.png'.format(str(angle).zfill(3))) for angle in range(0, 360, 10)]
-        # for ship in self.ship:
-        #     libtcod.image_set_key_color(ship, libtcod.black)
-
-            # [
-            # [r'    ',
-            #  r'####',
-            #  r'    ',
-            #  r'    ',],
-            # [r'    ',
-            #  r'  ##',
-            #  r'##  ',
-            #  r'    ',],
-            # [r'   #',
-            #  r'  # ',
-            #  r' #  ',
-            #  r'#   ',],
-            # [r'  # ',
-            #  r'  # ',
-            #  r' #  ',
-            #  r' #  ',],
-            # [r' #  ',
-            #  r' #  ',
-            #  r' #  ',
-            #  r' #  ',],
-
-            # [
-            #     r'####     ',
-            #     r' #####   ',
-            #     r'  #####  ',
-            #     r'  ###### ',
-            #     r'  #####  ',
-            #     r' #####   ',
-            #     r'####     ',
-            #     r'         ',],
-            # [
-            #     r'  #### # ',
-            #     r'#########',
-            #     r'   ##### ',
-            #     r'   ##### ',
-            #     r'    #### ',
-            #     r'   ###   ',
-            #     r'   ###   ',
-            #     r'         ',],
-            # [
-            #     r'      #  ',
-            #     r'  # #### ',
-            #     r' ####### ',
-            #     r'######## ',
-            #     r'   ##### ',
-            #     r'    ###  ',
-            #     r'     #   ',],
-            # [
-            #     r'    ##   ',
-            #     r'   ####  ',
-            #     r' ######  ',
-            #     r' ######  ',
-            #     r'#######  ',
-            #     r'##  ###  ',
-            #     r'     ##  ',
-            #     r'     ##  ',],
-            # [
-            #     r'   #     ',
-            #     r'  ###    ',
-            #     r' #####   ',
-            #     r' #####   ',
-            #     r'#######  ',
-            #     r'#######  ',
-            #     r'##   ##  ',
-            #     r'#     #  ',],
-
-            # r'  ^   ',
-            # r' /#\  ',
-            # r' ###  ',
-            # r'/#V#\ ',
-            # r'\/ \/ ',]
-            # r'  ª   ',
-            # r' ûÛú  ',
-            # r' ÛÛÛ  ',
-            # r'ûÛVÛú ',
-            # r'üý üý ',]
-            # ]
 
     def turn_left(self):
         self.heading += self.turn_rate
@@ -217,8 +136,10 @@ class Ship:
         velocity_vectorx = math.cos(self.velocity_angle) * self.velocity
         velocity_vectory = math.sin(self.velocity_angle) * self.velocity
 
-        deltavx = math.cos(self.heading) * self.deltav
-        deltavy = math.sin(self.heading) * self.deltav
+        x_component = math.cos(self.heading)
+        y_component = math.sin(self.heading)
+        deltavx = x_component * self.deltav
+        deltavy = y_component * self.deltav
 
         newx = velocity_vectorx + deltavx
         newy = velocity_vectory + deltavy
@@ -237,12 +158,14 @@ class Ship:
 
         if self.velocity < 0.15:
             self.velocity = 0.0
+        elif self.velocity > 7.0:
+            self.velocity = 7.0
 
-        starfield.add_particle(self.x+3, self.y+3, 255, 0, 0)
+        starfield.add_particle(self.x+3+x_component*-3, self.y+3+y_component*3, 0, 174, 255)
 
     def reverse_direction(self):
         if self.velocity > 0.0:
-            if not (self.velocity_angle_opposite - self.turn_rate) < self.heading < (self.velocity_angle_opposite + self.turn_rate):
+            if not (self.velocity_angle_opposite - self.turn_rate*0.9) < self.heading < (self.velocity_angle_opposite + self.turn_rate*0.9):
                 self.turn_left()
 
     def draw(self):
