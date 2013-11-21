@@ -35,7 +35,9 @@ libtcod.console_set_default_foreground(panel_console, libtcod.white)
 
 buffer = libtcod.ConsoleBuffer(SCREEN_WIDTH, SCREEN_HEIGHT)
 con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
+
 ship_console = libtcod.console_new(8, 8)
+libtcod.console_set_key_color(ship_console, libtcod.blue)
 
 mouse = libtcod.Mouse()
 key = libtcod.Key()
@@ -209,8 +211,8 @@ class Ship:
         #     ship = self.ship[0]
 
         ship = self.ship[int(round(math.degrees(self.heading), -1)/10)]
-        # libtcod.image_blit_2x(ship, con, self.x-4, self.y-4)
         # libtcod.image_set_key_color(ship, libtcod.black)
+        # libtcod.image_blit_2x(ship, con, self.x, self.y)
         libtcod.image_blit_2x(ship, ship_console, 0, 0)
         # libtcod.image_blit(ship, con, self.x+4, self.y+4, libtcod.BKGND_SET, 1.0, 1.0, 0)
 
