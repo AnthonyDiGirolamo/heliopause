@@ -29,6 +29,7 @@ panel_buffer  = libtcod.ConsoleBuffer(HUD_WIDTH, HUD_HEIGHT)
 
 buffer = libtcod.ConsoleBuffer(SCREEN_WIDTH, SCREEN_HEIGHT)
 con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
+ship_console = libtcod.console_new(8, 8)
 
 mouse = libtcod.Mouse()
 key = libtcod.Key()
@@ -74,37 +75,40 @@ starfield = Starfield()
 
 class Ship:
     def __init__(self):
-        self.x = SCREEN_WIDTH / 2
-        self.y = SCREEN_HEIGHT / 2
+        self.x = (SCREEN_WIDTH / 2) - 4
+        self.y = (SCREEN_HEIGHT / 2) - 4
 
         self.deltav = 0.25
-        self.turn_rate = math.radians(1.0)
+        self.turn_rate = math.radians(10.0)
         self.twopi = 2 * math.pi
         self.max_heading = self.twopi - self.turn_rate
 
         self.heading = 0.0
         self.velocity = 0.0
-        self.ship = [
-            [r'    ',
-             r'####',
-             r'    ',
-             r'    ',],
-            [r'    ',
-             r'  ##',
-             r'##  ',
-             r'    ',],
-            [r'   #',
-             r'  # ',
-             r' #  ',
-             r'#   ',],
-            [r'  # ',
-             r'  # ',
-             r' #  ',
-             r' #  ',],
-            [r' #  ',
-             r' #  ',
-             r' #  ',
-             r' #  ',],
+
+        self.ship = [libtcod.image_load('ship_{}.png'.format(str(angle).zfill(3))) for angle in range(0, 360, 10)]
+
+            # [
+            # [r'    ',
+            #  r'####',
+            #  r'    ',
+            #  r'    ',],
+            # [r'    ',
+            #  r'  ##',
+            #  r'##  ',
+            #  r'    ',],
+            # [r'   #',
+            #  r'  # ',
+            #  r' #  ',
+            #  r'#   ',],
+            # [r'  # ',
+            #  r'  # ',
+            #  r' #  ',
+            #  r' #  ',],
+            # [r' #  ',
+            #  r' #  ',
+            #  r' #  ',
+            #  r' #  ',],
 
             # [
             #     r'####     ',
@@ -161,7 +165,7 @@ class Ship:
             # r' ÛÛÛ  ',
             # r'ûÛVÛú ',
             # r'üý üý ',]
-            ]
+            # ]
 
     def turn_left(self):
         self.heading += self.turn_rate
@@ -182,34 +186,40 @@ class Ship:
             self.velocity = 0.0
 
     def draw(self):
-        heading = math.degrees(self.heading)
-        if heading >= 348.75 or heading < 11.25:
-            ship = self.ship[0]
-        elif 11.25 <= heading < 33.75:
-            ship = self.ship[1]
-        elif 33.75 <= heading < 56.25:
-            ship = self.ship[2]
-        elif 56.25 <= heading < 78.75:
-            ship = self.ship[3]
-        elif 78.75 <= heading < 101.25:
-            ship = self.ship[4]
-        else:
-            ship = self.ship[0]
-        for y, line in enumerate(ship):
-            for x, char in enumerate(line):
-                if char != " ":
-                    # if char == "\\":
-                    #     code = 252
-                    # else:
-                    code = ord(char)
+        # libtcod.image_blit(self.ship_image, con, self.x, self.y, libtcod.BKGND_ALPHA(0.5), 1.0, 1.0, self.heading*-1)
 
-                    buffer.set_fore(self.x + x, self.y + y, 255, 255, 255, code)
+        # heading = math.degrees(self.heading)
+        # if heading >= 348.75 or heading < 11.25:
+        #     ship = self.ship[0]
+        # elif 11.25 <= heading < 33.75:
+        #     ship = self.ship[1]
+        # elif 33.75 <= heading < 56.25:
+        #     ship = self.ship[2]
+        # elif 56.25 <= heading < 78.75:
+        #     ship = self.ship[3]
+        # elif 78.75 <= heading < 101.25:
+        #     ship = self.ship[4]
+        # else:
+        #     ship = self.ship[0]
+
+        ship = self.ship[int(round(math.degrees(self.heading), -1)/10)]
+        libtcod.image_blit_2x(ship, ship_console, 0, 0)
+
+        # for y, line in enumerate(ship):
+        #     for x, char in enumerate(line):
+        #         if char != " ":
+        #             # if char == "\\":
+        #             #     code = 252
+        #             # else:
+        #             code = ord(char)
+
+        #             buffer.set_fore(self.x + x, self.y + y, 255, 255, 255, code)
 
         # buffer.set_fore(self.x, self.y, 255, 255, 255, ord('@'))
 
 
 player_ship = Ship()
-objects = [player_ship]
+objects = []
 
 def render_all():
     for star in starfield:
@@ -228,10 +238,13 @@ def render_all():
     buffer.blit(con)
     libtcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
 
+    player_ship.draw()
+    libtcod.console_blit(ship_console, 0, 0, 0, 0, 0, player_ship.x, player_ship.y, 1.0, 1.0)
+
     libtcod.console_set_default_foreground(panel_console, libtcod.white)
     libtcod.console_print_ex(panel_console, 0, 0, libtcod.BKGND_NONE, libtcod.LEFT,
         "Ship [Heading: {}]  [Velocity: {}]  [Position: {}, {}]".format(
-            round(math.degrees(player_ship.heading),2), player_ship.velocity, player_ship.x, player_ship.y) )
+            math.degrees(player_ship.heading), player_ship.velocity, player_ship.x, player_ship.y) )
 
     # panel_buffer.blit( panel_console )
     libtcod.console_blit(panel_console, 0, 0, HUD_WIDTH, HUD_HEIGHT, 0, 0, 0)
