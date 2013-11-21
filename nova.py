@@ -37,7 +37,7 @@ buffer = libtcod.ConsoleBuffer(SCREEN_WIDTH, SCREEN_HEIGHT)
 con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
 
 ship_console = libtcod.console_new(8, 8)
-libtcod.console_set_key_color(ship_console, libtcod.blue)
+# libtcod.console_set_key_color(ship_console, libtcod.blue)
 
 mouse = libtcod.Mouse()
 key = libtcod.Key()
@@ -165,8 +165,8 @@ class Ship:
 
         if self.velocity < 0.15:
             self.velocity = 0.0
-        elif self.velocity > 7.0:
-            self.velocity = 7.0
+        elif self.velocity > 3.0:
+            self.velocity = 3.0
 
         starfield.add_particle(self.x+3+x_component*-3, self.y+3+y_component*3, 0, 174, 255)
 
@@ -174,6 +174,9 @@ class Ship:
         if self.velocity > 0.0:
             if not (self.velocity_angle_opposite - self.turn_rate*0.9) < self.heading < (self.velocity_angle_opposite + self.turn_rate*0.9):
                 self.turn_left()
+                # if self.heading + math.pi > self.velocity_angle_opposite:
+                # else:
+                    # self.turn_right()
 
     def draw(self):
 
@@ -185,7 +188,8 @@ class Ship:
 
         ship = self.ship[sprite_index]
         libtcod.image_set_key_color(ship, libtcod.blue)
-        libtcod.image_blit(ship, con, self.x+4, self.y+4, libtcod.BKGND_SET, 1.0, 1.0, 0)
+        # libtcod.image_blit(ship, con, self.x+4, self.y+4, libtcod.BKGND_SET, 1.0, 1.0, 0)
+        libtcod.image_blit_rect(ship, con, self.x-4, self.y-4, -1, -1, libtcod.BKGND_SET)
 
         # libtcod.image_blit_2x(ship, con, self.x, self.y)
         # libtcod.image_blit_2x(ship, ship_console, 0, 0)
@@ -239,7 +243,7 @@ def render_all():
     player_ship.draw()
     libtcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
 
-    # libtcod.console_blit(ship_console, 0, 0, 0, 0, 0, player_ship.x, player_ship.y, 1.0, 1.0)
+    # libtcod.console_blit(ship_console, 0, 0, 0, 0, 0, player_ship.x, player_ship.y, 0.9, 0.9)
 
     libtcod.console_print_ex(panel_console, 0, 0, libtcod.BKGND_NONE, libtcod.LEFT,
         "Ship [Heading: {}]  [Velocity: {}]  [VelocityAngle: {}".format(
