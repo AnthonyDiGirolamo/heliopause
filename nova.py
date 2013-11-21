@@ -173,10 +173,10 @@ class Ship:
     def reverse_direction(self):
         if self.velocity > 0.0:
             if not (self.velocity_angle_opposite - self.turn_rate*0.9) < self.heading < (self.velocity_angle_opposite + self.turn_rate*0.9):
-                self.turn_left()
-                # if self.heading + math.pi > self.velocity_angle_opposite:
-                # else:
-                    # self.turn_right()
+                if self.heading > self.velocity_angle_opposite or self.heading < self.velocity_angle:
+                    self.turn_right()
+                else:
+                    self.turn_left()
 
     def draw(self):
 
