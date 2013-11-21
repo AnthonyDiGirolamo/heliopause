@@ -91,6 +91,8 @@ class Ship:
         self.twopi = 2 * math.pi
         self.max_heading = self.twopi - self.turn_rate
 
+        self.velocity_angle = 0.0
+        self.velocity_angle_opposite = 180.0
         self.heading = 0.0
         self.velocity = 0.0
 
@@ -187,13 +189,39 @@ class Ship:
         if self.heading < 0.0:
             self.heading = self.max_heading
 
-    def increase_throttle(self):
-        self.velocity += self.deltav
+    def apply_thrust(self):
+        velocity_vectorx = math.cos(self.velocity_angle) * self.velocity
+        velocity_vectory = math.sin(self.velocity_angle) * self.velocity
 
-    def decrease_throttle(self):
-        self.velocity -= self.deltav
-        if self.velocity < 0:
-            self.velocity = 0.0
+        deltavx = math.cos(self.heading) * self.deltav
+        deltavy = math.sin(self.heading) * self.deltav
+
+        newx = velocity_vectorx + deltavx
+        newy = velocity_vectory + deltavy
+
+        self.velocity = math.sqrt(newx**2 + newy**2)
+        self.velocity_angle = math.atan(newy / newx)
+        if newx > 0.0 and newy < 0.0:
+            self.velocity_angle += self.twopi
+        elif newx < 0.0:
+            self.velocity_angle += math.pi
+
+        if self.velocity_angle > math.pi:
+            self.velocity_angle_opposite = self.velocity_angle - math.pi
+        else:
+            self.velocity_angle_opposite = self.velocity_angle + math.pi
+
+    def reverse_direction(self):
+        if not (self.velocity_angle_opposite - self.turn_rate) < self.heading < (self.velocity_angle_opposite + self.turn_rate):
+            self.heading += self.turn_rate
+
+    # def increase_throttle(self):
+    #     self.velocity += self.deltav
+
+    # def decrease_throttle(self):
+    #     self.velocity -= self.deltav
+    #     if self.velocity < 0:
+    #         self.velocity = 0.0
 
     def draw(self):
         # heading = math.degrees(self.heading)
@@ -254,8 +282,8 @@ def render_all():
     # libtcod.console_blit(ship_console, 0, 0, 0, 0, 0, player_ship.x, player_ship.y, 1.0, 1.0)
 
     libtcod.console_print_ex(panel_console, 0, 0, libtcod.BKGND_NONE, libtcod.LEFT,
-        "Ship [Heading: {}]  [Velocity: {}]  [Position: {}, {}]".format(
-            math.degrees(player_ship.heading), player_ship.velocity, player_ship.x, player_ship.y) )
+        "Ship [Heading: {}]  [Velocity: {}]  [VelocityAngle: {}".format(
+            math.degrees(player_ship.heading), player_ship.velocity, math.degrees(player_ship.velocity_angle)) )
 
     # panel_buffer.blit( panel_console )
     libtcod.console_blit(panel_console, 0, 0, HUD_WIDTH, HUD_HEIGHT, 0, 0, 0)
@@ -276,19 +304,13 @@ def handle_keys():
     # if game_state == 'playing':
     #     #movement keys
     if key.vk == libtcod.KEY_UP:
-        player_ship.increase_throttle()
+        player_ship.apply_thrust()
     elif key.vk == libtcod.KEY_DOWN:
-        player_ship.decrease_throttle()
-        # starfield.scroll(270)
-        # player_ship.y += 1
+        player_ship.reverse_direction()
     elif key.vk == libtcod.KEY_LEFT:
         player_ship.turn_left()
-        # starfield.scroll(0)
-        # player_ship.x -= 1
     elif key.vk == libtcod.KEY_RIGHT:
         player_ship.turn_right()
-        # starfield.scroll(180)
-        # player_ship.x += 1
     #     else:
     #         #test for other keys
     #         key_char = chr(key.c)
@@ -314,7 +336,7 @@ while not libtcod.console_is_window_closed():
     libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS|libtcod.EVENT_MOUSE,key,mouse)
 
     if player_ship.velocity > 0.0:
-        starfield.scroll( player_ship.heading, player_ship.velocity )
+        starfield.scroll( player_ship.velocity_angle, player_ship.velocity )
 
     render_all()
     libtcod.console_flush()
