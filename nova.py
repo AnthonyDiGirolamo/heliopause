@@ -15,10 +15,11 @@ laser_index = 20
 laser_colormap = libtcod.color_gen_map(
     [ libtcod.Color(0, 144, 255),  libtcod.Color(0, 222, 255) ],
     [ 0,                           laser_index] )
-laser_character_map = [219 for i in range(0, laser_index+1)]
+laser_character_map = [4 for i in range(0, laser_index+1)]
 
 class Particle:
-    def __init__(self, x, y, particle_type, index, colormap, charactermap, velocity=0.0, angle=0.0):
+    def __init__(self, x, y, particle_type, index, colormap, charactermap, velocity=0.0, angle=0.0,
+            velocity_component_x=0.0, velocity_component_y=0.0):
         self.x = x
         self.y = y
         self.velocity = velocity
@@ -28,11 +29,15 @@ class Particle:
         self.colormap = colormap
         self.charactermap = charactermap
         self.valid = True
+        self.velocity_component_x = velocity_component_x
+        self.velocity_component_y = velocity_component_y
 
     def update_position(self):
         if self.velocity > 0.0:
             self.x += math.cos(self.angle) * self.velocity
             self.y -= math.sin(self.angle) * self.velocity
+            self.x += self.velocity_component_x
+            self.y -= self.velocity_component_y
 
 class Starfield:
     def __init__(self):
@@ -86,8 +91,8 @@ class Starfield:
         self.particles = [p for p in self.particles if p.valid]
         for particle in self.particles:
             if particle.valid:
-                particle.x += deltax * self.parallax_speeds[0]
-                particle.y += deltay * self.parallax_speeds[0]
+                particle.x += deltax * 1.0
+                particle.y += deltay * 1.0
                 particle.index -= 1
                 if particle.index < 0:
                     particle.valid = False
@@ -106,6 +111,8 @@ class Ship:
         self.velocity_angle_opposite = 180.0
         self.heading = 0.0
         self.velocity = 0.0
+        self.velocity_component_x = 0.0
+        self.velocity_component_y = 0.0
 
         self.ship = [libtcod.image_load('images/ship_{0}.png'.format(str(angle).zfill(3))) for angle in range(0, 360, 10)]
 
@@ -136,6 +143,8 @@ class Ship:
 
         newx = velocity_vectorx + deltavx
         newy = velocity_vectory + deltavy
+        self.velocity_component_x = newx
+        self.velocity_component_y = newy
 
         # print(repr((newy,newx)))
 
@@ -167,7 +176,8 @@ class Ship:
                 thrust_exhaust_colormap,
                 thrust_exhaust_character_map,
                 1.0,
-                self.heading - math.pi if self.heading > math.pi else self.heading + math.pi )
+                self.heading - math.pi if self.heading > math.pi else self.heading + math.pi,
+                newx, newy)
         )
 
     def reverse_direction(self):
@@ -213,7 +223,9 @@ class Ship:
                 laser_colormap,
                 laser_character_map,
                 3.0,
-                self.heading
+                self.heading,
+                self.velocity_component_x,
+                self.velocity_component_y
             )
         )
 
@@ -292,7 +304,17 @@ def handle_keys():
         libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
     elif key.vk == libtcod.KEY_ESCAPE:
         return 'exit'  #exit game
-    #     else:
+    else:
+        for i in range(2):
+            starfield.add_particle(
+                Particle(
+                    randrange(0, SCREEN_WIDTH), randrange(0, SCREEN_HEIGHT),
+                    "thrust_exhaust",
+                    thrust_exhaust_index,
+                    thrust_exhaust_colormap,
+                    thrust_exhaust_character_map,
+                )
+            )
     #         #test for other keys
     #         key_char = chr(key.c)
     #         if key_char == 'g':
