@@ -5,46 +5,6 @@ import libtcodpy as libtcod
 import math
 from random import randrange, choice
 
-SCREEN_WIDTH = 120
-SCREEN_HEIGHT = 70
-# SCREEN_WIDTH = 180
-# SCREEN_HEIGHT = 106
-
-HUD_HEIGHT = 1
-HUD_WIDTH = SCREEN_WIDTH
-LIMIT_FPS = 30
-MAX_STARS = 150
-
-# hm = libtcod.heightmap_new(10,10)
-# libtcod.heightmap_mid_point_displacement(hm, 0, 5.0)
-# for x in range(0, 10):
-#     print(repr([libtcod.heightmap_get_value(hm, x, y) for y in range(0, 10)]))
-
-# libtcod.console_set_custom_font('fonts/8x8.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)
-# libtcod.console_set_custom_font('fonts/12x12.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)
-# libtcod.console_set_custom_font('fonts/terminal8x8_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
-# libtcod.console_set_custom_font('fonts/terminal8x8_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
-libtcod.console_set_custom_font('fonts/terminal12x12_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
-
-
-libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'python/libtcod tutorial', False)
-libtcod.sys_set_fps(LIMIT_FPS)
-
-panel_console = libtcod.console_new(HUD_WIDTH, HUD_HEIGHT)
-panel_buffer  = libtcod.ConsoleBuffer(HUD_WIDTH, HUD_HEIGHT)
-libtcod.console_set_default_foreground(panel_console, libtcod.white)
-
-buffer = libtcod.ConsoleBuffer(SCREEN_WIDTH, SCREEN_HEIGHT)
-con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
-
-ship_console = libtcod.console_new(8, 8)
-# libtcod.console_set_key_color(ship_console, libtcod.blue)
-
-mouse = libtcod.Mouse()
-key = libtcod.Key()
-
-libtcod.console_set_keyboard_repeat(1, 10)
-
 class Particle:
     def __init__(self, x, y, r, g, b, c=219):
         self.x = x
@@ -105,8 +65,6 @@ class Starfield:
                 particle.color_index -= 1
                 if particle.color_index < 0:
                     particle.valid = False
-
-starfield = Starfield()
 
 class Ship:
     def __init__(self):
@@ -180,11 +138,8 @@ class Ship:
                     self.turn_left()
 
     def draw(self):
-
         sprite_index = int(round(math.degrees(self.heading), -1)/10)
-        if sprite_index > 35:
-            sprite_index = 0
-        if sprite_index < 0:
+        if sprite_index > 35 or sprite_index < 0:
             sprite_index = 0
 
         ship = self.ship[sprite_index]
@@ -202,14 +157,7 @@ class Ship:
         #             #     code = 252
         #             # else:
         #             code = ord(char)
-
         #             buffer.set_fore(self.x + x, self.y + y, 255, 255, 255, code)
-
-        # buffer.set_fore(self.x, self.y, 255, 255, 255, ord('@'))
-
-
-player_ship = Ship()
-objects = []
 
 def render_all():
     for star in starfield:
@@ -261,11 +209,6 @@ def render_all():
 def handle_keys():
     global key;
 
-    if key.vk == libtcod.KEY_ENTER and key.lalt:
-        libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
-    elif key.vk == libtcod.KEY_ESCAPE:
-        return 'exit'  #exit game
-
     if key.vk == libtcod.KEY_UP:
         player_ship.throttle_open = key.pressed
     if key.vk == libtcod.KEY_DOWN:
@@ -275,6 +218,10 @@ def handle_keys():
     if key.vk == libtcod.KEY_RIGHT:
         player_ship.turning_right = key.pressed
 
+    if key.vk == libtcod.KEY_ENTER and key.lalt:
+        libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
+    elif key.vk == libtcod.KEY_ESCAPE:
+        return 'exit'  #exit game
     #     else:
     #         #test for other keys
     #         key_char = chr(key.c)
@@ -295,6 +242,52 @@ def handle_keys():
     #             if chosen_item is not None:
     #                 chosen_item.drop()
     #         return 'didnt-take-turn'
+
+SCREEN_WIDTH = 120
+SCREEN_HEIGHT = 70
+# SCREEN_WIDTH = 180
+# SCREEN_HEIGHT = 106
+
+HUD_HEIGHT = 1
+HUD_WIDTH = SCREEN_WIDTH
+LIMIT_FPS = 30
+MAX_STARS = 100
+
+# hm = libtcod.heightmap_new(10,10)
+# libtcod.heightmap_mid_point_displacement(hm, 0, 5.0)
+# for x in range(0, 10):
+#     print(repr([libtcod.heightmap_get_value(hm, x, y) for y in range(0, 10)]))
+
+# libtcod.console_set_custom_font('fonts/8x8.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)
+# libtcod.console_set_custom_font('fonts/12x12.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)
+# libtcod.console_set_custom_font('fonts/terminal8x8_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+# libtcod.console_set_custom_font('fonts/terminal8x8_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+libtcod.console_set_custom_font('fonts/terminal12x12_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+
+
+libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'python/libtcod tutorial', False)
+libtcod.sys_set_fps(LIMIT_FPS)
+
+panel_console = libtcod.console_new(HUD_WIDTH, HUD_HEIGHT)
+panel_buffer  = libtcod.ConsoleBuffer(HUD_WIDTH, HUD_HEIGHT)
+libtcod.console_set_default_foreground(panel_console, libtcod.white)
+
+buffer = libtcod.ConsoleBuffer(SCREEN_WIDTH, SCREEN_HEIGHT)
+con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
+
+ship_console = libtcod.console_new(8, 8)
+# libtcod.console_set_key_color(ship_console, libtcod.blue)
+
+mouse = libtcod.Mouse()
+key = libtcod.Key()
+
+libtcod.console_set_keyboard_repeat(1, 10)
+
+
+starfield = Starfield()
+player_ship = Ship()
+
+objects = []
 
 while not libtcod.console_is_window_closed():
     libtcod.sys_check_for_event(libtcod.KEY_PRESSED|libtcod.KEY_RELEASED|libtcod.EVENT_MOUSE,key,mouse)
