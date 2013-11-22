@@ -6,13 +6,20 @@ import math
 from random import randrange, choice
 
 class Particle:
-    def __init__(self, x, y, r, g, b, c=219):
+    def __init__(self, x, y, r, g, b, c=219, velocity=0.0, angle=0.0):
         self.x = x
         self.y = y
+        self.velocity = velocity
+        self.angle = angle
         self.character = c
         self.color_index = 10
         self.colormap = libtcod.color_gen_map([ libtcod.Color( 0,0,0 ), libtcod.Color(r,g,b) ], [ 0, self.color_index ])
         self.valid = True
+
+    def update_position(self):
+        if self.velocity > 0.0:
+            self.x += math.cos(self.angle) * self.velocity
+            self.y -= math.sin(self.angle) * self.velocity
 
 class Starfield:
     def __init__(self):
@@ -28,8 +35,8 @@ class Starfield:
     def __getitem__(self, index):
         return self.stars[index]
 
-    def add_particle(self, x, y, r, g, b):
-        self.particles.append( Particle(x, y, r, g, b) )
+    def add_particle(self, x, y, r, g, b, c, velocity, angle):
+        self.particles.append( Particle(x, y, r, g, b, c, velocity, angle) )
 
     def scroll(self, heading=0.0, velocity=0.0):
         deltax = math.cos(heading) * velocity * -1
@@ -55,9 +62,15 @@ class Starfield:
                 star[1] = SCREEN_HEIGHT-1
                 star[2] = choice(self.parallax_speeds)
 
-    def update_particles(self, heading=0.0, velocity=0.0):
+    def update_particle_positions(self):
+        for p in self.particles:
+            p.update_position()
+
+    def scroll_particles(self, heading=0.0, velocity=0.0):
         deltax = math.cos(heading) * velocity * -1
         deltay = math.sin(heading) * velocity
+        # remove particles which have faded
+        self.particles = [p for p in self.particles if p.valid]
         for particle in self.particles:
             if particle.valid:
                 particle.x += deltax * self.parallax_speeds[0]
@@ -110,8 +123,14 @@ class Ship:
         newx = velocity_vectorx + deltavx
         newy = velocity_vectory + deltavy
 
+        # print(repr((newy,newx)))
+
         self.velocity = math.sqrt(newx**2 + newy**2)
-        self.velocity_angle = math.atan(newy / newx)
+        try:
+            self.velocity_angle = math.atan(newy / newx)
+        except:
+            self.velocity_angle = 0.0
+
         if newx > 0.0 and newy < 0.0:
             self.velocity_angle += self.twopi
         elif newx < 0.0:
@@ -127,7 +146,8 @@ class Ship:
         elif self.velocity > 3.0:
             self.velocity = 3.0
 
-        starfield.add_particle(self.x+3+x_component*-3, self.y+3+y_component*3, 0, 174, 255)
+        starfield.add_particle(self.x+3+x_component*-3, self.y+3+y_component*3, 0, 174, 255, 219, 1.0,
+                self.heading - math.pi if self.heading > math.pi else self.heading + math.pi)
 
     def reverse_direction(self):
         if self.velocity > 0.0:
@@ -179,7 +199,7 @@ def render_all():
                 p.valid = False
                 continue
 
-            buffer.set_fore(x,   y, color[0], color[1], color[2], p.character)
+            buffer.set_fore(x,   y,   color[0], color[1], color[2], p.character)
             buffer.set_fore(x+1, y,   color[0], color[1], color[2], p.character)
             buffer.set_fore(x-1, y,   color[0], color[1], color[2], p.character)
             buffer.set_fore(x,   y+1, color[0], color[1], color[2], p.character)
@@ -195,8 +215,13 @@ def render_all():
     # libtcod.console_blit(ship_console, 0, 0, 0, 0, 0, player_ship.x, player_ship.y, 0.9, 0.9)
 
     libtcod.console_print_ex(panel_console, 0, 0, libtcod.BKGND_NONE, libtcod.LEFT,
-        "Ship [Heading: {0}]  [Velocity: {1}]  [VelocityAngle: {2}".format(
-            math.degrees(player_ship.heading), player_ship.velocity, math.degrees(player_ship.velocity_angle)) )
+            "Ship [Heading: {0}]  [Velocity: {1}] [VelocityAngle: {2}]  Particles: {3}".format(
+            round(math.degrees(player_ship.heading),2),
+            round(player_ship.velocity,2),
+            round(math.degrees(player_ship.velocity_angle),2),
+            len(starfield.particles)
+        ).ljust(SCREEN_WIDTH)
+    )
 
     # panel_buffer.blit( panel_console )
     libtcod.console_blit(panel_console, 0, 0, HUD_WIDTH, HUD_HEIGHT, 0, 0, 0)
@@ -294,7 +319,8 @@ while not libtcod.console_is_window_closed():
 
     if player_ship.velocity > 0.0:
         starfield.scroll( player_ship.velocity_angle, player_ship.velocity )
-    starfield.update_particles( player_ship.velocity_angle, player_ship.velocity )
+    starfield.update_particle_positions()
+    starfield.scroll_particles( player_ship.velocity_angle, player_ship.velocity )
 
     render_all()
     libtcod.console_flush()
