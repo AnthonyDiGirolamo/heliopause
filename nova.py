@@ -18,7 +18,7 @@ class Starfield:
     def __init__(self):
         self.parallax_speeds = [0.3, 0.6, 1.0]
         # self.star_characters = [7, ord('*'), 15]
-        self.star_characters = [ord('.'), 7, ord('*')]
+        self.star_characters = [ord('.'), 7]
         self.stars = [
             [float(randrange(0, SCREEN_WIDTH)), float(randrange(0, SCREEN_HEIGHT)),
                 choice(self.parallax_speeds), choice(self.star_characters)]
@@ -251,7 +251,7 @@ SCREEN_HEIGHT = 70
 HUD_HEIGHT = 1
 HUD_WIDTH = SCREEN_WIDTH
 LIMIT_FPS = 30
-MAX_STARS = 100
+MAX_STARS = 80
 
 # hm = libtcod.heightmap_new(10,10)
 # libtcod.heightmap_mid_point_displacement(hm, 0, 5.0)
