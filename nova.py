@@ -81,7 +81,7 @@ class Ship:
         self.heading = 0.0
         self.velocity = 0.0
 
-        self.ship = [libtcod.image_load('images/ship_{}.png'.format(str(angle).zfill(3))) for angle in range(0, 360, 10)]
+        self.ship = [libtcod.image_load('images/ship_{0}.png'.format(str(angle).zfill(3))) for angle in range(0, 360, 10)]
 
         self.throttle_open = False
         self.turning_left  = False
@@ -195,7 +195,7 @@ def render_all():
     # libtcod.console_blit(ship_console, 0, 0, 0, 0, 0, player_ship.x, player_ship.y, 0.9, 0.9)
 
     libtcod.console_print_ex(panel_console, 0, 0, libtcod.BKGND_NONE, libtcod.LEFT,
-        "Ship [Heading: {}]  [Velocity: {}]  [VelocityAngle: {}".format(
+        "Ship [Heading: {0}]  [Velocity: {1}]  [VelocityAngle: {2}".format(
             math.degrees(player_ship.heading), player_ship.velocity, math.degrees(player_ship.velocity_angle)) )
 
     # panel_buffer.blit( panel_console )
