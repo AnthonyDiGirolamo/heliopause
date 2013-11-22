@@ -5,15 +5,21 @@ import libtcodpy as libtcod
 import math
 from random import randrange, choice
 
+thrust_exhaust_index = 10
+thrust_exhaust_colormap = libtcod.color_gen_map(
+    [ libtcod.Color( 0,0,0 ), libtcod.Color(255, 144, 0),  libtcod.Color(255, 222, 0) ],
+    [ 0,                      thrust_exhaust_index/2,      thrust_exhaust_index] )
+thrust_exhaust_character_map = [176, 176, 177, 177, 178, 178, 219, 219, 219, 219]
+
 class Particle:
-    def __init__(self, x, y, r, g, b, c=219, velocity=0.0, angle=0.0):
+    def __init__(self, x, y, index, colormap, charactermap, velocity=0.0, angle=0.0):
         self.x = x
         self.y = y
         self.velocity = velocity
         self.angle = angle
-        self.character = c
-        self.color_index = 10
-        self.colormap = libtcod.color_gen_map([ libtcod.Color( 0,0,0 ), libtcod.Color(r,g,b) ], [ 0, self.color_index ])
+        self.index = index
+        self.colormap = colormap
+        self.charactermap = charactermap
         self.valid = True
 
     def update_position(self):
@@ -35,8 +41,8 @@ class Starfield:
     def __getitem__(self, index):
         return self.stars[index]
 
-    def add_particle(self, x, y, r, g, b, c, velocity, angle):
-        self.particles.append( Particle(x, y, r, g, b, c, velocity, angle) )
+    def add_particle(self, particle):
+        self.particles.append( particle )
 
     def scroll(self, heading=0.0, velocity=0.0):
         deltax = math.cos(heading) * velocity * -1
@@ -75,8 +81,8 @@ class Starfield:
             if particle.valid:
                 particle.x += deltax * self.parallax_speeds[0]
                 particle.y += deltay * self.parallax_speeds[0]
-                particle.color_index -= 1
-                if particle.color_index < 0:
+                particle.index -= 1
+                if particle.index < 0:
                     particle.valid = False
 
 class Ship:
@@ -146,8 +152,14 @@ class Ship:
         elif self.velocity > 3.0:
             self.velocity = 3.0
 
-        starfield.add_particle(self.x+3+x_component*-3, self.y+3+y_component*3, 0, 174, 255, 219, 1.0,
-                self.heading - math.pi if self.heading > math.pi else self.heading + math.pi)
+        starfield.add_particle(
+            Particle( self.x+3+x_component*-3, self.y+3+y_component*3,
+                thrust_exhaust_index,
+                thrust_exhaust_colormap,
+                thrust_exhaust_character_map,
+                1.0,
+                self.heading - math.pi if self.heading > math.pi else self.heading + math.pi )
+        )
 
     def reverse_direction(self):
         if self.velocity > 0.0:
@@ -192,18 +204,19 @@ def render_all():
 
     for p in starfield.particles:
         if p.valid:
-            color = p.colormap[p.color_index]
+            color = p.colormap[p.index]
+            character = p.charactermap[p.index]
             x = int(round(p.x))
             y = int(round(p.y))
             if x < 2 or x > SCREEN_WIDTH-2 or y < 2 or y > SCREEN_HEIGHT-3:
                 p.valid = False
                 continue
 
-            buffer.set_fore(x,   y,   color[0], color[1], color[2], p.character)
-            buffer.set_fore(x+1, y,   color[0], color[1], color[2], p.character)
-            buffer.set_fore(x-1, y,   color[0], color[1], color[2], p.character)
-            buffer.set_fore(x,   y+1, color[0], color[1], color[2], p.character)
-            buffer.set_fore(x,   y-1, color[0], color[1], color[2], p.character)
+            buffer.set_fore(x,   y,   color[0], color[1], color[2], character)
+            buffer.set_fore(x+1, y,   color[0], color[1], color[2], character)
+            buffer.set_fore(x-1, y,   color[0], color[1], color[2], character)
+            buffer.set_fore(x,   y+1, color[0], color[1], color[2], character)
+            buffer.set_fore(x,   y-1, color[0], color[1], color[2], character)
 
     for object in objects:
         object.draw()
