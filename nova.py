@@ -9,14 +9,21 @@ thrust_exhaust_index = 10
 thrust_exhaust_colormap = libtcod.color_gen_map(
     [ libtcod.Color( 0,0,0 ), libtcod.Color(255, 144, 0),  libtcod.Color(255, 222, 0) ],
     [ 0,                      thrust_exhaust_index/2,      thrust_exhaust_index] )
-thrust_exhaust_character_map = [176, 176, 177, 177, 178, 178, 219, 219, 219, 219]
+thrust_exhaust_character_map = [176, 176, 176, 177, 177, 178, 178, 219, 219, 219]
+
+laser_index = 20
+laser_colormap = libtcod.color_gen_map(
+    [ libtcod.Color(0, 144, 255),  libtcod.Color(0, 222, 255) ],
+    [ 0,                           laser_index] )
+laser_character_map = [219 for i in range(0, laser_index+1)]
 
 class Particle:
-    def __init__(self, x, y, index, colormap, charactermap, velocity=0.0, angle=0.0):
+    def __init__(self, x, y, particle_type, index, colormap, charactermap, velocity=0.0, angle=0.0):
         self.x = x
         self.y = y
         self.velocity = velocity
         self.angle = angle
+        self.particle_type = particle_type
         self.index = index
         self.colormap = colormap
         self.charactermap = charactermap
@@ -106,6 +113,7 @@ class Ship:
         self.turning_left  = False
         self.turning_right = False
         self.reversing     = False
+        self.laser_firing  = False
 
     def turn_left(self):
         self.heading += self.turn_rate
@@ -149,11 +157,12 @@ class Ship:
 
         if self.velocity < 0.15:
             self.velocity = 0.0
-        elif self.velocity > 3.0:
-            self.velocity = 3.0
+        elif self.velocity > 5.0:
+            self.velocity = 5.0
 
         starfield.add_particle(
             Particle( self.x+3+x_component*-3, self.y+3+y_component*3,
+                "thrust_exhaust",
                 thrust_exhaust_index,
                 thrust_exhaust_colormap,
                 thrust_exhaust_character_map,
@@ -190,6 +199,23 @@ class Ship:
         #             # else:
         #             code = ord(char)
         #             buffer.set_fore(self.x + x, self.y + y, 255, 255, 255, code)
+    def fire_laser(self):
+        x_component = math.cos(self.heading)
+        y_component = math.sin(self.heading)
+        starfield.add_particle(
+            Particle(
+                # self.x,
+                self.x+3+x_component*6,
+                self.y+3+y_component*-6,
+                # self.y-y_component*10,
+                "laser",
+                laser_index,
+                laser_colormap,
+                laser_character_map,
+                3.0,
+                self.heading
+            )
+        )
 
 def render_all():
     for star in starfield:
@@ -212,11 +238,14 @@ def render_all():
                 p.valid = False
                 continue
 
-            buffer.set_fore(x,   y,   color[0], color[1], color[2], character)
-            buffer.set_fore(x+1, y,   color[0], color[1], color[2], character)
-            buffer.set_fore(x-1, y,   color[0], color[1], color[2], character)
-            buffer.set_fore(x,   y+1, color[0], color[1], color[2], character)
-            buffer.set_fore(x,   y-1, color[0], color[1], color[2], character)
+            if p.particle_type == "thrust_exhaust":
+                buffer.set_fore(x,   y,   color[0], color[1], color[2], character)
+                buffer.set_fore(x+1, y,   color[0], color[1], color[2], character)
+                buffer.set_fore(x-1, y,   color[0], color[1], color[2], character)
+                buffer.set_fore(x,   y+1, color[0], color[1], color[2], character)
+                buffer.set_fore(x,   y-1, color[0], color[1], color[2], character)
+            else:
+                buffer.set_fore(x,   y,   color[0], color[1], color[2], character)
 
     for object in objects:
         object.draw()
@@ -255,6 +284,9 @@ def handle_keys():
         player_ship.turning_left = key.pressed
     if key.vk == libtcod.KEY_RIGHT:
         player_ship.turning_right = key.pressed
+
+    if key.vk == libtcod.KEY_SPACE:
+        player_ship.laser_firing = key.pressed
 
     if key.vk == libtcod.KEY_ENTER and key.lalt:
         libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
@@ -344,6 +376,9 @@ while not libtcod.console_is_window_closed():
 
     if player_ship.throttle_open:
         player_ship.apply_thrust()
+
+    if player_ship.laser_firing:
+        player_ship.fire_laser()
 
     if player_ship.reversing:
         player_ship.reverse_direction()
