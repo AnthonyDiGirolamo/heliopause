@@ -5,9 +5,11 @@ import libtcodpy as libtcod
 import math
 from random import randrange, choice
 
+sector_background = libtcod.Color(0,64,128)
+# sector_background = libtcod.Color(0,0,0)
 thrust_exhaust_index = 10
 thrust_exhaust_colormap = libtcod.color_gen_map(
-    [ libtcod.Color( 0,0,0 ), libtcod.Color(255, 144, 0),  libtcod.Color(255, 222, 0) ],
+    [ sector_background, libtcod.Color(255, 144, 0),  libtcod.Color(255, 222, 0) ],
     [ 0,                      thrust_exhaust_index/2,      thrust_exhaust_index] )
 thrust_exhaust_character_map = [176, 176, 176, 177, 177, 178, 178, 219, 219, 219]
 
@@ -284,7 +286,7 @@ def render_all():
 
     # libtcod.console_blit(ship_console, 0, 0, 0, 0, 0, player_ship.x, player_ship.y, 0.9, 0.9)
 
-    libtcod.console_print_frame(panel_console, 0, 0, HUD_WIDTH, HUD_HEIGHT, clear=True, flag=libtcod.BKGND_DEFAULT, fmt=0)
+    libtcod.console_print_frame(panel_console, 0, 0, HUD_WIDTH, HUD_HEIGHT, clear=True, flag=libtcod.BKGND_SET, fmt=0)
     libtcod.console_print_ex(panel_console, 1, 1, libtcod.BKGND_SET, libtcod.LEFT,
             ( " Ship Heading: {0}\n"
               "     Velocity: {1}\n"
@@ -301,7 +303,7 @@ def render_all():
     # panel_buffer.blit( panel_console )
     libtcod.console_blit(panel_console, 0, 0, HUD_WIDTH, HUD_HEIGHT, 0, 0, 0, 0.75, 0.75)
 
-    buffer.clear()
+    buffer.clear(sector_background[0],sector_background[1],sector_background[2])
     # libtcod.console_set_default_background(ship_console, libtcod.black)
     # libtcod.console_clear(ship_console)
 
@@ -362,8 +364,8 @@ SCREEN_HEIGHT = 70
 # SCREEN_WIDTH = 180
 # SCREEN_HEIGHT = 106
 
-HUD_HEIGHT = 6
-HUD_WIDTH = 24
+HUD_HEIGHT = 10
+HUD_WIDTH = 26
 LIMIT_FPS = 30
 MAX_STARS = 80
 
@@ -381,7 +383,8 @@ libtcod.console_set_custom_font('fonts/terminal12x12_gs_ro.png', libtcod.FONT_TY
 libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'python/libtcod tutorial', False)
 libtcod.sys_set_fps(LIMIT_FPS)
 
-panel_buffer  = libtcod.ConsoleBuffer(HUD_WIDTH, HUD_HEIGHT)
+# buffer = ConsoleBuffer(width, height, back_r=0, back_g=0, back_b=0, fore_r=0, fore_g=0, fore_b=0, char=' ')
+panel_buffer  = libtcod.ConsoleBuffer(HUD_WIDTH, HUD_HEIGHT, sector_background[0], sector_background[1], sector_background[2])
 
 panel_console = libtcod.console_new(HUD_WIDTH, HUD_HEIGHT)
 
@@ -390,6 +393,7 @@ libtcod.console_set_default_background(panel_console, libtcod.black)
 
 buffer = libtcod.ConsoleBuffer(SCREEN_WIDTH, SCREEN_HEIGHT)
 con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
+libtcod.console_set_default_background(panel_console, sector_background)
 
 ship_console = libtcod.console_new(8, 8)
 # libtcod.console_set_key_color(ship_console, libtcod.blue)
