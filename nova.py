@@ -35,9 +35,10 @@ class Particle:
     def update_position(self):
         if self.velocity > 0.0:
             self.x += math.cos(self.angle) * self.velocity
-            self.y -= math.sin(self.angle) * self.velocity
-            self.x += self.velocity_component_x
-            self.y -= self.velocity_component_y
+            self.y += math.sin(self.angle) * self.velocity
+
+        self.x += self.velocity_component_x
+        self.y += self.velocity_component_y
 
 class Starfield:
     def __init__(self):
@@ -58,7 +59,7 @@ class Starfield:
 
     def scroll(self, heading=0.0, velocity=0.0):
         deltax = math.cos(heading) * velocity * -1
-        deltay = math.sin(heading) * velocity
+        deltay = math.sin(heading) * velocity * -1
 
         for star in self.stars:
             star[0] += deltax * star[2]
@@ -86,7 +87,7 @@ class Starfield:
 
     def scroll_particles(self, heading=0.0, velocity=0.0):
         deltax = math.cos(heading) * velocity * -1
-        deltay = math.sin(heading) * velocity
+        deltay = math.sin(heading) * velocity * -1
         # remove particles which have faded
         self.particles = [p for p in self.particles if p.valid]
         for particle in self.particles:
@@ -170,7 +171,7 @@ class Ship:
             self.velocity = 5.0
 
         starfield.add_particle(
-            Particle( self.x+3+x_component*-3, self.y+3+y_component*3,
+            Particle( self.x+3+x_component*-3, self.y+4+y_component*-3,
                 "thrust_exhaust",
                 thrust_exhaust_index,
                 thrust_exhaust_colormap,
@@ -216,7 +217,7 @@ class Ship:
             Particle(
                 # self.x,
                 self.x+3+x_component*6,
-                self.y+3+y_component*-6,
+                self.y+4+y_component*6,
                 # self.y-y_component*10,
                 "laser",
                 laser_index,
@@ -229,7 +230,14 @@ class Ship:
             )
         )
 
+def mirror_y_coordinate(y):
+    return (SCREEN_HEIGHT - 1 - y)
+
 def render_all():
+    # for x in range(0, SCREEN_HEIGHT):
+    #     # for y in range(0, SCREEN_HEIGHT):
+    #     buffer.set_fore(x, mirror_y_coordinate(x), 255, 255, 255, ord('$'))
+
     for star in starfield:
         color = 255
         if star[2] > 0.9:
@@ -238,7 +246,7 @@ def render_all():
             color = 170
         elif 0.2 < star[2] < 0.4:
             color = 85
-        buffer.set_fore(int(round(star[0])), int(round(star[1])), color, color, color, star[3])
+        buffer.set_fore(int(round(star[0])), mirror_y_coordinate(int(round(star[1]))), color, color, color, star[3])
 
     for p in starfield.particles:
         if p.valid:
@@ -251,13 +259,13 @@ def render_all():
                 continue
 
             if p.particle_type == "thrust_exhaust":
-                buffer.set_fore(x,   y,   color[0], color[1], color[2], character)
-                buffer.set_fore(x+1, y,   color[0], color[1], color[2], character)
-                buffer.set_fore(x-1, y,   color[0], color[1], color[2], character)
-                buffer.set_fore(x,   y+1, color[0], color[1], color[2], character)
-                buffer.set_fore(x,   y-1, color[0], color[1], color[2], character)
+                buffer.set_fore(x,   mirror_y_coordinate(y),   color[0], color[1], color[2], character)
+                buffer.set_fore(x+1, mirror_y_coordinate(y),   color[0], color[1], color[2], character)
+                buffer.set_fore(x-1, mirror_y_coordinate(y),   color[0], color[1], color[2], character)
+                buffer.set_fore(x,   mirror_y_coordinate(y+1), color[0], color[1], color[2], character)
+                buffer.set_fore(x,   mirror_y_coordinate(y-1), color[0], color[1], color[2], character)
             else:
-                buffer.set_fore(x,   y,   color[0], color[1], color[2], character)
+                buffer.set_fore(x,   mirror_y_coordinate(y),   color[0], color[1], color[2], character)
 
     for object in objects:
         object.draw()
@@ -315,6 +323,7 @@ def handle_keys():
                     thrust_exhaust_character_map,
                 )
             )
+
     #         #test for other keys
     #         key_char = chr(key.c)
     #         if key_char == 'g':
