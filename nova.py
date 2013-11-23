@@ -22,6 +22,8 @@ class Particle:
             velocity_component_x=0.0, velocity_component_y=0.0):
         self.x = x
         self.y = y
+        self.sector_position_x = 0.0
+        self.sector_position_y = 0.0
         self.velocity = velocity
         self.angle = angle
         self.particle_type = particle_type
@@ -103,6 +105,9 @@ class Ship:
         self.x = (SCREEN_WIDTH / 2) - 4
         self.y = (SCREEN_HEIGHT / 2) - 4
 
+        self.sector_position_x = 0.0
+        self.sector_position_y = 0.0
+
         self.deltav = 0.15
         self.turn_rate = math.radians(5.0)
         self.twopi = 2 * math.pi
@@ -146,6 +151,9 @@ class Ship:
         newy = velocity_vectory + deltavy
         self.velocity_component_x = newx
         self.velocity_component_y = newy
+
+        self.sector_position_x += newx
+        self.sector_position_y += newy
 
         # print(repr((newy,newx)))
 
@@ -276,17 +284,22 @@ def render_all():
 
     # libtcod.console_blit(ship_console, 0, 0, 0, 0, 0, player_ship.x, player_ship.y, 0.9, 0.9)
 
-    libtcod.console_print_ex(panel_console, 0, 0, libtcod.BKGND_NONE, libtcod.LEFT,
-            "Ship [Heading: {0}]  [Velocity: {1}] [VelocityAngle: {2}]  Particles: {3}".format(
-            round(math.degrees(player_ship.heading),2),
-            round(player_ship.velocity,2),
-            round(math.degrees(player_ship.velocity_angle),2),
-            len(starfield.particles)
-        ).ljust(SCREEN_WIDTH)
+    libtcod.console_print_frame(panel_console, 0, 0, HUD_WIDTH, HUD_HEIGHT, clear=True, flag=libtcod.BKGND_DEFAULT, fmt=0)
+    libtcod.console_print_ex(panel_console, 1, 1, libtcod.BKGND_SET, libtcod.LEFT,
+            ( " Ship Heading: {0}\n"
+              "     Velocity: {1}\n"
+              "VelocityAngle: {2}\n"
+              "    Particles: {3}\n"
+            ).format(
+                round(math.degrees(player_ship.heading),2),
+                round(player_ship.velocity,2),
+                round(math.degrees(player_ship.velocity_angle),2),
+                len(starfield.particles)
+        ).ljust(HUD_WIDTH)
     )
 
     # panel_buffer.blit( panel_console )
-    libtcod.console_blit(panel_console, 0, 0, HUD_WIDTH, HUD_HEIGHT, 0, 0, 0)
+    libtcod.console_blit(panel_console, 0, 0, HUD_WIDTH, HUD_HEIGHT, 0, 0, 0, 0.75, 0.75)
 
     buffer.clear()
     # libtcod.console_set_default_background(ship_console, libtcod.black)
@@ -349,8 +362,8 @@ SCREEN_HEIGHT = 70
 # SCREEN_WIDTH = 180
 # SCREEN_HEIGHT = 106
 
-HUD_HEIGHT = 1
-HUD_WIDTH = SCREEN_WIDTH
+HUD_HEIGHT = 6
+HUD_WIDTH = 24
 LIMIT_FPS = 30
 MAX_STARS = 80
 
@@ -365,13 +378,15 @@ MAX_STARS = 80
 # libtcod.console_set_custom_font('fonts/terminal8x8_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 libtcod.console_set_custom_font('fonts/terminal12x12_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 
-
 libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'python/libtcod tutorial', False)
 libtcod.sys_set_fps(LIMIT_FPS)
 
-panel_console = libtcod.console_new(HUD_WIDTH, HUD_HEIGHT)
 panel_buffer  = libtcod.ConsoleBuffer(HUD_WIDTH, HUD_HEIGHT)
+
+panel_console = libtcod.console_new(HUD_WIDTH, HUD_HEIGHT)
+
 libtcod.console_set_default_foreground(panel_console, libtcod.white)
+libtcod.console_set_default_background(panel_console, libtcod.black)
 
 buffer = libtcod.ConsoleBuffer(SCREEN_WIDTH, SCREEN_HEIGHT)
 con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
