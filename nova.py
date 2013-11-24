@@ -5,8 +5,9 @@ import libtcodpy as libtcod
 import math
 from random import randrange, choice
 
-sector_background = libtcod.Color(0,64,128)
-# sector_background = libtcod.Color(0,0,0)
+# sector_background = libtcod.Color(32,32,64)
+sector_background = libtcod.Color(0,0,0)
+
 thrust_exhaust_index = 10
 thrust_exhaust_colormap = libtcod.color_gen_map(
     [ sector_background, libtcod.Color(255, 144, 0),  libtcod.Color(255, 222, 0) ],
@@ -43,6 +44,41 @@ class Particle:
 
         self.x += self.velocity_component_x
         self.y += self.velocity_component_y
+
+        self.sector_position_x += self.velocity_component_x
+        self.sector_position_y += self.velocity_component_y
+
+class Feature:
+    def __init__(self):
+        self.sector_position_x = 0
+        self.sector_position_y = 0
+        self.width = 10
+        self.height = 10
+
+    def draw(self):
+        # +-----+
+        # |  +--+---------+
+        # |  |  |         |
+        # +--+--+         |
+        #    |            |
+        #    +------------+
+        visible_space_left   = player_ship.sector_position_x - SCREEN_WIDTH/2
+        visible_space_top    = player_ship.sector_position_y + SCREEN_HEIGHT/2
+        visible_space_right  = visible_space_left + SCREEN_WIDTH
+        visible_space_bottom = visible_space_top - SCREEN_HEIGHT
+        feature_left         = self.sector_position_x
+        feature_top          = self.sector_position_y
+        feature_right        = self.sector_position_x + self.width
+        feature_bottom       = self.sector_position_y + self.height
+
+        # !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top);
+        startingx = int(self.sector_position_x - visible_space_left)
+        startingy = int(self.sector_position_y - visible_space_bottom)
+
+        for x in range(startingx, startingx+self.width):
+            for y in range(startingy, startingy-self.height, -1):
+                buffer.set_fore( x, mirror_y_coordinate(y), 128, 255, 128, ord('#') )
+
 
 class Starfield:
     def __init__(self):
@@ -140,6 +176,11 @@ class Ship:
         if self.heading < 0.0:
             self.heading = self.max_heading
 
+    def update_location(self):
+        if self.velocity > 0.0:
+            self.sector_position_x += self.velocity_component_x
+            self.sector_position_y += self.velocity_component_y
+
     def apply_thrust(self):
         velocity_vectorx = math.cos(self.velocity_angle) * self.velocity
         velocity_vectory = math.sin(self.velocity_angle) * self.velocity
@@ -153,9 +194,6 @@ class Ship:
         newy = velocity_vectory + deltavy
         self.velocity_component_x = newx
         self.velocity_component_y = newy
-
-        self.sector_position_x += newx
-        self.sector_position_y += newy
 
         # print(repr((newy,newx)))
 
@@ -177,8 +215,8 @@ class Ship:
 
         if self.velocity < 0.15:
             self.velocity = 0.0
-        elif self.velocity > 5.0:
-            self.velocity = 5.0
+        elif self.velocity > 3.0:
+            self.velocity = 3.0
 
         starfield.add_particle(
             Particle( self.x+3+x_component*-3, self.y+4+y_component*-3,
@@ -199,6 +237,16 @@ class Ship:
                 else:
                     self.turn_left()
 
+    # \--,
+    #  \  \--,
+    #   \     \----,
+    #    \          \---,
+    #     X              ----
+    #    /          /---`
+    #   /     /----`
+    #  /  /--`
+    # /--`
+
     def draw(self):
         sprite_index = int(round(math.degrees(self.heading), -1)/10)
         if sprite_index > 35 or sprite_index < 0:
@@ -208,6 +256,8 @@ class Ship:
         libtcod.image_set_key_color(ship, libtcod.blue)
         # libtcod.image_blit(ship, con, self.x+4, self.y+4, libtcod.BKGND_SET, 1.0, 1.0, 0)
         libtcod.image_blit_rect(ship, con, self.x-4, self.y-4, -1, -1, libtcod.BKGND_SET)
+
+        self.update_location()
 
         # libtcod.image_blit_2x(ship, con, self.x, self.y)
         # libtcod.image_blit_2x(ship, ship_console, 0, 0)
@@ -277,8 +327,8 @@ def render_all():
             else:
                 buffer.set_fore(x,   mirror_y_coordinate(y),   color[0], color[1], color[2], character)
 
-    for object in objects:
-        object.draw()
+    for o in objects:
+        o.draw()
 
     buffer.blit(con)
     player_ship.draw()
@@ -292,11 +342,23 @@ def render_all():
               "     Velocity: {1}\n"
               "VelocityAngle: {2}\n"
               "    Particles: {3}\n"
+              "Sector Position:\n"
+              " {4}, {5}\n"
+              "Top Left:\n"
+              " {6}, {7}\n"
+              "Bottom Right:\n"
+              " {8}, {9}\n"
             ).format(
                 round(math.degrees(player_ship.heading),2),
                 round(player_ship.velocity,2),
                 round(math.degrees(player_ship.velocity_angle),2),
-                len(starfield.particles)
+                len(starfield.particles),
+                round(player_ship.sector_position_x),
+                round(player_ship.sector_position_y),
+                round(player_ship.sector_position_x - SCREEN_WIDTH/2),
+                round(player_ship.sector_position_y + SCREEN_HEIGHT/2),
+                round(player_ship.sector_position_x - SCREEN_WIDTH/2 + SCREEN_WIDTH),
+                round(player_ship.sector_position_y + SCREEN_HEIGHT/2 - SCREEN_HEIGHT),
         ).ljust(HUD_WIDTH)
     )
 
@@ -327,17 +389,17 @@ def handle_keys():
         libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
     elif key.vk == libtcod.KEY_ESCAPE:
         return 'exit'  #exit game
-    else:
-        for i in range(2):
-            starfield.add_particle(
-                Particle(
-                    randrange(0, SCREEN_WIDTH), randrange(0, SCREEN_HEIGHT),
-                    "thrust_exhaust",
-                    thrust_exhaust_index,
-                    thrust_exhaust_colormap,
-                    thrust_exhaust_character_map,
-                )
-            )
+    # else:
+    #     for i in range(2):
+    #         starfield.add_particle(
+    #             Particle(
+    #                 randrange(0, SCREEN_WIDTH), randrange(0, SCREEN_HEIGHT),
+    #                 "thrust_exhaust",
+    #                 thrust_exhaust_index,
+    #                 thrust_exhaust_colormap,
+    #                 thrust_exhaust_character_map,
+    #             )
+    #         )
 
     #         #test for other keys
     #         key_char = chr(key.c)
@@ -364,7 +426,7 @@ SCREEN_HEIGHT = 70
 # SCREEN_WIDTH = 180
 # SCREEN_HEIGHT = 106
 
-HUD_HEIGHT = 10
+HUD_HEIGHT = 14
 HUD_WIDTH = 26
 LIMIT_FPS = 30
 MAX_STARS = 80
@@ -391,6 +453,7 @@ panel_console = libtcod.console_new(HUD_WIDTH, HUD_HEIGHT)
 libtcod.console_set_default_foreground(panel_console, libtcod.white)
 libtcod.console_set_default_background(panel_console, libtcod.black)
 
+global buffer
 buffer = libtcod.ConsoleBuffer(SCREEN_WIDTH, SCREEN_HEIGHT)
 con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
 libtcod.console_set_default_background(panel_console, sector_background)
@@ -403,11 +466,10 @@ key = libtcod.Key()
 
 libtcod.console_set_keyboard_repeat(1, 10)
 
-
 starfield = Starfield()
 player_ship = Ship()
 
-objects = []
+objects = [Feature()]
 
 while not libtcod.console_is_window_closed():
     libtcod.sys_check_for_event(libtcod.KEY_PRESSED|libtcod.KEY_RELEASED|libtcod.EVENT_MOUSE,key,mouse)
