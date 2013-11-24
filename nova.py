@@ -82,9 +82,9 @@ class Feature:
         # print(repr((endingx, endingy)))
 
         startingx = int(max([0, startingx]))
-        startingy = int(min([SCREEN_HEIGHT,  startingy]))
+        startingy = int(min([SCREEN_HEIGHT-1,  startingy]))
         endingx = int(min([SCREEN_WIDTH, endingx]))
-        endingy = int(max([0, endingy]))
+        endingy = int(max([-1, endingy]))
         # print(repr((startingx, startingy)))
         # print(repr((endingx, endingy)))
 
@@ -159,7 +159,7 @@ class Ship:
         self.sector_position_x = 0.0
         self.sector_position_y = 0.0
 
-        self.deltav = 0.15
+        self.deltav = 0.10
         self.turn_rate = math.radians(5.0)
         self.twopi = 2 * math.pi
         self.max_heading = self.twopi - self.turn_rate
@@ -226,7 +226,7 @@ class Ship:
         else:
             self.velocity_angle_opposite = self.velocity_angle + math.pi
 
-        if self.velocity < 0.15:
+        if self.velocity < 0.09:
             self.velocity = 0.0
         elif self.velocity > 3.0:
             self.velocity = 3.0
