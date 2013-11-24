@@ -78,15 +78,13 @@ class Feature:
         startingy = int(self.sector_position_y - visible_space_bottom)
         endingx = startingx + self.width
         endingy = startingy - self.height
-        # print(repr((startingx, startingy)))
-        # print(repr((endingx, endingy)))
+        # print(repr((startingx, startingy)), repr((endingx, endingy)))
 
         startingx = int(max([0, startingx]))
         startingy = int(min([SCREEN_HEIGHT-1,  startingy]))
         endingx = int(min([SCREEN_WIDTH, endingx]))
         endingy = int(max([-1, endingy]))
-        # print(repr((startingx, startingy)))
-        # print(repr((endingx, endingy)))
+        # print(repr((startingx, startingy)), repr((endingx, endingy)))
 
         for x in range(startingx, endingx):
             for y in range(startingy, endingy, -1):
@@ -321,6 +319,9 @@ def render_all():
             color = 85
         buffer.set_fore(int(round(star[0])), mirror_y_coordinate(int(round(star[1]))), color, color, color, star[3])
 
+    for o in objects:
+        o.draw()
+
     for p in starfield.particles:
         if p.valid:
             color = p.colormap[p.index]
@@ -339,9 +340,6 @@ def render_all():
                 buffer.set_fore(x,   mirror_y_coordinate(y-1), color[0], color[1], color[2], character)
             else:
                 buffer.set_fore(x,   mirror_y_coordinate(y),   color[0], color[1], color[2], character)
-
-    for o in objects:
-        o.draw()
 
     buffer.blit(con)
     player_ship.draw()
