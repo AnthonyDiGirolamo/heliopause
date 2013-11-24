@@ -60,8 +60,10 @@ class Feature:
         # |  +--+---------+
         # |  |  |         |
         # +--+--+         |
-        #    |            |
-        #    +------------+
+        #    |       +----+--+
+        #    +-------|----+  |
+        #            +-------+
+
         visible_space_left   = player_ship.sector_position_x - SCREEN_WIDTH/2
         visible_space_top    = player_ship.sector_position_y + SCREEN_HEIGHT/2
         visible_space_right  = visible_space_left + SCREEN_WIDTH
@@ -74,9 +76,20 @@ class Feature:
         # !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top);
         startingx = int(self.sector_position_x - visible_space_left)
         startingy = int(self.sector_position_y - visible_space_bottom)
+        endingx = startingx + self.width
+        endingy = startingy - self.height
+        # print(repr((startingx, startingy)))
+        # print(repr((endingx, endingy)))
 
-        for x in range(startingx, startingx+self.width):
-            for y in range(startingy, startingy-self.height, -1):
+        startingx = int(max([0, startingx]))
+        startingy = int(min([SCREEN_HEIGHT,  startingy]))
+        endingx = int(min([SCREEN_WIDTH, endingx]))
+        endingy = int(max([0, endingy]))
+        # print(repr((startingx, startingy)))
+        # print(repr((endingx, endingy)))
+
+        for x in range(startingx, endingx):
+            for y in range(startingy, endingy, -1):
                 buffer.set_fore( x, mirror_y_coordinate(y), 128, 255, 128, ord('#') )
 
 
