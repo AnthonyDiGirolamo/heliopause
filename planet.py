@@ -1,5 +1,5 @@
-import pprint
-pp = pprint.PrettyPrinter(indent=4, width=120).pprint
+# import pprint
+# pp = pprint.PrettyPrinter(indent=4, width=120).pprint
 
 class Planet:
     def __init__(self, sector):
@@ -21,7 +21,7 @@ class Planet:
                 else:
                     col.append(0)
             self.circle_mask.append(col)
-        pp(self.circle_mask)
+        # pp(self.circle_mask)
 
     def draw(self):
         feature_left         = self.sector_position_x

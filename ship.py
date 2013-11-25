@@ -27,7 +27,7 @@ class Ship:
         self.sector_position_x = 0.0
         self.sector_position_y = 0.0
 
-        self.deltav = 0.15
+        self.deltav = 0.05
         self.turn_rate = math.radians(10.0)
         self.twopi = 2 * math.pi
         self.max_heading = self.twopi - self.turn_rate
@@ -124,7 +124,7 @@ class Ship:
         else:
             self.velocity_angle_opposite = self.velocity_angle + math.pi
 
-        if self.velocity < 0.15:
+        if self.velocity < self.deltav:
             self.velocity = 0.0
         elif self.velocity > 3.0:
             self.velocity = 3.0
