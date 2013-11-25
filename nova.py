@@ -25,8 +25,8 @@ laser_character_map = [4 for i in range(0, laser_index+1)]
 
 class Sector:
     def __init__(self, screen_width, screen_height, buffer):
-        # self.background = libtcod.Color(32,32,64)
         self.background = libtcod.Color(0,0,0)
+        # self.background = libtcod.Color(32,32,64)
 
         self.buffer = buffer
         self.screen_width = screen_width
@@ -135,9 +135,6 @@ class Game:
         # self.buffer = ConsoleBuffer(width, height, back_r=0, back_g=0, back_b=0, fore_r=0, fore_g=0, fore_b=0, char=' ')
         self.console = libtcod.console_new(self.screen_width, self.screen_height)
 
-        # ship_console = libtcod.console_new(8, 8)
-        # libtcod.console_set_key_color(ship_console, libtcod.blue)
-
         self.mouse = libtcod.Mouse()
         self.key = libtcod.Key()
 
@@ -145,7 +142,7 @@ class Game:
 
         self.starfield = Starfield(self.sector, max_stars=50)
 
-        self.player_ship = Ship(self.sector, self.console)
+        self.player_ship = Ship(self.sector)
 
         self.panel_console = libtcod.console_new(self.hud_width, self.hud_height)
         libtcod.console_set_default_foreground(self.panel_console, libtcod.white)
@@ -218,9 +215,8 @@ class Game:
 
         self.player_ship.draw()
         self.buffer.blit(self.console)
-        libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
 
-        # libtcod.console_blit(ship_console, 0, 0, 0, 0, 0, self.player_ship.x, self.player_ship.y, 0.9, 0.9)
+        libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
 
         libtcod.console_print_frame(self.panel_console, 0, 0, self.hud_width, self.hud_height, clear=True, flag=libtcod.BKGND_SET, fmt=0)
         libtcod.console_print_ex(self.panel_console, 1, 1, libtcod.BKGND_SET, libtcod.LEFT,
@@ -251,9 +247,6 @@ class Game:
         libtcod.console_blit(self.panel_console, 0, 0, self.hud_width, self.hud_height, 0, 0, 0, 0.75, 0.75)
 
         self.buffer.clear(self.sector.background[0],self.sector.background[1],self.sector.background[2])
-
-        # libtcod.console_set_default_background(ship_console, libtcod.black)
-        # libtcod.console_clear(ship_console)
 
 
     def handle_keys(self):
