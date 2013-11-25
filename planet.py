@@ -1,12 +1,15 @@
 # import pprint
-# pp = pprint.PrettyPrinter(indent=4, width=120).pprint
+# pp = pprint.PrettyPrinter(indent=4, width=200).pprint
+from random import randrange
 
 class Planet:
     def __init__(self, sector):
         self.sector = sector
-        self.sector_position_x = -10
-        self.sector_position_y = 10
-        self.width = 30
+        self.sector_position_x = randrange(-100, 100)
+        self.sector_position_y = randrange(-100, 100)
+        self.width = randrange(10, 50)
+        if (self.width % 2) != 0:
+            self.width += 1
         self.height = self.width
         self.build_circle_mask()
 

@@ -19,7 +19,8 @@ class Sector:
         self.visible_space_bottom = 0
 
         self.planets = []
-        self.add_planet()
+        for i in range(0, 5):
+            self.add_planet()
 
         self.particles = []
 
