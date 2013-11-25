@@ -9,19 +9,6 @@ from particle import Particle
 from ship import Ship
 from starfield import Starfield
 
-sector_background = libtcod.Color(0,0,0)
-
-thrust_exhaust_index = 10
-thrust_exhaust_colormap = libtcod.color_gen_map(
-    [ sector_background, libtcod.Color(255, 144, 0),  libtcod.Color(255, 222, 0) ],
-    [ 0,                 thrust_exhaust_index/2,      thrust_exhaust_index] )
-thrust_exhaust_character_map = [176, 176, 176, 177, 177, 178, 178, 219, 219, 219]
-
-laser_index = 20
-laser_colormap = libtcod.color_gen_map(
-    [ libtcod.Color(0, 144, 255),  libtcod.Color(0, 222, 255) ],
-    [ 0,                           laser_index] )
-laser_character_map = [4 for i in range(0, laser_index+1)]
 
 class Sector:
     def __init__(self, screen_width, screen_height, buffer):
@@ -84,100 +71,48 @@ class Planet:
         self.height = 20
 
     def draw(self):
-        # +-----+
-        # |  +--+---------+
-        # |  |  |         |
-        # +--+--+         |
-        #    |       +----+--+
-        #    +-------|----+  |
-        #            +-------+
-
         feature_left         = self.sector_position_x
         feature_top          = self.sector_position_y
         feature_right        = self.sector_position_x + self.width
         feature_bottom       = self.sector_position_y + self.height
 
-        # !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top);
         startingx = int(self.sector_position_x - self.sector.visible_space_left)
         startingy = int(self.sector_position_y - self.sector.visible_space_bottom)
         endingx = startingx + self.width
         endingy = startingy - self.height
-        # print(repr((startingx, startingy)), repr((endingx, endingy)))
 
         startingx = int(max([0, startingx]))
         startingy = int(min([self.sector.screen_height-1,  startingy]))
         endingx = int(min([self.sector.screen_width, endingx]))
         endingy = int(max([-1, endingy]))
-        # print(repr((startingx, startingy)), repr((endingx, endingy)))
 
         for x in range(startingx, endingx):
             for y in range(startingy, endingy, -1):
                 self.sector.buffer.set_fore( x, self.sector.mirror_y_coordinate(y), 128, 255, 128, ord('@') )
 
+
 class Game:
     def __init__(self, screen_width=120, screen_height=70):
         self.screen_width = screen_width
         self.screen_height = screen_height
-
         self.hud_height = 14
         self.hud_width = 26
-
-        libtcod.sys_set_fps(30)
-        libtcod.console_set_keyboard_repeat(1, 10)
-        # libtcod.console_set_custom_font('fonts/8x8.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)
-        # libtcod.console_set_custom_font('fonts/12x12.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)
-        libtcod.console_set_custom_font('fonts/terminal8x8_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
-        # libtcod.console_set_custom_font('fonts/terminal12x12_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 
         libtcod.console_init_root(self.screen_width, self.screen_height, 'Nova', False)
 
         self.buffer = libtcod.ConsoleBuffer(self.screen_width, self.screen_height)
-        # self.buffer = ConsoleBuffer(width, height, back_r=0, back_g=0, back_b=0, fore_r=0, fore_g=0, fore_b=0, char=' ')
         self.console = libtcod.console_new(self.screen_width, self.screen_height)
 
         self.mouse = libtcod.Mouse()
         self.key = libtcod.Key()
 
         self.sector = Sector(self.screen_width, self.screen_height, self.buffer)
-
         self.starfield = Starfield(self.sector, max_stars=50)
-
         self.player_ship = Ship(self.sector)
 
         self.panel_console = libtcod.console_new(self.hud_width, self.hud_height)
         libtcod.console_set_default_foreground(self.panel_console, libtcod.white)
         libtcod.console_set_default_background(self.panel_console, self.sector.background)
-
-
-    def main_loop(self):
-        while not libtcod.console_is_window_closed():
-            libtcod.sys_check_for_event(libtcod.KEY_PRESSED|libtcod.KEY_RELEASED|libtcod.EVENT_MOUSE, self.key, self.mouse)
-
-            if self.player_ship.velocity > 0.0:
-                self.starfield.scroll( self.player_ship.velocity_angle, self.player_ship.velocity )
-
-            self.sector.update_particle_positions()
-            self.sector.scroll_particles( self.player_ship.velocity_angle, self.player_ship.velocity )
-
-            self.render_all()
-            libtcod.console_flush()
-
-            player_action = self.handle_keys()
-            if player_action == 'exit':
-                break
-
-            if self.player_ship.throttle_open:
-                self.player_ship.apply_thrust()
-
-            if self.player_ship.laser_firing:
-                self.player_ship.fire_laser()
-
-            if self.player_ship.reversing:
-                self.player_ship.reverse_direction()
-            elif self.player_ship.turning_left:
-                self.player_ship.turn_left()
-            elif self.player_ship.turning_right:
-                self.player_ship.turn_right()
 
     def render_all(self):
         for star in self.starfield:
@@ -244,10 +179,19 @@ class Game:
             ).ljust(self.hud_width)
         )
 
+        # for i in range(2):
+        #     self.sector.add_particle(
+        #         Particle(
+        #             randrange(0, self.screen_width), randrange(0, self.screen_height),
+        #             "thrust_exhaust",
+        #             thrust_exhaust_index,
+        #             thrust_exhaust_colormap,
+        #             thrust_exhaust_character_map,
+        #         )
+        #     )
+
         libtcod.console_blit(self.panel_console, 0, 0, self.hud_width, self.hud_height, 0, 0, 0, 0.75, 0.75)
-
-        self.buffer.clear(self.sector.background[0],self.sector.background[1],self.sector.background[2])
-
+        self.buffer.clear(self.sector.background[0], self.sector.background[1], self.sector.background[2])
 
     def handle_keys(self):
         if self.key.vk == libtcod.KEY_UP:
@@ -265,40 +209,48 @@ class Game:
         if self.key.vk == libtcod.KEY_ENTER and self.key.lalt:
             libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
         elif self.key.vk == libtcod.KEY_ESCAPE:
-            return 'exit'  #exit game
-        # else:
-        #     for i in range(2):
-        #         self.sector.add_particle(
-        #             Particle(
-        #                 randrange(0, self.screen_width), randrange(0, self.screen_height),
-        #                 "thrust_exhaust",
-        #                 thrust_exhaust_index,
-        #                 thrust_exhaust_colormap,
-        #                 thrust_exhaust_character_map,
-        #             )
-        #         )
+            return 1  #exit game
 
-        #         #test for other keys
-        #         key_char = chr(key.c)
-        #         if key_char == 'g':
-        #             #pick up an item
-        #             for object in objects:  #look for an item in the player's tile
-        #                 if object.x == player.x and object.y == player.y and object.item:
-        #                     object.item.pick_up()
-        #                     break
-        #         if key_char == 'i':
-        #             #show the inventory; if an item is selected, use it
-        #             chosen_item = inventory_menu('Press the key next to an item to use it, or any other to cancel.\n')
-        #             if chosen_item is not None:
-        #                 chosen_item.use()
-        #         if key_char == 'd':
-        #             #show the inventory; if an item is selected, drop it
-        #             chosen_item = inventory_menu('Press the key next to an item to drop it, or any other to cancel.\n')
-        #             if chosen_item is not None:
-        #                 chosen_item.drop()
-        #         return 'didnt-take-turn'
+    def main_loop(self):
+        while not libtcod.console_is_window_closed():
+            libtcod.sys_check_for_event(libtcod.KEY_PRESSED|libtcod.KEY_RELEASED|libtcod.EVENT_MOUSE, self.key, self.mouse)
 
-# game = Game(180, 120)
-game = Game()
+            if self.player_ship.velocity > 0.0:
+                self.starfield.scroll( self.player_ship.velocity_angle, self.player_ship.velocity )
+
+            self.sector.update_particle_positions()
+            self.sector.scroll_particles( self.player_ship.velocity_angle, self.player_ship.velocity )
+
+            self.render_all()
+            libtcod.console_flush()
+
+            player_action = self.handle_keys()
+            if player_action == 1:
+                break
+
+            if self.player_ship.throttle_open:
+                self.player_ship.apply_thrust()
+
+            if self.player_ship.laser_firing:
+                self.player_ship.fire_laser()
+
+            if self.player_ship.reversing:
+                self.player_ship.reverse_direction()
+            elif self.player_ship.turning_left:
+                self.player_ship.turn_left()
+            elif self.player_ship.turning_right:
+                self.player_ship.turn_right()
+
+# libtcod setup
+
+libtcod.sys_set_fps(30)
+libtcod.console_set_keyboard_repeat(1, 10)
+# libtcod.console_set_custom_font('fonts/8x8.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)
+# libtcod.console_set_custom_font('fonts/12x12.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)
+libtcod.console_set_custom_font('fonts/terminal8x8_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+# libtcod.console_set_custom_font('fonts/terminal12x12_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+
+# game = Game()
+game = Game(180, 120)
 game.main_loop()
 
