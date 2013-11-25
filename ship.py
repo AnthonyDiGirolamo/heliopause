@@ -28,7 +28,7 @@ class Ship:
         self.sector_position_y = 0.0
 
         self.deltav = 0.15
-        self.turn_rate = math.radians(5.0)
+        self.turn_rate = math.radians(10.0)
         self.twopi = 2 * math.pi
         self.max_heading = self.twopi - self.turn_rate
 
