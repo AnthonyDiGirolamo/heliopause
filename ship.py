@@ -9,7 +9,7 @@ sector_background = libtcod.Color(0,0,0)
 thrust_exhaust_index = 10
 thrust_exhaust_colormap = libtcod.color_gen_map(
     [ sector_background, libtcod.Color(255, 144, 0),  libtcod.Color(255, 222, 0) ],
-    [ 0,                      thrust_exhaust_index/2,      thrust_exhaust_index] )
+    [ 0,                 thrust_exhaust_index/2,      thrust_exhaust_index] )
 thrust_exhaust_character_map = [176, 176, 176, 177, 177, 178, 178, 219, 219, 219]
 
 laser_index = 20
@@ -19,12 +19,11 @@ laser_colormap = libtcod.color_gen_map(
 laser_character_map = [4 for i in range(0, laser_index+1)]
 
 class Ship:
-    def __init__(self, screen_width, screen_height, buffer, con, starfield):
+    def __init__(self, sector, con):
         self.con = con
-        self.output_buffer = buffer
-        self.starfield = starfield
-        self.x = (screen_width / 2) - 4
-        self.y = (screen_height / 2) - 4
+        self.sector = sector
+        self.x = (self.sector.screen_width / 2) - 4
+        self.y = (self.sector.screen_height / 2) - 4
 
         self.sector_position_x = 0.0
         self.sector_position_y = 0.0
@@ -128,7 +127,7 @@ class Ship:
         elif self.velocity > 3.0:
             self.velocity = 3.0
 
-        self.starfield.add_particle(
+        self.sector.add_particle(
             Particle( self.x+3+x_component*-2, self.y+4+y_component*-2,
                 "thrust_exhaust",
                 thrust_exhaust_index,
@@ -179,12 +178,12 @@ class Ship:
                     b = cell[0]
                     f = cell[1]
                     c = cell[2]
-                    self.output_buffer.set(self.x + x, self.y + y, b[0], b[1], b[2], f[0], f[1], f[2], c)
+                    self.sector.buffer.set(self.x + x, self.y + y, b[0], b[1], b[2], f[0], f[1], f[2], c)
 
     def fire_laser(self):
         x_component = math.cos(self.heading)
         y_component = math.sin(self.heading)
-        self.starfield.add_particle(
+        self.sector.add_particle(
             Particle(
                 # self.x,
                 self.x+3+x_component*3,

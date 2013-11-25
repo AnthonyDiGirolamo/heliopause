@@ -3,5 +3,5 @@ export LD_LIBRARY_PATH=/Users/anthony/code/libtcod_osx:$LD_LIBRARY_PATH
 
 # /usr/local/Cellar/pypy/2.1.0/libexec/bin/pypy $@
 python2.6 $@
+# python2.6 -m cProfile $@
 # python2.7 $@
-# python -m cProfile $@
