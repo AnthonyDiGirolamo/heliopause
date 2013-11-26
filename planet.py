@@ -10,14 +10,14 @@ class Planet:
         self.sector = sector
         self.sector_position_x = randrange(-100, 100)
         self.sector_position_y = randrange(-100, 100)
-        self.width = randrange(10, 50)
+        self.width = randrange(30, 50)
         if (self.width % 2) != 0:
             self.width += 1
         self.height = self.width
 
         # Earthlike colormap
         self.colormap = libtcod.color_gen_map(
-            [ libtcod.Color(0,0,0), libtcod.Color(30,30,170),
+            [ libtcod.Color(10,10,40), libtcod.Color(40,40,170),
               libtcod.Color(114, 150, 71), libtcod.Color(80,120,10),
               libtcod.Color(17,109,7), libtcod.Color(120,220,120),
               libtcod.Color(208,208,239), libtcod.Color(255,255,255)],
@@ -53,7 +53,7 @@ class Planet:
         libtcod.heightmap_normalize(tmp)
         libtcod.heightmap_add_hm(hm,tmp,hm)
         libtcod.heightmap_delete(tmp)
-        self.addHill(hm,40,11.4,0.31,0.09)
+        # self.addHill(hm,40,11.4,0.31,0.09)
         libtcod.heightmap_add(hm,-0.2)
         libtcod.heightmap_clamp(hm,0.0,1.0)
         smoothKernelWeight[4] = 20
