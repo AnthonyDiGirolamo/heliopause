@@ -1,5 +1,5 @@
-# import pprint
-# pp = pprint.PrettyPrinter(indent=4, width=200).pprint
+import pprint
+pp = pprint.PrettyPrinter(indent=4, width=200).pprint
 import math
 from random import randrange
 
@@ -24,6 +24,8 @@ class Planet:
               libtcod.Color(208,208,239), libtcod.Color(255,255,255)],
             [ 0, 30, 34, 80, 90, 200, 210, 255]
         )
+        self.heightmap_width = self.width * 2 + 1
+        self.heightmap_height = self.height + 1
         self.build_circle_mask()
         self.build_heightmap()
 
@@ -33,9 +35,9 @@ class Planet:
             hillMaxRadius=baseRadius*(1.0+radiusVar)
             radius = libtcod.random_get_float(self.rnd,hillMinRadius, hillMaxRadius)
             theta = libtcod.random_get_float(self.rnd,0.0, 6.283185) # between 0 and 2Pi
-            dist = libtcod.random_get_float(self.rnd,0.0, float(min(self.width*2,self.height))/2 - radius)
-            xh = int(self.width/2 + math.cos(theta) * dist)
-            yh = int(self.height/2 + math.sin(theta) * dist)
+            dist = libtcod.random_get_float(self.rnd,0.0, float(min(self.heightmap_width,self.heightmap_height))/2 - radius)
+            xh = int(self.heightmap_width/2 + math.cos(theta) * dist)
+            yh = int(self.heightmap_height/2 + math.sin(theta) * dist)
             libtcod.heightmap_add_hill(hm,float(xh),float(yh),radius,height)
 
     def build_heightmap(self):
@@ -47,9 +49,9 @@ class Planet:
         smoothKernelDy=[-1,-1,-1,0,0,0,1,1,1]
         smoothKernelWeight=[1.0,2.0,1.0,2.0,20.0,2.0,1.0,2.0,1.0]
 
-        hm=libtcod.heightmap_new(self.width*2,self.height)
+        hm=libtcod.heightmap_new(self.heightmap_width, self.heightmap_height)
         coef=[0.11,0.22,-0.22,0.18,]
-        tmp =libtcod.heightmap_new(self.width*2,self.height)
+        tmp =libtcod.heightmap_new(self.heightmap_width, self.heightmap_height)
         libtcod.heightmap_add_voronoi(tmp,100,4,coef,self.rnd)
         libtcod.heightmap_normalize(tmp)
         libtcod.heightmap_add_hm(hm,tmp,hm)
@@ -67,16 +69,37 @@ class Planet:
 
     def build_circle_mask(self):
         radius = self.width / 2
-        self.circle_mask = []
-        for x in range(-radius, radius+1):
+        circle_mask = []
+        for y in range(radius, -radius-1, -1):
             col = []
-            for y in range(radius, -radius-1, -1):
+            for x in range(-radius, radius+1):
                 if float(x)**2.0 + float(y)**2.0 < float(radius)**2.0:
                     col.append(1)
                 else:
                     col.append(0)
+            circle_mask.append(col)
+
+        self.circle_mask = []
+        for y, row in enumerate(circle_mask):
+            col = []
+            for x, cell in enumerate(row):
+                if x > 0 and y > 0 and x < len(row)-1 and y < len(circle_mask) - 1:
+                    cell_sum = circle_mask[x-1][y-1] + circle_mask[x][y-1] + circle_mask[x+1][y-1] + circle_mask[x-1][y] + circle_mask[x][y] + circle_mask[x+1][y] + circle_mask[x-1][y+1] + circle_mask[x][y+1] + circle_mask[x+1][y+1]
+                    if cell_sum <= 7 and cell_sum > 4:
+                        col.append(2)
+                    elif cell_sum > 6:
+                        col.append(1)
+                    else:
+                        col.append(0)
+                else:
+                    col.append(0)
             self.circle_mask.append(col)
         # pp(self.circle_mask)
+
+    def blend_colors(self, r1, g1, b1, r2, g2, b2, alpha):
+        return ( int(alpha * r1 + (1-alpha) * r2),
+                 int(alpha * g1 + (1-alpha) * g2),
+                 int(alpha * b1 + (1-alpha) * b2) )
 
     def draw(self):
         feature_left         = self.sector_position_x
@@ -94,10 +117,10 @@ class Planet:
         endingx = min([self.sector.screen_width, endingx])
         endingy = max([-1, endingy])
 
-        maskx = 1
+        maskx = 0
         if startingx == 0:
             maskx += self.width - endingx
-        start_masky = 1
+        start_masky = 0
         if startingy == self.sector.screen_height-1:
             start_masky += self.height - (startingy - endingy)
         masky = start_masky
@@ -107,15 +130,20 @@ class Planet:
                     color = int(libtcod.heightmap_get_value(self.heightmap, maskx+self.rotation_index, masky))
                     if color > 255:
                         color = 255
-                    self.sector.buffer.set(x, self.sector.mirror_y_coordinate(y),
-                        self.colormap[color][0], self.colormap[color][1], self.colormap[color][2],
-                        self.colormap[color][0], self.colormap[color][1], self.colormap[color][2], ord('@') )
-                        # 128, 255, 128, ord('@') )
+
+                    r = self.colormap[color][0]
+                    g = self.colormap[color][1]
+                    b = self.colormap[color][2]
+                    if self.circle_mask[maskx][masky] == 2:
+                        r, g, b = self.blend_colors(r, g, b, 0, 0, 0, 0.5)
+
+                    self.sector.buffer.set(x, self.sector.mirror_y_coordinate(y), r, g, b, r, g, b, ord('@') )
+                    # 128, 255, 128, ord('@') )
                 masky += 1
             masky = start_masky
             maskx += 1
 
-        self.rotation_index += 1
-        if self.rotation_index > self.width*2:
-            self.rotation_index = 0
+        # self.rotation_index += 1
+        # if self.rotation_index > self.width*2:
+        #     self.rotation_index = 0
 
