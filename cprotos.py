@@ -9,16 +9,16 @@ def setup_protos(lib):
     lib.TCOD_line_step.restype = c_bool
     lib.TCOD_line_step.argtypes=[POINTER(c_int), POINTER(c_int)]
 
-    #_lib.TCOD_line.restype=c_bool 
+    #_lib.TCOD_line.restype=c_bool
     #_lib.TCOD_line.argtypes=[c_int, c_int, c_int, c_int, TCOD_line_listener_t]
 
-    lib.TCOD_line_init_mt.restype=c_void 
+    lib.TCOD_line_init_mt.restype=c_void
     lib.TCOD_line_init_mt.argtypes=[c_int, c_int, c_int, c_int, c_void_p]
 
-    lib.TCOD_line_step_mt.restype=c_bool 
+    lib.TCOD_line_step_mt.restype=c_bool
     lib.TCOD_line_step_mt.argtypes=[POINTER(c_int), POINTER(c_int), c_void_p]
 
-    #_lib.TCOD_line_mt.restype=c_bool 
+    #_lib.TCOD_line_mt.restype=c_bool
     #_lib.TCOD_line_mt.argtypes=[c_int, c_int, c_int, c_int, TCOD_line_listener_t , c_void_p]
 
     lib.TCOD_bsp_new.restype=c_void_p
@@ -27,7 +27,7 @@ def setup_protos(lib):
     lib.TCOD_bsp_new_with_size.restype=c_void_p
     lib.TCOD_bsp_new_with_size.argtypes=[c_int,c_int,c_int, c_int]
 
-    lib.TCOD_bsp_delete.restype=c_void 
+    lib.TCOD_bsp_delete.restype=c_void
     lib.TCOD_bsp_delete.argtypes=[c_void_p]
 
     lib.TCOD_bsp_left.restype=c_void_p
@@ -39,37 +39,37 @@ def setup_protos(lib):
     lib.TCOD_bsp_father.restype=c_void_p
     lib.TCOD_bsp_father.argtypes=[c_void_p]
 
-    lib.TCOD_bsp_is_leaf.restype=c_bool 
+    lib.TCOD_bsp_is_leaf.restype=c_bool
     lib.TCOD_bsp_is_leaf.argtypes=[c_void_p]
 
-    #_lib.c_void_pre_order.restype=c_bool 
+    #_lib.c_void_pre_order.restype=c_bool
     #_lib.c_void_pre_order.argtypes=[c_void_p, TCOD_bsp_callback_t , void_p]
 
-    #_lib.TCOD_bsp_traverse_in_order.restype=c_bool 
+    #_lib.TCOD_bsp_traverse_in_order.restype=c_bool
     #_lib.TCOD_bsp_traverse_in_order.argtypes=[c_void_p, TCOD_bsp_callback_t , void_p]
 
-    #_lib.c_void_post_order.restype=c_bool 
+    #_lib.c_void_post_order.restype=c_bool
     #_lib.c_void_post_order.argtypes=[c_void_p, TCOD_bsp_callback_t , void_p]
 
-    #_lib.TCOD_bsp_traverse_level_order.restype=c_bool 
+    #_lib.TCOD_bsp_traverse_level_order.restype=c_bool
     #_lib.TCOD_bsp_traverse_level_order.argtypes=[c_void_p, TCOD_bsp_callback_t , void_p]
 
-    #_lib.TCOD_bsp_traverse_inverted_level_order.restype=c_bool 
+    #_lib.TCOD_bsp_traverse_inverted_level_order.restype=c_bool
     #_lib.TCOD_bsp_traverse_inverted_level_order.argtypes=[c_void_p, TCOD_bsp_callback_t , void_p]
 
-    lib.TCOD_bsp_contains.restype=c_bool 
+    lib.TCOD_bsp_contains.restype=c_bool
     lib.TCOD_bsp_contains.argtypes=[c_void_p, c_int, c_int]
 
     lib.TCOD_bsp_find_node.restype=c_void_p
     lib.TCOD_bsp_find_node.argtypes=[c_void_p, c_int, c_int]
 
-    lib.TCOD_bsp_resize.restype=c_void 
+    lib.TCOD_bsp_resize.restype=c_void
     lib.TCOD_bsp_resize.argtypes=[c_void_p, c_int,c_int, c_int, c_int]
 
-    lib.TCOD_bsp_split_once.restype=c_void 
+    lib.TCOD_bsp_split_once.restype=c_void
     lib.TCOD_bsp_split_once.argtypes=[c_void_p, c_bool , c_int]
 
-    lib.TCOD_bsp_split_recursive.restype=c_void 
+    lib.TCOD_bsp_split_recursive.restype=c_void
     lib.TCOD_bsp_split_recursive.argtypes=[c_void_p, c_void_p , c_int, ]
 
     lib.TCOD_bsp_remove_sons.restype=c_void
@@ -657,7 +657,7 @@ def setup_protos(lib):
     lib.TCOD_random_restore.argtypes=[c_void_p , c_void_p ]
 
     lib.TCOD_random_new_from_seed.restype=c_void_p
-    lib.TCOD_random_new_from_seed.argtypes=[c_int , c_int ]
+    lib.TCOD_random_new_from_seed.argtypes=[c_uint , c_uint ]
 
     lib.TCOD_random_delete.restype=c_void
     lib.TCOD_random_delete.argtypes=[c_void_p ]
