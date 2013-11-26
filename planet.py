@@ -15,6 +15,7 @@ class Planet:
             self.width += 1
         self.height = self.width
 
+        # Earthlike colormap
         self.colormap = libtcod.color_gen_map(
             [ libtcod.Color(0,0,0), libtcod.Color(30,30,170),
               libtcod.Color(114, 150, 71), libtcod.Color(80,120,10),
@@ -61,7 +62,7 @@ class Planet:
         libtcod.heightmap_rain_erosion(hm,1000,0.46,0.12,self.rnd)
         libtcod.heightmap_normalize(hm,0,255)
         self.heightmap = hm
-        print(repr(libtcod.heightmap_get_minmax(self.heightmap)))
+        # print(repr(libtcod.heightmap_get_minmax(self.heightmap)))
 
     def build_circle_mask(self):
         radius = self.width / 2
@@ -82,34 +83,34 @@ class Planet:
         feature_right        = self.sector_position_x + self.width
         feature_bottom       = self.sector_position_y + self.height
 
-        startingx = int(self.sector_position_x - self.sector.visible_space_left)
-        startingy = int(self.sector_position_y - self.sector.visible_space_bottom)
+        startingx = int(self.sector_position_x - math.floor(self.sector.visible_space_left))
+        startingy = int(self.sector_position_y - math.floor(self.sector.visible_space_bottom))
         endingx = startingx + self.width
         endingy = startingy - self.height
 
-        startingx = int(max([0, startingx]))
-        startingy = int(min([self.sector.screen_height-1,  startingy]))
-        endingx = int(min([self.sector.screen_width, endingx]))
-        endingy = int(max([-1, endingy]))
+        startingx = max([0, startingx])
+        startingy = min([self.sector.screen_height-1,  startingy])
+        endingx = min([self.sector.screen_width, endingx])
+        endingy = max([-1, endingy])
 
-        row = 1
+        maskx = 1
         if startingx == 0:
-            row += self.width - endingx
-        start_col = 1
+            maskx += self.width - endingx
+        start_masky = 1
         if startingy == self.sector.screen_height-1:
-            start_col += self.height - (startingy - endingy)
-        col = start_col
+            start_masky += self.height - (startingy - endingy)
+        masky = start_masky
         for x in range(startingx, endingx):
             for y in range(startingy, endingy, -1):
-                if self.circle_mask[row][col]:
-                    color = int(libtcod.heightmap_get_value(self.heightmap, row, col))
+                if self.circle_mask[maskx][masky]:
+                    color = int(libtcod.heightmap_get_value(self.heightmap, maskx, masky))
                     if color > 255:
                         color = 255
                     self.sector.buffer.set(x, self.sector.mirror_y_coordinate(y),
                         self.colormap[color][0], self.colormap[color][1], self.colormap[color][2],
                         self.colormap[color][0], self.colormap[color][1], self.colormap[color][2], ord('@') )
                         # 128, 255, 128, ord('@') )
-                col += 1
-            col = start_col
-            row += 1
+                masky += 1
+            masky = start_masky
+            maskx += 1
 
