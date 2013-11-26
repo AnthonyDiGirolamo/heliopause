@@ -17,7 +17,7 @@ class Planet:
 
         # Earthlike colormap
         self.colormap = libtcod.color_gen_map(
-            [ libtcod.Color(10,10,40), libtcod.Color(40,40,170),
+            [ libtcod.Color(10,10,40), libtcod.Color(30,30,170),
               libtcod.Color(114, 150, 71), libtcod.Color(80,120,10),
               libtcod.Color(17,109,7), libtcod.Color(120,220,120),
               libtcod.Color(208,208,239), libtcod.Color(255,255,255)],
