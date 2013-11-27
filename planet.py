@@ -1,35 +1,63 @@
 import pprint
 pp = pprint.PrettyPrinter(indent=4, width=200).pprint
 import math
-from random import randrange
+import sys
+import random
+import collections
 
 import libtcodpy as libtcod
 
 class Planet:
-    def __init__(self, sector):
+    def __init__(self, sector, planet_class='terran', position_x=-30, position_y=30, radius=60):
+        self.planet_class = planet_class
         self.sector = sector
-        self.sector_position_x = -20 #randrange(-100, 100)
-        self.sector_position_y = 20 #randrange(-100, 100)
-        self.width = 50 #randrange(30, 50)
+        self.sector_position_x = position_x
+        self.sector_position_y = position_y
+        self.width = radius
         if (self.width % 2) != 0:
             self.width += 1
         self.height = self.width
         self.rotation_index = 0
 
-        # Earthlike colormap
-        # self.colormap = libtcod.color_gen_map(
-        #     [ libtcod.Color(10,10,40), libtcod.Color(30,30,170),
-        #       libtcod.Color(114, 150, 71), libtcod.Color(80,120,10),
-        #       libtcod.Color(17,109,7), libtcod.Color(120,220,120),
-        #       libtcod.Color(208,208,239), libtcod.Color(255,255,255)],
-        #     [ 0, 30, 34, 80, 90, 200, 210, 255]
-        # )
+        self.rnd=libtcod.random_new_from_seed(1094911894)
 
-        # Star colormap
-        self.colormap = libtcod.color_gen_map( [ libtcod.Color(255, 222, 0), libtcod.Color(232, 112, 26) ], [ 0, 255] )
+        if self.planet_class == 'terran':
+            # Earthlike colormap
+            self.colormap = collections.deque( libtcod.color_gen_map(
+                [ libtcod.Color(10,10,40), libtcod.Color(30,30,170),
+                  libtcod.Color(114, 150, 71), libtcod.Color(80,120,10),
+                  libtcod.Color(17,109,7), libtcod.Color(120,220,120),
+                  libtcod.Color(208,208,239), libtcod.Color(255,255,255)],
+                [ 0, 30, 34, 80, 90, 200, 210, 255]
+            ))
+            self.noise_dx = 0.0
+            self.noise_dy = 0.0
+            self.noise_dz = 0.0
+            self.noise_octaves = 4.0
+            self.noise_zoom = 1.0
+            self.noise_hurst = libtcod.NOISE_DEFAULT_HURST
+            self.noise_lacunarity = libtcod.NOISE_DEFAULT_LACUNARITY
+        elif self.planet_class == 'star':
+            # Star colormap
+            self.colormap = collections.deque(
+                libtcod.color_gen_map(
+                    [ libtcod.Color(255, 222, 0), libtcod.Color(232, 112, 26), libtcod.Color(255, 222, 0), libtcod.Color(232, 112, 26), libtcod.Color(255, 222, 0)],
+                    [ 0, 64, 128, 192, 255] )
+            )
+            self.noise_dx = 0.0
+            self.noise_dy = 0.0
+            self.noise_dz = 0.0
+            self.noise_octaves = 4.0
+            self.noise_zoom = 4.0
+            self.noise_hurst = libtcod.NOISE_DEFAULT_HURST
+            self.noise_lacunarity = libtcod.NOISE_DEFAULT_LACUNARITY
 
-        self.heightmap_width = self.width * 2 + 1
-        self.heightmap_height = self.height + 1
+        self.heightmap_width = self.width * 2
+        self.heightmap_height = self.height
+
+        self.char_shades = ['.',':','!','*','o','e','&','#','%','@']
+        self.shades = [i/10.0 for i in range(10, -1, -1)]
+
         self.build_circle_mask()
         self.build_heightmap()
 
@@ -45,18 +73,7 @@ class Planet:
     #         libtcod.heightmap_add_hill(hm,float(xh),float(yh),radius,height)
 
     def build_heightmap(self):
-        self.rnd=libtcod.random_new_from_seed(1094911894)
-
-        noise_func = 0
-        noise_dx = 0.0
-        noise_dy = 0.0
-        noise_dz = 0.0
-        noise_octaves = 4.0
-        noise_zoom = 4.0
-        noise_hurst = libtcod.NOISE_DEFAULT_HURST
-        noise_lacunarity = libtcod.NOISE_DEFAULT_LACUNARITY
-
-        noise = libtcod.noise_new(3, noise_hurst, noise_lacunarity, self.rnd)
+        noise = libtcod.noise_new(3, self.noise_hurst, self.noise_lacunarity, self.rnd)
 
         hm = libtcod.heightmap_new(self.heightmap_width, self.heightmap_height)
         libtcod.heightmap_clear(hm)
@@ -64,10 +81,10 @@ class Planet:
             for x in range(self.heightmap_width):
                 libtcod.heightmap_set_value(hm, x, y, 0.0)
 
-        pp((self.heightmap_width, self.heightmap_height))
-        noise_dx += 0.01
-        noise_dy += 0.01
-        noise_dz += 0.01
+        # pp((self.heightmap_width, self.heightmap_height))
+        self.noise_dx += 0.01
+        self.noise_dy += 0.01
+        self.noise_dz += 0.01
 
         pi_times_two = 2 * math.pi
         pi_div_two = math.pi / 2.0
@@ -80,20 +97,13 @@ class Planet:
         while phi <= pi_div_two:
             while theta <= pi_times_two:
                 f = [
-                    noise_zoom * math.cos(phi) * math.cos(theta),
-                    noise_zoom * math.cos(phi) * math.sin(theta),
-                    noise_zoom * math.sin(phi),
+                    self.noise_zoom * math.cos(phi) * math.cos(theta),
+                    self.noise_zoom * math.cos(phi) * math.sin(theta),
+                    self.noise_zoom * math.sin(phi),
                 ]
-                value = libtcod.noise_get_fbm(noise, f, noise_octaves, libtcod.NOISE_PERLIN)
+                value = libtcod.noise_get_fbm(noise, f, self.noise_octaves, libtcod.NOISE_PERLIN)
                 # print((x, y, value))
                 libtcod.heightmap_set_value(hm, x, y, value)
-                # c = int((value + 1.0) / 2.0 * 255)
-                # if c < 0:
-                #     c = 0
-                # elif c > 255:
-                #     c = 255
-                # col = libtcod.Color(c // 2, c // 2, c)
-                # libtcod.image_put_pixel(noise_img,x,y,col)
                 theta += (pi_times_two / self.heightmap_width)
                 x += 1
             phi += (math.pi / (self.heightmap_height-1))
@@ -101,10 +111,12 @@ class Planet:
             x = 0
             theta = 0.0
 
-        # libtcod.heightmap_normalize(hm, 0, 1.0)
-        # libtcod.heightmap_add(hm,-0.35)
-        # libtcod.heightmap_clamp(hm,0.0,1.0)
-        # libtcod.heightmap_rain_erosion(hm,1000,0.46,0.12,self.rnd)
+        if self.planet_class == 'terran':
+            libtcod.heightmap_normalize(hm, 0, 1.0)
+            libtcod.heightmap_add(hm,-0.35)
+            libtcod.heightmap_clamp(hm,0.0,1.0)
+            libtcod.heightmap_rain_erosion(hm,1000,0.46,0.12,self.rnd)
+
         libtcod.heightmap_normalize(hm, 0, 255)
         self.heightmap = hm
 
@@ -134,36 +146,76 @@ class Planet:
         # self.heightmap = hm
         # # print(repr(libtcod.heightmap_get_minmax(self.heightmap)))
 
-    def build_circle_mask(self):
-        radius = self.width / 2
-        circle_mask = []
-        for y in range(radius, -radius-1, -1):
-            col = []
-            for x in range(-radius, radius+1):
-                if float(x)**2.0 + float(y)**2.0 < float(radius)**2.0:
-                    col.append(1)
-                else:
-                    col.append(0)
-            circle_mask.append(col)
+    def normalize(self, v):
+        len = math.sqrt(v[0]**2 + v[1]**2 + v[2]**2)
+        return (v[0]/len, v[1]/len, v[2]/len)
 
-        # TODO: there has to be a better way to do this
-        # given a circle_mask made of 1s, change the edges to 2s
+    def dot(self, x,y):
+        d = x[0]*y[0] + x[1]*y[1] + x[2]*y[2]
+        return -d if d < 0 else 0
+
+    def draw_sphere(self, r, k, ambient, light):
         self.circle_mask = []
-        for y, row in enumerate(circle_mask):
+        for i in range(int(math.floor(-r)), int(math.ceil(r))):
+            x = i + 0.5
             col = []
-            for x, cell in enumerate(row):
-                if x > 0 and y > 0 and x < len(row)-1 and y < len(circle_mask) - 1:
-                    cell_sum = circle_mask[x-1][y-1] + circle_mask[x][y-1] + circle_mask[x+1][y-1] + circle_mask[x-1][y] + circle_mask[x][y] + circle_mask[x+1][y] + circle_mask[x-1][y+1] + circle_mask[x][y+1] + circle_mask[x+1][y+1]
-                    if cell_sum <= 7 and cell_sum > 4:
-                        col.append(2)
-                    elif cell_sum > 6:
-                        col.append(1)
-                    else:
-                        col.append(0)
+
+            for j in range(int(math.floor(-1*r)), int(math.ceil(1*r))):
+                # y = j/2 + 0.5
+                y = j + 0.5
+                if x*x + y*y <= r*r:
+                    vec = self.normalize((x,y,math.sqrt(r*r - x*x - y*y)))
+                    b = self.dot(light,vec)**k + ambient
+                    intensity = int((1-b)*(len(self.shades)-1))
+                    col.append( self.shades[intensity] if 0 <= intensity < len(self.shades) else self.shades[0] )
+                    sys.stdout.write(self.char_shades[intensity] if 0 <= intensity < len(self.char_shades) else self.char_shades[0])
                 else:
                     col.append(0)
+                    sys.stdout.write(' ')
+            sys.stdout.write("\n")
+
             self.circle_mask.append(col)
         # pp(self.circle_mask)
+        # pp(len(self.circle_mask))
+        # pp(len(self.circle_mask[0]))
+
+    def build_circle_mask(self):
+        if self.planet_class == 'star':
+            light = self.normalize((10,10,-50))
+            self.draw_sphere(self.width/2, 0.5, 0.1, light)
+        else:
+            light = self.normalize((20,20,-50))
+            self.draw_sphere(self.width/2, 0.5, 0.1, light)
+
+        # radius = self.width / 2
+        # circle_mask = []
+        # for y in range(radius, -radius-1, -1):
+        #     col = []
+        #     for x in range(-radius, radius+1):
+        #         if float(x)**2.0 + float(y)**2.0 < float(radius)**2.0:
+        #             col.append(1)
+        #         else:
+        #             col.append(0)
+        #     circle_mask.append(col)
+
+        # # TODO: there has to be a better way to do this
+        # # given a circle_mask made of 1s, change the edges to 2s
+        # self.circle_mask = []
+        # for y, row in enumerate(circle_mask):
+        #     col = []
+        #     for x, cell in enumerate(row):
+        #         if x > 0 and y > 0 and x < len(row)-1 and y < len(circle_mask) - 1:
+        #             cell_sum = circle_mask[x-1][y-1] + circle_mask[x][y-1] + circle_mask[x+1][y-1] + circle_mask[x-1][y] + circle_mask[x][y] + circle_mask[x+1][y] + circle_mask[x-1][y+1] + circle_mask[x][y+1] + circle_mask[x+1][y+1]
+        #             if cell_sum <= 7 and cell_sum > 4:
+        #                 col.append(2)
+        #             elif cell_sum > 6:
+        #                 col.append(1)
+        #             else:
+        #                 col.append(0)
+        #         else:
+        #             col.append(0)
+        #     self.circle_mask.append(col)
+        # # pp(self.circle_mask)
 
     def blend_colors(self, r1, g1, b1, r2, g2, b2, alpha):
         return ( int(alpha * r1 + (1-alpha) * r2),
@@ -203,8 +255,8 @@ class Planet:
                     r = self.colormap[color][0]
                     g = self.colormap[color][1]
                     b = self.colormap[color][2]
-                    # if self.circle_mask[maskx][masky] == 2:
-                    #     r, g, b = self.blend_colors(r, g, b, 0, 0, 0, 0.5)
+                    if self.circle_mask[maskx][masky] < 1.0:
+                        r, g, b = self.blend_colors(r, g, b, 0, 0, 0, self.circle_mask[maskx][masky])
 
                     self.sector.buffer.set(x, self.sector.mirror_y_coordinate(y), r, g, b, r, g, b, ord('@') )
                     # 128, 255, 128, ord('@') )
@@ -212,7 +264,9 @@ class Planet:
             masky = start_masky
             maskx += 1
 
-        self.rotation_index += 1
-        if self.rotation_index > self.width*2:
-            self.rotation_index = 0
+        if self.planet_class == 'star':
+            self.colormap.rotate(2)
+        # self.rotation_index += 1
+        # if self.rotation_index > self.width*2:
+        #     self.rotation_index = 0
 

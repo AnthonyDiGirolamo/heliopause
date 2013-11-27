@@ -19,16 +19,16 @@ class Sector:
         self.visible_space_bottom = 0
 
         self.planets = []
-        for i in range(0, 1):
-            self.add_planet()
+        self.add_planet(planet_class='star', position_x=-50, position_y=15, radius=30)
+        self.add_planet(planet_class='terran', position_x=0, position_y=30, radius=60)
 
         self.particles = []
 
     def mirror_y_coordinate(self, y):
         return (self.screen_height- 1 - y)
 
-    def add_planet(self):
-        self.planets.append(Planet(sector=self))
+    def add_planet(self, **keyword_args):
+        self.planets.append(Planet(sector=self, **keyword_args))
 
     def update_visibility(self, player_sector_position_x, player_sector_position_y):
         self.visible_space_left   = player_sector_position_x - self.screen_width/2

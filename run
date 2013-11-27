@@ -5,3 +5,4 @@ export LD_LIBRARY_PATH=/Users/anthony/code/libtcod_osx:$LD_LIBRARY_PATH
 python2.6 $@
 # python2.6 -m cProfile $@
 # python2.7 $@
+# ipython
