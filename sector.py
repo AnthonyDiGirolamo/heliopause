@@ -19,8 +19,9 @@ class Sector:
         self.visible_space_bottom = 0
 
         self.planets = []
-        self.add_planet(planet_class='star', position_x=-50, position_y=15, radius=30)
-        self.add_planet(planet_class='terran', position_x=0, position_y=20, radius=40)
+        self.add_planet(planet_class='star',   position_x=-50, position_y=15, diameter=30)
+        self.add_planet(planet_class='terran', position_x=0,   position_y=20, diameter=30)
+        self.add_planet(planet_class='terran', position_x=60,  position_y=30, diameter=60)
 
         self.particles = []
 

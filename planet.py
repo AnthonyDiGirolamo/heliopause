@@ -8,20 +8,17 @@ import collections
 import libtcodpy as libtcod
 
 class Planet:
-    def __init__(self, sector, planet_class='terran', position_x=-30, position_y=30, radius=60):
+    def __init__(self, sector, planet_class='terran', position_x=-30, position_y=30, diameter=60, seed=3849058430):
         self.planet_class = planet_class
+        self.seed = seed
         self.sector = sector
         self.sector_position_x = position_x
         self.sector_position_y = position_y
-        self.width = radius
+        self.width = diameter
         if (self.width % 2) != 0:
             self.width += 1
         self.height = self.width
         self.rotation_index = 0
-
-        # self.rnd=libtcod.random_new_from_seed(1094911894)
-        self.rnd=libtcod.random_new_from_seed(3849058430)
-        # self.rnd=libtcod.random_get_instance()
 
         # Classes:
         #     arid
@@ -34,8 +31,7 @@ class Planet:
         #     ocean
         #     terran
         #     tundra
-
-        #TODO: clouds, atmosphere / aura
+        #TODO: clouds / atmosphere
 
         if self.planet_class == 'terran':
             # Earthlike colormap
@@ -76,15 +72,17 @@ class Planet:
 
         self.build_circle_mask()
         self.build_heightmap()
+        self.build_atmosphere()
+
+    def build_atmosphere(self):
+        pass
 
     def build_heightmap(self):
+        self.rnd=libtcod.random_new_from_seed(self.seed)
+
         noise = libtcod.noise_new(3, self.noise_hurst, self.noise_lacunarity, self.rnd)
 
         hm = libtcod.heightmap_new(self.heightmap_width, self.heightmap_height)
-        libtcod.heightmap_clear(hm)
-        for y in range(self.heightmap_height):
-            for x in range(self.heightmap_width):
-                libtcod.heightmap_set_value(hm, x, y, 0.0)
 
         self.noise_dx += 0.01
         self.noise_dy += 0.01
