@@ -62,7 +62,6 @@ while phi <= pi_div_two:
         elif c > 255:
             c = 255
         col = libtcod.Color(c // 2, c // 2, c)
-        pp((x,y))
         libtcod.image_put_pixel(noise_img,x,y,col)
         theta += (pi_times_two / SCREEN_WIDTH)
         x += 1
@@ -89,5 +88,5 @@ while phi <= pi_div_two:
 libtcod.image_blit_2x(noise_img,con,0,0)
 libtcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
 libtcod.console_flush()
-time.sleep(10)
+time.sleep(5)
 
