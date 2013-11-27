@@ -21,6 +21,7 @@ class Planet:
 
         # self.rnd=libtcod.random_new_from_seed(1094911894)
         self.rnd=libtcod.random_new_from_seed(3849058430)
+        # self.rnd=libtcod.random_get_instance()
 
         if self.planet_class == 'terran':
             # Earthlike colormap
@@ -114,7 +115,7 @@ class Planet:
 
         if self.planet_class == 'terran':
             libtcod.heightmap_normalize(hm, 0, 1.0)
-            libtcod.heightmap_add(hm,-0.35)
+            libtcod.heightmap_add(hm,-0.55)
             libtcod.heightmap_clamp(hm,0.0,1.0)
             libtcod.heightmap_rain_erosion(hm,1000,0.46,0.12,self.rnd)
 
@@ -251,26 +252,26 @@ class Planet:
 
         for y in range(startingy, endingy, -1):
             for x in range(startingx, endingx):
-                # if self.circle_mask[maskx][masky]:
-                color = int(libtcod.heightmap_get_value(self.heightmap, ((maskx+self.rotation_index) % self.heightmap_width), masky))
-                if color > 255:
-                    color = 255
+                if self.circle_mask[maskx][masky]:
+                    color = int(libtcod.heightmap_get_value(self.heightmap, ((maskx+self.rotation_index) % self.heightmap_width), masky))
+                    if color > 255:
+                        color = 255
 
-                r = self.colormap[color][0]
-                g = self.colormap[color][1]
-                b = self.colormap[color][2]
-                # if self.circle_mask[maskx][masky] < 1.0:
-                #     r, g, b = self.blend_colors(r, g, b, 0, 0, 0, self.circle_mask[maskx][masky])
+                    r = self.colormap[color][0]
+                    g = self.colormap[color][1]
+                    b = self.colormap[color][2]
+                    if self.circle_mask[maskx][masky] < 1.0:
+                        r, g, b = self.blend_colors(r, g, b, 0, 0, 0, self.circle_mask[maskx][masky])
 
-                self.sector.buffer.set(x, self.sector.mirror_y_coordinate(y), r, g, b, r, g, b, ord('@') )
+                    self.sector.buffer.set(x, self.sector.mirror_y_coordinate(y), r, g, b, r, g, b, ord('@') )
                 maskx += 1
             maskx = start_maskx
             masky += 1
 
         if self.planet_class == 'star':
             self.colormap.rotate(1)
-        else:
-            self.rotation_index += 1
-            if self.rotation_index >= self.heightmap_width:
-                self.rotation_index = 0
+        # else:
+        #     self.rotation_index += 1
+        #     if self.rotation_index >= self.heightmap_width:
+        #         self.rotation_index = 0
 

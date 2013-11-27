@@ -20,7 +20,7 @@ class Sector:
 
         self.planets = []
         self.add_planet(planet_class='star', position_x=-50, position_y=15, radius=30)
-        self.add_planet(planet_class='terran', position_x=0, position_y=30, radius=60)
+        self.add_planet(planet_class='terran', position_x=0, position_y=20, radius=40)
 
         self.particles = []
 

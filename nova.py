@@ -10,7 +10,6 @@ from starfield import Starfield
 from sector import Sector
 from planet import Planet
 
-
 class Game:
     def __init__(self, screen_width=120, screen_height=70):
         self.screen_width = screen_width
@@ -104,6 +103,7 @@ class Game:
                     round(self.sector.visible_space_bottom),
             ).ljust(self.hud_width)
         )
+        libtcod.console_blit(self.panel_console, 0, 0, self.hud_width, self.hud_height, 0, 0, 0, 0.75, 0.75)
 
         # for i in range(2):
         #     self.sector.add_particle(
@@ -116,7 +116,7 @@ class Game:
         #         )
         #     )
 
-        libtcod.console_blit(self.panel_console, 0, 0, self.hud_width, self.hud_height, 0, 0, 0, 0.75, 0.75)
+
         libtcod.console_flush()
         self.buffer.clear(self.sector.background[0], self.sector.background[1], self.sector.background[2])
 
