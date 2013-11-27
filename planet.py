@@ -19,7 +19,8 @@ class Planet:
         self.height = self.width
         self.rotation_index = 0
 
-        self.rnd=libtcod.random_new_from_seed(1094911894)
+        # self.rnd=libtcod.random_new_from_seed(1094911894)
+        self.rnd=libtcod.random_new_from_seed(3849058430)
 
         if self.planet_class == 'terran':
             # Earthlike colormap
@@ -55,7 +56,7 @@ class Planet:
         self.heightmap_width = self.width * 2
         self.heightmap_height = self.height
 
-        self.char_shades = ['.',':','!','*','o','e','&','#','%','@']
+        # self.char_shades = ['.',':','!','*','o','e','&','#','%','@']
         self.shades = [i/10.0 for i in range(10, -1, -1)]
 
         self.build_circle_mask()
@@ -168,11 +169,11 @@ class Planet:
                     b = self.dot(light,vec)**k + ambient
                     intensity = int((1-b)*(len(self.shades)-1))
                     col.append( self.shades[intensity] if 0 <= intensity < len(self.shades) else self.shades[0] )
-                    sys.stdout.write(self.char_shades[intensity] if 0 <= intensity < len(self.char_shades) else self.char_shades[0])
+                    # sys.stdout.write(self.char_shades[intensity] if 0 <= intensity < len(self.char_shades) else self.char_shades[0])
                 else:
                     col.append(0)
-                    sys.stdout.write(' ')
-            sys.stdout.write("\n")
+                    # sys.stdout.write(' ')
+            # sys.stdout.write("\n")
 
             self.circle_mask.append(col)
         # pp(self.circle_mask)
@@ -238,35 +239,38 @@ class Planet:
         endingx = min([self.sector.screen_width, endingx])
         endingy = max([-1, endingy])
 
-        maskx = 0
+        start_maskx = 0
         if startingx == 0:
-            maskx += self.width - endingx
+            start_maskx += self.width - endingx
+        maskx = start_maskx
+
         start_masky = 0
         if startingy == self.sector.screen_height-1:
             start_masky += self.height - (startingy - endingy)
         masky = start_masky
-        for x in range(startingx, endingx):
-            for y in range(startingy, endingy, -1):
-                if self.circle_mask[maskx][masky]:
-                    color = int(libtcod.heightmap_get_value(self.heightmap, maskx+self.rotation_index, masky))
-                    if color > 255:
-                        color = 255
 
-                    r = self.colormap[color][0]
-                    g = self.colormap[color][1]
-                    b = self.colormap[color][2]
-                    if self.circle_mask[maskx][masky] < 1.0:
-                        r, g, b = self.blend_colors(r, g, b, 0, 0, 0, self.circle_mask[maskx][masky])
+        for y in range(startingy, endingy, -1):
+            for x in range(startingx, endingx):
+                # if self.circle_mask[maskx][masky]:
+                color = int(libtcod.heightmap_get_value(self.heightmap, ((maskx+self.rotation_index) % self.heightmap_width), masky))
+                if color > 255:
+                    color = 255
 
-                    self.sector.buffer.set(x, self.sector.mirror_y_coordinate(y), r, g, b, r, g, b, ord('@') )
-                    # 128, 255, 128, ord('@') )
-                masky += 1
-            masky = start_masky
-            maskx += 1
+                r = self.colormap[color][0]
+                g = self.colormap[color][1]
+                b = self.colormap[color][2]
+                # if self.circle_mask[maskx][masky] < 1.0:
+                #     r, g, b = self.blend_colors(r, g, b, 0, 0, 0, self.circle_mask[maskx][masky])
+
+                self.sector.buffer.set(x, self.sector.mirror_y_coordinate(y), r, g, b, r, g, b, ord('@') )
+                maskx += 1
+            maskx = start_maskx
+            masky += 1
 
         if self.planet_class == 'star':
-            self.colormap.rotate(2)
-        # self.rotation_index += 1
-        # if self.rotation_index > self.width*2:
-        #     self.rotation_index = 0
+            self.colormap.rotate(1)
+        else:
+            self.rotation_index += 1
+            if self.rotation_index >= self.heightmap_width:
+                self.rotation_index = 0
 
