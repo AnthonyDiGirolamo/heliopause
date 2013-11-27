@@ -23,6 +23,20 @@ class Planet:
         self.rnd=libtcod.random_new_from_seed(3849058430)
         # self.rnd=libtcod.random_get_instance()
 
+        # Classes:
+        #     arid
+        #     artic
+        #     barren
+        #     desert
+        #     gas giant
+        #     junlge
+        #     lava
+        #     ocean
+        #     terran
+        #     tundra
+
+        #TODO: clouds, atmosphere / aura
+
         if self.planet_class == 'terran':
             # Earthlike colormap
             self.colormap = collections.deque( libtcod.color_gen_map(
@@ -63,17 +77,6 @@ class Planet:
         self.build_circle_mask()
         self.build_heightmap()
 
-    # def addHill(self, hm,nbHill,baseRadius,radiusVar,height) :
-    #     for i in range(nbHill) :
-    #         hillMinRadius=baseRadius*(1.0-radiusVar)
-    #         hillMaxRadius=baseRadius*(1.0+radiusVar)
-    #         radius = libtcod.random_get_float(self.rnd,hillMinRadius, hillMaxRadius)
-    #         theta = libtcod.random_get_float(self.rnd,0.0, 6.283185) # between 0 and 2Pi
-    #         dist = libtcod.random_get_float(self.rnd,0.0, float(min(self.heightmap_width,self.heightmap_height))/2 - radius)
-    #         xh = int(self.heightmap_width/2 + math.cos(theta) * dist)
-    #         yh = int(self.heightmap_height/2 + math.sin(theta) * dist)
-    #         libtcod.heightmap_add_hill(hm,float(xh),float(yh),radius,height)
-
     def build_heightmap(self):
         noise = libtcod.noise_new(3, self.noise_hurst, self.noise_lacunarity, self.rnd)
 
@@ -83,7 +86,6 @@ class Planet:
             for x in range(self.heightmap_width):
                 libtcod.heightmap_set_value(hm, x, y, 0.0)
 
-        # pp((self.heightmap_width, self.heightmap_height))
         self.noise_dx += 0.01
         self.noise_dy += 0.01
         self.noise_dz += 0.01
@@ -188,36 +190,6 @@ class Planet:
         else:
             light = self.normalize((20,20,-50))
             self.draw_sphere(self.width/2, 0.5, 0.1, light)
-
-        # radius = self.width / 2
-        # circle_mask = []
-        # for y in range(radius, -radius-1, -1):
-        #     col = []
-        #     for x in range(-radius, radius+1):
-        #         if float(x)**2.0 + float(y)**2.0 < float(radius)**2.0:
-        #             col.append(1)
-        #         else:
-        #             col.append(0)
-        #     circle_mask.append(col)
-
-        # # TODO: there has to be a better way to do this
-        # # given a circle_mask made of 1s, change the edges to 2s
-        # self.circle_mask = []
-        # for y, row in enumerate(circle_mask):
-        #     col = []
-        #     for x, cell in enumerate(row):
-        #         if x > 0 and y > 0 and x < len(row)-1 and y < len(circle_mask) - 1:
-        #             cell_sum = circle_mask[x-1][y-1] + circle_mask[x][y-1] + circle_mask[x+1][y-1] + circle_mask[x-1][y] + circle_mask[x][y] + circle_mask[x+1][y] + circle_mask[x-1][y+1] + circle_mask[x][y+1] + circle_mask[x+1][y+1]
-        #             if cell_sum <= 7 and cell_sum > 4:
-        #                 col.append(2)
-        #             elif cell_sum > 6:
-        #                 col.append(1)
-        #             else:
-        #                 col.append(0)
-        #         else:
-        #             col.append(0)
-        #     self.circle_mask.append(col)
-        # # pp(self.circle_mask)
 
     def blend_colors(self, r1, g1, b1, r2, g2, b2, alpha):
         return ( int(alpha * r1 + (1-alpha) * r2),
