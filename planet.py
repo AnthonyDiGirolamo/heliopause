@@ -49,6 +49,7 @@ class Planet:
             self.noise_zoom = 1.0
             self.noise_hurst = libtcod.NOISE_DEFAULT_HURST
             self.noise_lacunarity = libtcod.NOISE_DEFAULT_LACUNARITY
+
         elif self.planet_class == 'star':
             # Star colormap
             self.colormap = collections.deque(
@@ -74,19 +75,15 @@ class Planet:
         self.build_heightmap()
         self.build_atmosphere()
 
-    def build_atmosphere(self):
-        pass
-
-    def build_heightmap(self):
+    def spherical_noise(self, noise_dx=0.0, noise_dy=0.0, noise_dz=0.0, noise_octaves=4.0, noise_zoom=1.0, noise_hurst=libtcod.NOISE_DEFAULT_HURST, noise_lacunarity=libtcod.NOISE_DEFAULT_LACUNARITY):
         self.rnd=libtcod.random_new_from_seed(self.seed)
 
-        noise = libtcod.noise_new(3, self.noise_hurst, self.noise_lacunarity, self.rnd)
-
+        noise = libtcod.noise_new(3, noise_hurst, noise_lacunarity, self.rnd)
         hm = libtcod.heightmap_new(self.heightmap_width, self.heightmap_height)
 
-        self.noise_dx += 0.01
-        self.noise_dy += 0.01
-        self.noise_dz += 0.01
+        noise_dx += 0.01
+        noise_dy += 0.01
+        noise_dz += 0.01
 
         pi_times_two = 2 * math.pi
         pi_div_two = math.pi / 2.0
@@ -99,11 +96,11 @@ class Planet:
         while phi <= pi_div_two:
             while theta <= pi_times_two:
                 f = [
-                    self.noise_zoom * math.cos(phi) * math.cos(theta),
-                    self.noise_zoom * math.cos(phi) * math.sin(theta),
-                    self.noise_zoom * math.sin(phi),
+                    noise_zoom * math.cos(phi) * math.cos(theta),
+                    noise_zoom * math.cos(phi) * math.sin(theta),
+                    noise_zoom * math.sin(phi),
                 ]
-                value = libtcod.noise_get_fbm(noise, f, self.noise_octaves, libtcod.NOISE_PERLIN)
+                value = libtcod.noise_get_fbm(noise, f, noise_octaves, libtcod.NOISE_PERLIN)
                 # print((x, y, value))
                 libtcod.heightmap_set_value(hm, x, y, value)
                 theta += (pi_times_two / self.heightmap_width)
@@ -112,6 +109,13 @@ class Planet:
             y += 1
             x = 0
             theta = 0.0
+        return hm
+
+    def build_atmosphere(self):
+        pass
+
+    def build_heightmap(self):
+        hm = self.spherical_noise( self.noise_dx, self.noise_dy, self.noise_dz, self.noise_octaves, self.noise_zoom, self.noise_hurst, self.noise_lacunarity )
 
         if self.planet_class == 'terran':
             libtcod.heightmap_normalize(hm, 0, 1.0)
