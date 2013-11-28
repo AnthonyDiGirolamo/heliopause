@@ -75,15 +75,25 @@ class Planet:
         self.shades = [i/10.0 for i in range(10, -1, -1)]
 
         self.build_circle_mask()
-        self.build_heightmap()
-        self.build_atmosphere()
+        self.heightmap = self.build_heightmap(self.heightmap_width, self.heightmap_height)
+        self.atmosphere = self.build_atmosphere(self.heightmap_width, self.heightmap_height)
         self.build_sprite()
 
-    def spherical_noise(self, noise_dx=0.0, noise_dy=0.0, noise_dz=0.0, noise_octaves=4.0, noise_zoom=1.0, noise_hurst=libtcod.NOISE_DEFAULT_HURST, noise_lacunarity=libtcod.NOISE_DEFAULT_LACUNARITY, seed=None):
+    def spherical_noise(self,
+            noise_dx=0.0,
+            noise_dy=0.0,
+            noise_dz=0.0,
+            noise_octaves=4.0,
+            noise_zoom=1.0,
+            noise_hurst=libtcod.NOISE_DEFAULT_HURST,
+            noise_lacunarity=libtcod.NOISE_DEFAULT_LACUNARITY,
+            width=None,
+            height=None,
+            seed=None):
         self.rnd = libtcod.random_new_from_seed(self.seed) if seed is None else libtcod.random_new_from_seed(seed)
 
         noise = libtcod.noise_new(3, noise_hurst, noise_lacunarity, self.rnd)
-        hm = libtcod.heightmap_new(self.heightmap_width, self.heightmap_height)
+        hm = libtcod.heightmap_new(width, height)
 
         noise_dx += 0.01
         noise_dy += 0.01
@@ -107,15 +117,15 @@ class Planet:
                 value = libtcod.noise_get_fbm(noise, f, noise_octaves, libtcod.NOISE_PERLIN)
                 # print((x, y, value))
                 libtcod.heightmap_set_value(hm, x, y, value)
-                theta += (pi_times_two / self.heightmap_width)
+                theta += (pi_times_two / width)
                 x += 1
-            phi += (math.pi / (self.heightmap_height-1))
+            phi += (math.pi / (height-1))
             y += 1
             x = 0
             theta = 0.0
         return hm
 
-    def build_atmosphere(self):
+    def build_atmosphere(self, width, height):
         if self.planet_class == 'terran':
             atmosphere = self.spherical_noise(
                     noise_dx=10.0,
@@ -124,17 +134,28 @@ class Planet:
                     noise_octaves=4.0,
                     noise_zoom=2.0,
                     noise_hurst=self.noise_hurst,
-                    noise_lacunarity=self.noise_lacunarity )
+                    noise_lacunarity=self.noise_lacunarity,
+                    width=width,
+                    height=height )
 
             libtcod.heightmap_normalize(atmosphere, 0, 1.0)
             libtcod.heightmap_add(atmosphere,0.30)
             libtcod.heightmap_clamp(atmosphere,0.0,1.0)
-            self.atmosphere = atmosphere
+            return atmosphere
         else:
-            self.atmosphere = None
+            return None
 
-    def build_heightmap(self):
-        hm = self.spherical_noise( self.noise_dx, self.noise_dy, self.noise_dz, self.noise_octaves, self.noise_zoom, self.noise_hurst, self.noise_lacunarity )
+    def build_heightmap(self, width, height):
+        hm = self.spherical_noise(
+                self.noise_dx,
+                self.noise_dy,
+                self.noise_dz,
+                self.noise_octaves,
+                self.noise_zoom,
+                self.noise_hurst,
+                self.noise_lacunarity,
+                width,
+                height)
 
         if self.planet_class == 'terran':
             libtcod.heightmap_normalize(hm, 0, 1.0)
@@ -143,7 +164,7 @@ class Planet:
             libtcod.heightmap_rain_erosion(hm,1000,0.46,0.12,self.rnd)
 
         libtcod.heightmap_normalize(hm, 0, 255)
-        self.heightmap = hm
+        return hm
 
         # # self.rnd=libtcod.random_new_from_seed(1094911894)
         # self.rnd=libtcod.random_get_instance()
@@ -224,15 +245,20 @@ class Planet:
                 column.append( [r, g, b] )
             self.sprite.append(column)
 
-    def blend_layers(self, x, y, terrain_rotation=0, atmosphere_rotation=0):
-        terrain_color = int(libtcod.heightmap_get_value(self.heightmap, ((x+terrain_rotation) % self.heightmap_width), y))
+    def blend_layers(self, x, y, terrain_rotation=0, atmosphere_rotation=0, width=None, height=None):
+        if width is None:
+            width = self.heightmap_width
+        if height is None:
+            height = self.heightmap_height
+
+        terrain_color = int(libtcod.heightmap_get_value(self.heightmap, ((x+terrain_rotation) % width), y))
         if terrain_color > 255:
             terrain_color = 255
         r = self.height_colormap[terrain_color][0]
         g = self.height_colormap[terrain_color][1]
         b = self.height_colormap[terrain_color][2]
         if self.atmosphere:
-            cloud_cover = libtcod.heightmap_get_value(self.atmosphere, ((x+atmosphere_rotation) % self.heightmap_width), y)
+            cloud_cover = libtcod.heightmap_get_value(self.atmosphere, ((x+atmosphere_rotation) % width), y)
             r, g, b = self.blend_colors(r, g, b, 255, 255, 255, cloud_cover)
         if self.circle_mask[x][y] < 1.0:
             r, g, b = self.blend_colors(r, g, b, 0, 0, 0, self.circle_mask[x][y])
@@ -299,5 +325,59 @@ class Planet:
                     self.atmosphere_rotation_index = 0
 
     def render_detail(self):
+        feature_left         = self.sector_position_x - (self.width / 2)
+        feature_top          = self.sector_position_y + (self.width / 2)
+        feature_right        = feature_left + self.width
+        feature_bottom       = feature_top  + self.height
 
-        pass
+        startingx = int(feature_left - math.floor(self.sector.visible_space_left))
+        startingy = int(feature_top  - math.floor(self.sector.visible_space_bottom))
+        endingx = startingx + self.width
+        endingy = startingy - self.height
+
+        startingx = max([0, startingx])
+        startingy = min([self.sector.screen_height-1,  startingy])
+        endingx = min([self.sector.screen_width, endingx])
+        endingy = max([-1, endingy])
+
+        start_maskx = 0
+        if startingx == 0:
+            start_maskx += self.width - endingx
+        maskx = start_maskx
+
+        start_masky = 0
+        if startingy == self.sector.screen_height-1:
+            start_masky += self.height - (startingy - endingy)
+        masky = start_masky
+
+        for y in range(startingy, endingy, -1):
+            for x in range(startingx, endingx):
+                if self.circle_mask[maskx][masky]:
+                    if self.planet_class == 'star':
+                        r, g, b = self.blend_layers(maskx, masky)
+                    else:
+                        # r, g, b = self.sprite[maskx][masky][0], self.sprite[maskx][masky][1], self.sprite[maskx][masky][2]
+                        r, g, b = self.blend_layers(maskx, masky, terrain_rotation=self.terrain_rotation_index, atmosphere_rotation=self.atmosphere_rotation_index)
+
+                    self.sector.buffer.set(x, self.sector.mirror_y_coordinate(y), r, g, b, r, g, b, ord('@') )
+                maskx += 1
+            maskx = start_maskx
+            masky += 1
+
+        if self.planet_class == 'star':
+            self.height_colormap.rotate(1)
+        else:
+            t = time.clock()
+            if t > self.last_terrain_rotation + 5.0:
+                self.last_terrain_rotation = t
+                self.terrain_rotation_index += 1
+                if self.terrain_rotation_index >= self.heightmap_width:
+                    self.terrain_rotation_index = 0
+
+            if t > self.last_atmosphere_rotation + 1.0:
+                self.last_atmosphere_rotation = t
+                self.atmosphere_rotation_index += 1
+                if self.atmosphere_rotation_index >= self.heightmap_width:
+                    self.atmosphere_rotation_index = 0
+
+        key = libtcod.console_wait_for_keypress(True)
