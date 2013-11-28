@@ -174,6 +174,7 @@ class Ship:
                     f = cell[1]
                     c = cell[2]
                     self.sector.buffer.set(self.x + x, self.y + y, b[0], b[1], b[2], f[0], f[1], f[2], c)
+                    # self.sector.buffer.set_fore(self.x + x, self.y + y, f[0], f[1], f[2], c)
 
     def fire_laser(self):
         x_component = math.cos(self.heading)

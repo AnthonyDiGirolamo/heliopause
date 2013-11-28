@@ -35,7 +35,7 @@ class Planet:
 
         if self.planet_class == 'terran':
             # Earthlike colormap
-            self.colormap = collections.deque( libtcod.color_gen_map(
+            self.height_colormap = collections.deque( libtcod.color_gen_map(
                 [ libtcod.Color(10,10,40), libtcod.Color(30,30,170),
                   libtcod.Color(114, 150, 71), libtcod.Color(80,120,10),
                   libtcod.Color(17,109,7), libtcod.Color(120,220,120),
@@ -52,11 +52,9 @@ class Planet:
 
         elif self.planet_class == 'star':
             # Star colormap
-            self.colormap = collections.deque(
-                libtcod.color_gen_map(
-                    [ libtcod.Color(255, 222, 0), libtcod.Color(232, 112, 26), libtcod.Color(255, 222, 0), libtcod.Color(232, 112, 26), libtcod.Color(255, 222, 0)],
-                    [ 0, 64, 128, 192, 255] )
-            )
+            self.height_colormap = collections.deque( libtcod.color_gen_map(
+                [ libtcod.Color(255, 222, 0), libtcod.Color(232, 112, 26), libtcod.Color(255, 222, 0), libtcod.Color(232, 112, 26), libtcod.Color(255, 222, 0)],
+                [ 0, 64, 128, 192, 255] ))
             self.noise_dx = 0.0
             self.noise_dy = 0.0
             self.noise_dz = 0.0
@@ -75,8 +73,8 @@ class Planet:
         self.build_heightmap()
         self.build_atmosphere()
 
-    def spherical_noise(self, noise_dx=0.0, noise_dy=0.0, noise_dz=0.0, noise_octaves=4.0, noise_zoom=1.0, noise_hurst=libtcod.NOISE_DEFAULT_HURST, noise_lacunarity=libtcod.NOISE_DEFAULT_LACUNARITY):
-        self.rnd=libtcod.random_new_from_seed(self.seed)
+    def spherical_noise(self, noise_dx=0.0, noise_dy=0.0, noise_dz=0.0, noise_octaves=4.0, noise_zoom=1.0, noise_hurst=libtcod.NOISE_DEFAULT_HURST, noise_lacunarity=libtcod.NOISE_DEFAULT_LACUNARITY, seed=None):
+        self.rnd = libtcod.random_new_from_seed(self.seed) if seed is None else libtcod.random_new_from_seed(seed)
 
         noise = libtcod.noise_new(3, noise_hurst, noise_lacunarity, self.rnd)
         hm = libtcod.heightmap_new(self.heightmap_width, self.heightmap_height)
@@ -112,7 +110,22 @@ class Planet:
         return hm
 
     def build_atmosphere(self):
-        pass
+        if self.planet_class == 'terran':
+            atmosphere = self.spherical_noise(
+                    noise_dx=10.0,
+                    noise_dy=10.0,
+                    noise_dz=10.0,
+                    noise_octaves=4.0,
+                    noise_zoom=2.0,
+                    noise_hurst=self.noise_hurst,
+                    noise_lacunarity=self.noise_lacunarity )
+
+            libtcod.heightmap_normalize(atmosphere, 0, 1.0)
+            libtcod.heightmap_add(atmosphere,0.30)
+            libtcod.heightmap_clamp(atmosphere,0.0,1.0)
+            self.atmosphere = atmosphere
+        else:
+            self.atmosphere = None
 
     def build_heightmap(self):
         hm = self.spherical_noise( self.noise_dx, self.noise_dy, self.noise_dz, self.noise_octaves, self.noise_zoom, self.noise_hurst, self.noise_lacunarity )
@@ -227,13 +240,20 @@ class Planet:
         for y in range(startingy, endingy, -1):
             for x in range(startingx, endingx):
                 if self.circle_mask[maskx][masky]:
-                    color = int(libtcod.heightmap_get_value(self.heightmap, ((maskx+self.rotation_index) % self.heightmap_width), masky))
+                    # color = int(libtcod.heightmap_get_value(self.heightmap, ((maskx+self.rotation_index) % self.heightmap_width), masky))
+                    color = int(libtcod.heightmap_get_value(self.heightmap, maskx, masky))
                     if color > 255:
                         color = 255
 
-                    r = self.colormap[color][0]
-                    g = self.colormap[color][1]
-                    b = self.colormap[color][2]
+                    r = self.height_colormap[color][0]
+                    g = self.height_colormap[color][1]
+                    b = self.height_colormap[color][2]
+
+                    if self.atmosphere:
+                        cloud_cover = libtcod.heightmap_get_value(self.atmosphere, ((maskx+self.rotation_index) % self.heightmap_width), masky)
+                        print(cloud_cover)
+                        r, g, b = self.blend_colors(r, g, b, 255, 255, 255, cloud_cover)
+
                     if self.circle_mask[maskx][masky] < 1.0:
                         r, g, b = self.blend_colors(r, g, b, 0, 0, 0, self.circle_mask[maskx][masky])
 
@@ -243,7 +263,7 @@ class Planet:
             masky += 1
 
         if self.planet_class == 'star':
-            self.colormap.rotate(1)
+            self.height_colormap.rotate(1)
         # else:
         #     self.rotation_index += 1
         #     if self.rotation_index >= self.heightmap_width:
