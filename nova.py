@@ -9,6 +9,7 @@ from ship import Ship
 from starfield import Starfield
 from sector import Sector
 from planet import Planet
+import collections
 
 class Game:
     def __init__(self, screen_width=120, screen_height=70):
@@ -32,6 +33,13 @@ class Game:
         self.panel_console = libtcod.console_new(self.hud_width, self.hud_height)
         libtcod.console_set_default_foreground(self.panel_console, libtcod.white)
         libtcod.console_set_default_background(self.panel_console, self.sector.background)
+
+        self.message_height = 4
+        self.message_width = self.screen_width
+        self.messages = collections.deque([])
+        self.message_console = libtcod.console_new(self.message_width, self.message_height)
+        libtcod.console_set_default_foreground(self.message_console, libtcod.white)
+        libtcod.console_set_default_background(self.message_console, self.sector.background)
 
     def render_all(self):
         if self.player_ship.velocity > 0.0:
@@ -105,6 +113,11 @@ class Game:
         )
         libtcod.console_blit(self.panel_console, 0, 0, self.hud_width, self.hud_height, 0, 0, 0, 0.75, 0.75)
 
+        if len(self.messages) > 0:
+            libtcod.console_print_ex(self.message_console, 0, 0, libtcod.BKGND_SET, libtcod.LEFT,
+                    "\n".join([message.ljust(self.message_width) for message in self.messages]) )
+            libtcod.console_blit(self.message_console, 0, 0, self.message_width, self.message_height, 0, 0, self.screen_height-self.message_height, 0.75, 0.75)
+
         # for i in range(2):
         #     self.sector.add_particle(
         #         Particle(
@@ -115,7 +128,6 @@ class Game:
         #             thrust_exhaust_character_map,
         #         )
         #     )
-
 
         libtcod.console_flush()
         self.buffer.clear(self.sector.background[0], self.sector.background[1], self.sector.background[2])
@@ -137,6 +149,14 @@ class Game:
             libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
         elif self.key.vk == libtcod.KEY_ESCAPE:
             return 1  #exit game
+        elif self.key.pressed:
+            key_character = chr(self.key.c)
+            if key_character == 'l':
+                result, message = self.sector.land_at_closest_planet(self.player_ship)
+                if message:
+                    if len(self.messages) == self.message_height:
+                        self.messages.popleft()
+                    self.messages.append(message)
 
     def main_loop(self):
         while not libtcod.console_is_window_closed():
@@ -167,8 +187,8 @@ libtcod.sys_set_fps(30)
 libtcod.console_set_keyboard_repeat(1, 10)
 # libtcod.console_set_custom_font('fonts/8x8.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)
 # libtcod.console_set_custom_font('fonts/12x12.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)
-# libtcod.console_set_custom_font('fonts/terminal8x8_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
-libtcod.console_set_custom_font('fonts/terminal12x12_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+libtcod.console_set_custom_font('fonts/terminal8x8_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+# libtcod.console_set_custom_font('fonts/terminal12x12_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 # libtcod.console_set_custom_font('fonts/terminal16x16_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 
 # game = Game(90, 53)

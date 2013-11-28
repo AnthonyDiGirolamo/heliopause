@@ -1,5 +1,7 @@
 import libtcodpy as libtcod
 import math
+import pprint
+pp = pprint.PrettyPrinter(indent=4, width=200).pprint
 
 from planet import Planet
 
@@ -19,9 +21,11 @@ class Sector:
         self.visible_space_bottom = 0
 
         self.planets = []
-        self.add_planet(planet_class='star',   position_x=-50, position_y=15, diameter=30)
-        self.add_planet(planet_class='terran', position_x=0,   position_y=20, diameter=30)
-        self.add_planet(planet_class='terran', position_x=60,  position_y=30, diameter=60)
+        self.add_planet(planet_class='star',   position_x=-50, position_y=0, diameter=30)
+        self.add_planet(planet_class='terran', position_x=-17,   position_y=0, diameter=30)
+        self.add_planet(planet_class='terran', position_x=30,  position_y=0, diameter=60)
+
+        self.planet_distances = [None for p in self.planets]
 
         self.particles = []
 
@@ -36,6 +40,39 @@ class Sector:
         self.visible_space_top    = player_sector_position_y + self.screen_height/2
         self.visible_space_right  = self.visible_space_left + self.screen_width
         self.visible_space_bottom = self.visible_space_top - self.screen_height
+
+    def update_planet_distances(self, shipx, shipy):
+        self.planet_distances = [ math.sqrt((shipx - planet.sector_position_x)**2.0 + (shipy - planet.sector_position_y)**2.0) for planet in self.planets]
+
+    def closest_planet(self, shipx, shipy):
+        self.update_planet_distances(shipx, shipy)
+        nearest_planet_index = 0
+        smallest_distance = None
+        for index, distance in enumerate(self.planet_distances):
+            if smallest_distance is None or distance < smallest_distance:
+                nearest_planet_index = index
+                smallest_distance = distance
+        return [nearest_planet_index, smallest_distance]
+
+    def land_at_closest_planet(self, ship):
+        landed = False
+        message = None
+        index, distance = self.closest_planet(ship.sector_position_x, ship.sector_position_y)
+        planet = self.planets[index]
+        if distance < 1.25*(planet.width/2.0):
+            for p in self.planets:
+                p.selected = False
+            planet.selected = True
+            if ship.velocity > 0.30:
+                message = "{0} you are moving to fast to land at this planet".format(distance)
+            else:
+                message = "{0} landed".format(distance)
+                landed = True
+        else:
+            message = "{0} there isn't a planet in landing range".format(distance)
+        if landed:
+            ship.velocity = 0.0
+        return [landed, message]
 
     def add_particle(self, particle):
         self.particles.append( particle )

@@ -20,6 +20,8 @@ class Planet:
         self.height = self.width
         self.rotation_index = 0
 
+        self.selected = False
+
         # Classes:
         #     arid
         #     artic
@@ -31,7 +33,6 @@ class Planet:
         #     ocean
         #     terran
         #     tundra
-        #TODO: clouds / atmosphere
 
         if self.planet_class == 'terran':
             # Earthlike colormap
@@ -234,13 +235,13 @@ class Planet:
         return [r, g, b]
 
     def draw(self):
-        feature_left         = self.sector_position_x
-        feature_top          = self.sector_position_y
-        feature_right        = self.sector_position_x + self.width
-        feature_bottom       = self.sector_position_y + self.height
+        feature_left         = self.sector_position_x - (self.width / 2)
+        feature_top          = self.sector_position_y + (self.width / 2)
+        feature_right        = feature_left + self.width
+        feature_bottom       = feature_top  + self.height
 
-        startingx = int(self.sector_position_x - math.floor(self.sector.visible_space_left))
-        startingy = int(self.sector_position_y - math.floor(self.sector.visible_space_bottom))
+        startingx = int(feature_left - math.floor(self.sector.visible_space_left))
+        startingy = int(feature_top  - math.floor(self.sector.visible_space_bottom))
         endingx = startingx + self.width
         endingy = startingy - self.height
 
@@ -261,11 +262,16 @@ class Planet:
 
         for y in range(startingy, endingy, -1):
             for x in range(startingx, endingx):
+                if self.selected:
+                    if ((y==startingy or y==endingy+1) and (x>endingx-5 or x<startingx+4)) or ((x==startingx or x==endingx-1) and (y>startingy-4 or y<endingy+5)):
+                        self.sector.buffer.set(x, self.sector.mirror_y_coordinate(y), 0, 255, 0, 0, 255, 0, ord('@') )
+
                 if self.circle_mask[maskx][masky]:
                     if self.planet_class == 'star':
-                        r, g, b = self.blend_layers(maskx, masky, terrain_rotation=0, atmosphere_rotation=self.rotation_index)
+                        r, g, b = self.blend_layers(maskx, masky)
                     else:
                         r, g, b = self.sprite[maskx][masky][0], self.sprite[maskx][masky][1], self.sprite[maskx][masky][2]
+                        # r, g, b = self.blend_layers(maskx, masky, terrain_rotation=self.rotation_index, atmosphere_rotation=self.rotation_index)
 
                     self.sector.buffer.set(x, self.sector.mirror_y_coordinate(y), r, g, b, r, g, b, ord('@') )
                 maskx += 1
@@ -274,8 +280,8 @@ class Planet:
 
         if self.planet_class == 'star':
             self.height_colormap.rotate(1)
-        else:
-            self.rotation_index += 1
-            if self.rotation_index >= self.heightmap_width:
-                self.rotation_index = 0
+        # else:
+        #     self.rotation_index += 1
+        #     if self.rotation_index >= self.heightmap_width:
+        #         self.rotation_index = 0
 
