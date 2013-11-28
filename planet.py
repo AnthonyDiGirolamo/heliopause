@@ -72,6 +72,7 @@ class Planet:
         self.build_circle_mask()
         self.build_heightmap()
         self.build_atmosphere()
+        self.build_sprite()
 
     def spherical_noise(self, noise_dx=0.0, noise_dy=0.0, noise_dz=0.0, noise_octaves=4.0, noise_zoom=1.0, noise_hurst=libtcod.NOISE_DEFAULT_HURST, noise_lacunarity=libtcod.NOISE_DEFAULT_LACUNARITY, seed=None):
         self.rnd = libtcod.random_new_from_seed(self.seed) if seed is None else libtcod.random_new_from_seed(seed)
@@ -195,8 +196,6 @@ class Planet:
 
             self.circle_mask.append(col)
         # pp(self.circle_mask)
-        # pp(len(self.circle_mask))
-        # pp(len(self.circle_mask[0]))
 
     def build_circle_mask(self):
         if self.planet_class == 'star':
@@ -210,6 +209,29 @@ class Planet:
         return ( int(alpha * r1 + (1-alpha) * r2),
                  int(alpha * g1 + (1-alpha) * g2),
                  int(alpha * b1 + (1-alpha) * b2) )
+
+    def build_sprite(self):
+        self.sprite = []
+        for x in range(0, self.width):
+            column = []
+            for y in range(0, self.height):
+                r, g, b = self.blend_layers(x, y)
+                column.append( [r, g, b] )
+            self.sprite.append(column)
+
+    def blend_layers(self, x, y, terrain_rotation=0, atmosphere_rotation=0):
+        terrain_color = int(libtcod.heightmap_get_value(self.heightmap, ((x+terrain_rotation) % self.heightmap_width), y))
+        if terrain_color > 255:
+            terrain_color = 255
+        r = self.height_colormap[terrain_color][0]
+        g = self.height_colormap[terrain_color][1]
+        b = self.height_colormap[terrain_color][2]
+        if self.atmosphere:
+            cloud_cover = libtcod.heightmap_get_value(self.atmosphere, ((x+atmosphere_rotation) % self.heightmap_width), y)
+            r, g, b = self.blend_colors(r, g, b, 255, 255, 255, cloud_cover)
+        if self.circle_mask[x][y] < 1.0:
+            r, g, b = self.blend_colors(r, g, b, 0, 0, 0, self.circle_mask[x][y])
+        return [r, g, b]
 
     def draw(self):
         feature_left         = self.sector_position_x
@@ -240,22 +262,10 @@ class Planet:
         for y in range(startingy, endingy, -1):
             for x in range(startingx, endingx):
                 if self.circle_mask[maskx][masky]:
-                    # color = int(libtcod.heightmap_get_value(self.heightmap, ((maskx+self.rotation_index) % self.heightmap_width), masky))
-                    color = int(libtcod.heightmap_get_value(self.heightmap, maskx, masky))
-                    if color > 255:
-                        color = 255
-
-                    r = self.height_colormap[color][0]
-                    g = self.height_colormap[color][1]
-                    b = self.height_colormap[color][2]
-
-                    if self.atmosphere:
-                        cloud_cover = libtcod.heightmap_get_value(self.atmosphere, ((maskx+self.rotation_index) % self.heightmap_width), masky)
-                        print(cloud_cover)
-                        r, g, b = self.blend_colors(r, g, b, 255, 255, 255, cloud_cover)
-
-                    if self.circle_mask[maskx][masky] < 1.0:
-                        r, g, b = self.blend_colors(r, g, b, 0, 0, 0, self.circle_mask[maskx][masky])
+                    if self.planet_class == 'star':
+                        r, g, b = self.blend_layers(maskx, masky, terrain_rotation=0, atmosphere_rotation=self.rotation_index)
+                    else:
+                        r, g, b = self.sprite[maskx][masky][0], self.sprite[maskx][masky][1], self.sprite[maskx][masky][2]
 
                     self.sector.buffer.set(x, self.sector.mirror_y_coordinate(y), r, g, b, r, g, b, ord('@') )
                 maskx += 1
@@ -264,8 +274,8 @@ class Planet:
 
         if self.planet_class == 'star':
             self.height_colormap.rotate(1)
-        # else:
-        #     self.rotation_index += 1
-        #     if self.rotation_index >= self.heightmap_width:
-        #         self.rotation_index = 0
+        else:
+            self.rotation_index += 1
+            if self.rotation_index >= self.heightmap_width:
+                self.rotation_index = 0
 
