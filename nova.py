@@ -152,7 +152,7 @@ class Game:
         elif self.key.pressed:
             key_character = chr(self.key.c)
             if key_character == 'l':
-                result, message = self.sector.land_at_closest_planet(self.player_ship)
+                landed, message = self.sector.land_at_closest_planet(self.player_ship)
                 if message:
                     if len(self.messages) == self.message_height:
                         self.messages.popleft()

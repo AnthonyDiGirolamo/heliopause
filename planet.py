@@ -4,6 +4,7 @@ import math
 import sys
 import random
 import collections
+import time
 
 import libtcodpy as libtcod
 
@@ -18,7 +19,10 @@ class Planet:
         if (self.width % 2) != 0:
             self.width += 1
         self.height = self.width
-        self.rotation_index = 0
+        self.terrain_rotation_index = 0
+        self.atmosphere_rotation_index = 0
+        self.last_terrain_rotation = 0.0
+        self.last_atmosphere_rotation = 0.0
 
         self.selected = False
 
@@ -270,8 +274,8 @@ class Planet:
                     if self.planet_class == 'star':
                         r, g, b = self.blend_layers(maskx, masky)
                     else:
-                        r, g, b = self.sprite[maskx][masky][0], self.sprite[maskx][masky][1], self.sprite[maskx][masky][2]
-                        # r, g, b = self.blend_layers(maskx, masky, terrain_rotation=self.rotation_index, atmosphere_rotation=self.rotation_index)
+                        # r, g, b = self.sprite[maskx][masky][0], self.sprite[maskx][masky][1], self.sprite[maskx][masky][2]
+                        r, g, b = self.blend_layers(maskx, masky, terrain_rotation=self.terrain_rotation_index, atmosphere_rotation=self.atmosphere_rotation_index)
 
                     self.sector.buffer.set(x, self.sector.mirror_y_coordinate(y), r, g, b, r, g, b, ord('@') )
                 maskx += 1
@@ -280,8 +284,20 @@ class Planet:
 
         if self.planet_class == 'star':
             self.height_colormap.rotate(1)
-        # else:
-        #     self.rotation_index += 1
-        #     if self.rotation_index >= self.heightmap_width:
-        #         self.rotation_index = 0
+        else:
+            t = time.clock()
+            if t > self.last_terrain_rotation + 5.0:
+                self.last_terrain_rotation = t
+                self.terrain_rotation_index += 1
+                if self.terrain_rotation_index >= self.heightmap_width:
+                    self.terrain_rotation_index = 0
 
+            if t > self.last_atmosphere_rotation + 1.0:
+                self.last_atmosphere_rotation = t
+                self.atmosphere_rotation_index += 1
+                if self.atmosphere_rotation_index >= self.heightmap_width:
+                    self.atmosphere_rotation_index = 0
+
+    def render_detail(self):
+
+        pass

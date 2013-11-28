@@ -21,9 +21,9 @@ class Sector:
         self.visible_space_bottom = 0
 
         self.planets = []
-        self.add_planet(planet_class='star',   position_x=-50, position_y=0, diameter=30)
-        self.add_planet(planet_class='terran', position_x=-17,   position_y=0, diameter=30)
-        self.add_planet(planet_class='terran', position_x=30,  position_y=0, diameter=60)
+        self.add_planet(planet_class='star',   position_x=-30, position_y=0, diameter=40)
+        # self.add_planet(planet_class='terran', position_x=-17,   position_y=0, diameter=30)
+        self.add_planet(planet_class='terran', position_x=30,  position_y=0, diameter=30)
 
         self.planet_distances = [None for p in self.planets]
 
@@ -63,13 +63,13 @@ class Sector:
             for p in self.planets:
                 p.selected = False
             planet.selected = True
-            if ship.velocity > 0.30:
-                message = "{0} you are moving to fast to land at this planet".format(distance)
+            if ship.velocity > 0.20:
+                message = "You are moving to fast to land.".format(distance)
             else:
-                message = "{0} landed".format(distance)
                 landed = True
+                planet.render_detail()
         else:
-            message = "{0} there isn't a planet in landing range".format(distance)
+            message = "There isn't a planet in landing range."
         if landed:
             ship.velocity = 0.0
         return [landed, message]
