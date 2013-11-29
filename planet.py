@@ -59,6 +59,7 @@ class Planet:
             ))
             self.noise_octaves = 6.0
             self.noise_zoom = 1.0
+
         elif self.planet_class == 'ocean':
             self.height_colormap = collections.deque( libtcod.color_gen_map(
                 [
@@ -69,13 +70,31 @@ class Planet:
                   libtcod.Color(92,  198, 169),
                   libtcod.Color(170, 211, 142),
                   libtcod.Color(78,  144, 72),
-                  # libtcod.Color(49,  107, 50),
                   libtcod.Color(24,  55,  23),
                 ],
                 [0, 40, 80, 130, 150, 160, 180, 200]
             ))
             self.noise_octaves = 6.0
             self.noise_zoom = 1.0
+
+        elif self.planet_class == 'jungle':
+            self.height_colormap = collections.deque( libtcod.color_gen_map(
+                [
+                  libtcod.Color(29,  53,  112),
+                  libtcod.Color(69,  137, 200),
+                  libtcod.Color(61,  86,  34),
+                  libtcod.Color(42,  72,  38),
+                  libtcod.Color(52,  103, 35),
+                  libtcod.Color(29,  47,  18),
+                  libtcod.Color(75,  118, 33),
+                  libtcod.Color(100, 173, 22),
+                  # libtcod.Color(61,  71,  33),
+                  # libtcod.Color(141, 132, 56),
+                ],
+                [0, 60, 80, 110, 150, 205, 235, 255]
+            ))
+            self.noise_octaves = 6.0
+            self.noise_zoom = 3.0
 
         elif self.planet_class == 'star':
             self.height_colormap = collections.deque( libtcod.color_gen_map(
@@ -156,7 +175,7 @@ class Planet:
         return hm
 
     def build_atmosphere(self, width, height):
-        if self.planet_class == 'terran' or self.planet_class == 'ocean' :
+        if self.planet_class == 'terran' or self.planet_class == 'ocean' or self.planet_class == 'jungle' :
             atmosphere = self.spherical_noise(
                     noise_dx=10.0,
                     noise_dy=10.0,
@@ -200,6 +219,13 @@ class Planet:
             libtcod.heightmap_clamp(hm,0.0,1.0)
             libtcod.heightmap_rain_erosion(hm,3000,0.46,0.12,self.rnd)
             libtcod.heightmap_normalize(hm, 0, 200)
+
+        elif self.planet_class == 'jungle':
+            libtcod.heightmap_normalize(hm, 0, 1.0)
+            libtcod.heightmap_add(hm,0.20)
+            libtcod.heightmap_clamp(hm,0.0,1.0)
+            libtcod.heightmap_rain_erosion(hm,3000,0.25,0.05,self.rnd)
+            libtcod.heightmap_normalize(hm, 0, 255)
 
         else:
             libtcod.heightmap_normalize(hm, 0, 255)
