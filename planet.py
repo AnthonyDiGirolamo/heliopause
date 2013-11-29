@@ -96,9 +96,30 @@ class Planet:
             self.noise_octaves = 6.0
             self.noise_zoom = 3.0
 
-        elif self.planet_class == 'star':
+        elif self.planet_class == 'lava':
             self.height_colormap = collections.deque( libtcod.color_gen_map(
-                [ libtcod.Color(255, 222, 0), libtcod.Color(232, 112, 26), libtcod.Color(255, 222, 0), libtcod.Color(232, 112, 26), libtcod.Color(255, 222, 0)],
+                [
+                  libtcod.Color(255, 151, 19),
+                  libtcod.Color(255, 52,  0),
+                  libtcod.Color(91,  31,  12),
+                  libtcod.Color(31,  21,  11),
+                  libtcod.Color(56,  44,  21),
+                  libtcod.Color(0,   0,   0),
+                  libtcod.Color(62,  19,  15),
+                  libtcod.Color(94,  65,  35),
+                ],
+                [0, 60, 80, 110, 150, 205, 235, 255]
+            ))
+            self.noise_octaves = 6.0
+            self.noise_zoom = 6.0
+        elif self.planet_class == 'star':
+            star_colors = random.choice([
+                [libtcod.Color(255, 222, 0), libtcod.Color(232, 112, 26)],
+                [libtcod.Color(211, 230, 255), libtcod.Color(128, 181, 255)],
+            ])
+
+            self.height_colormap = collections.deque( libtcod.color_gen_map(
+                star_colors * 2 + [star_colors[0]],
                 [ 0, 64, 128, 192, 255] ))
             self.noise_octaves = 4.0
             self.noise_zoom = 4.0
@@ -225,6 +246,11 @@ class Planet:
             libtcod.heightmap_add(hm,0.20)
             libtcod.heightmap_clamp(hm,0.0,1.0)
             libtcod.heightmap_rain_erosion(hm,3000,0.25,0.05,self.rnd)
+            libtcod.heightmap_normalize(hm, 0, 255)
+
+        elif self.planet_class == 'lava':
+            libtcod.heightmap_normalize(hm, 0, 1.0)
+            libtcod.heightmap_rain_erosion(hm,1000,0.65,0.05,self.rnd)
             libtcod.heightmap_normalize(hm, 0, 255)
 
         else:
