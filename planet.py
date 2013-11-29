@@ -61,15 +61,18 @@ class Planet:
             self.noise_zoom = 1.0
         elif self.planet_class == 'ocean':
             self.height_colormap = collections.deque( libtcod.color_gen_map(
-                [ libtcod.Color(18,  51,  57),
+                [
+                  libtcod.Color(13,  44,  53),
+                  libtcod.Color(18,  51,  57),
                   libtcod.Color(16,  70,  63),
                   libtcod.Color(31,  106, 100),
                   libtcod.Color(92,  198, 169),
                   libtcod.Color(170, 211, 142),
                   libtcod.Color(78,  144, 72),
-                  libtcod.Color(49,  107, 50),
-                  libtcod.Color(24,  55,  23)],
-                [0, 30, 70, 110, 125, 135, 200, 255]
+                  # libtcod.Color(49,  107, 50),
+                  libtcod.Color(24,  55,  23),
+                ],
+                [0, 40, 80, 130, 150, 160, 180, 200]
             ))
             self.noise_octaves = 6.0
             self.noise_zoom = 1.0
@@ -189,13 +192,18 @@ class Planet:
             libtcod.heightmap_add(hm,-0.40)
             libtcod.heightmap_clamp(hm,0.0,1.0)
             libtcod.heightmap_rain_erosion(hm,1000,0.46,0.12,self.rnd)
+            libtcod.heightmap_normalize(hm, 0, 255)
+
         elif self.planet_class == 'ocean':
             libtcod.heightmap_normalize(hm, 0, 1.0)
-            libtcod.heightmap_add(hm,-0.55)
+            libtcod.heightmap_add(hm,-0.40)
             libtcod.heightmap_clamp(hm,0.0,1.0)
-            libtcod.heightmap_rain_erosion(hm,2000,0.46,0.12,self.rnd)
+            libtcod.heightmap_rain_erosion(hm,3000,0.46,0.12,self.rnd)
+            libtcod.heightmap_normalize(hm, 0, 200)
 
-        libtcod.heightmap_normalize(hm, 0, 255)
+        else:
+            libtcod.heightmap_normalize(hm, 0, 255)
+
         return hm
 
         # # self.rnd=libtcod.random_new_from_seed(1094911894)
@@ -418,15 +426,15 @@ class Planet:
             self.height_colormap.rotate(1)
         else:
             t = time.clock()
-            if t > self.last_terrain_rotation + 5.0:
+            if t > self.last_terrain_rotation + 1.0:
                 self.last_terrain_rotation = t
                 self.terrain_rotation_index += 1
-                if self.terrain_rotation_index >= self.heightmap_width:
+                if self.terrain_rotation_index >= self.detail_heightmap_width:
                     self.terrain_rotation_index = 0
 
-            if t > self.last_atmosphere_rotation + 1.0:
+            if t > self.last_atmosphere_rotation + 0.2:
                 self.last_atmosphere_rotation = t
                 self.atmosphere_rotation_index += 1
-                if self.atmosphere_rotation_index >= self.heightmap_width:
+                if self.atmosphere_rotation_index >= self.detail_heightmap_width:
                     self.atmosphere_rotation_index = 0
 
