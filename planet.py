@@ -39,8 +39,13 @@ class Planet:
         #     terran
         #     tundra
 
+        self.noise_dx = 0.0
+        self.noise_dy = 0.0
+        self.noise_dz = 0.0
+        self.noise_hurst = libtcod.NOISE_DEFAULT_HURST
+        self.noise_lacunarity = libtcod.NOISE_DEFAULT_LACUNARITY
+
         if self.planet_class == 'terran':
-            # Earthlike colormap
             self.height_colormap = collections.deque( libtcod.color_gen_map(
                 [ libtcod.Color(10,10,40), libtcod.Color(30,30,170),
                   libtcod.Color(114, 150, 71), libtcod.Color(80,120,10),
@@ -48,26 +53,15 @@ class Planet:
                   libtcod.Color(208,208,239), libtcod.Color(255,255,255)],
                 [ 0, 30, 34, 80, 90, 200, 210, 255]
             ))
-            self.noise_dx = 0.0
-            self.noise_dy = 0.0
-            self.noise_dz = 0.0
             self.noise_octaves = 4.0
             self.noise_zoom = 1.0
-            self.noise_hurst = libtcod.NOISE_DEFAULT_HURST
-            self.noise_lacunarity = libtcod.NOISE_DEFAULT_LACUNARITY
 
         elif self.planet_class == 'star':
-            # Star colormap
             self.height_colormap = collections.deque( libtcod.color_gen_map(
                 [ libtcod.Color(255, 222, 0), libtcod.Color(232, 112, 26), libtcod.Color(255, 222, 0), libtcod.Color(232, 112, 26), libtcod.Color(255, 222, 0)],
                 [ 0, 64, 128, 192, 255] ))
-            self.noise_dx = 0.0
-            self.noise_dy = 0.0
-            self.noise_dz = 0.0
             self.noise_octaves = 4.0
             self.noise_zoom = 4.0
-            self.noise_hurst = libtcod.NOISE_DEFAULT_HURST
-            self.noise_lacunarity = libtcod.NOISE_DEFAULT_LACUNARITY
 
         self.heightmap_width = self.width * 2
         self.heightmap_height = self.height
@@ -176,7 +170,7 @@ class Planet:
             libtcod.heightmap_normalize(hm, 0, 1.0)
             libtcod.heightmap_add(hm,-0.55)
             libtcod.heightmap_clamp(hm,0.0,1.0)
-            libtcod.heightmap_rain_erosion(hm,1000,0.46,0.12,self.rnd)
+            libtcod.heightmap_rain_erosion(hm,2000,0.46,0.12,self.rnd)
 
         libtcod.heightmap_normalize(hm, 0, 255)
         return hm
