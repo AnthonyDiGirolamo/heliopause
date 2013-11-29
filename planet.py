@@ -186,7 +186,7 @@ class Planet:
 
         if self.planet_class == 'terran':
             libtcod.heightmap_normalize(hm, 0, 1.0)
-            libtcod.heightmap_add(hm,-0.55)
+            libtcod.heightmap_add(hm,-0.40)
             libtcod.heightmap_clamp(hm,0.0,1.0)
             libtcod.heightmap_rain_erosion(hm,1000,0.46,0.12,self.rnd)
         elif self.planet_class == 'ocean':

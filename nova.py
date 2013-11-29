@@ -182,10 +182,13 @@ class Game:
             libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
 
             libtcod.console_print_frame(self.landing_console, 0, 0, self.landing_screen_width, self.landing_screen_height, clear=True, flag=libtcod.BKGND_SET, fmt=0)
-            title = "[ Landed at Planet X ]"
+            title = "[ Landed at Planet ... ]"
             libtcod.console_print_ex(self.landing_console,
                     (self.landing_screen_width/2) - (len(title)/2),
                     0, libtcod.BKGND_SET, libtcod.LEFT, title)
+            libtcod.console_print_ex(self.landing_console,
+                    2, 2, libtcod.BKGND_SET, libtcod.LEFT,
+                    "Class: {0}".format(planet.planet_class))
             libtcod.console_blit(self.landing_console, 0, 0, self.landing_screen_width, self.landing_screen_height, 0, self.screen_width/2, 2, 1.0, 0.25)
 
             libtcod.console_flush()
