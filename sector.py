@@ -27,6 +27,7 @@ class Sector:
         self.add_planet(planet_class='jungle', position_x=5,   position_y=-15, diameter=30, seed=876535609)
         self.add_planet(planet_class='lava',   position_x=50,  position_y=15,  diameter=30)
         self.add_planet(planet_class='tundra', position_x=75,  position_y=-15, diameter=30, seed=958492104)
+        self.add_planet(planet_class='arid',   position_x=85,  position_y=15,  diameter=30, seed=393859601)
 
         self.planet_distances = [None for p in self.planets]
 
