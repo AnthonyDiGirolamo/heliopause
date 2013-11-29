@@ -23,7 +23,7 @@ class Sector:
         self.planets = []
         self.add_planet(planet_class='star',   position_x=-30, position_y=0, diameter=40)
         # self.add_planet(planet_class='terran', position_x=-17,   position_y=0, diameter=30)
-        self.add_planet(planet_class='terran', position_x=30,  position_y=0, diameter=30)
+        self.add_planet(planet_class='terran', position_x=30,  position_y=0, diameter=60)
 
         self.planet_distances = [None for p in self.planets]
 
@@ -72,7 +72,7 @@ class Sector:
             message = "There isn't a planet in landing range."
         if landed:
             ship.velocity = 0.0
-        return [landed, message]
+        return [landed, message, index]
 
     def add_particle(self, particle):
         self.particles.append( particle )

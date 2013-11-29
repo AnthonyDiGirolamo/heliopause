@@ -41,6 +41,12 @@ class Game:
         libtcod.console_set_default_foreground(self.message_console, libtcod.white)
         libtcod.console_set_default_background(self.message_console, self.sector.background)
 
+        self.landing_screen_width = self.screen_width / 2
+        self.landing_screen_height = self.screen_height
+        self.landing_console = libtcod.console_new(self.landing_screen_width, self.landing_screen_height)
+        libtcod.console_set_default_foreground(self.landing_console, libtcod.white)
+        libtcod.console_set_default_background(self.landing_console, self.sector.background)
+
     def render_all(self):
         if self.player_ship.velocity > 0.0:
             self.starfield.scroll( self.player_ship.velocity_angle, self.player_ship.velocity )
@@ -145,18 +151,51 @@ class Game:
         if self.key.vk == libtcod.KEY_SPACE:
             self.player_ship.laser_firing = self.key.pressed
 
-        if self.key.vk == libtcod.KEY_ENTER and self.key.lalt:
+        if self.key.pressed and self.key.vk == libtcod.KEY_ENTER and self.key.lalt:
             libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
-        elif self.key.vk == libtcod.KEY_ESCAPE:
+        elif self.key.pressed and self.key.vk == libtcod.KEY_ESCAPE:
             return 1  #exit game
         elif self.key.pressed:
             key_character = chr(self.key.c)
             if key_character == 'l':
-                landed, message = self.sector.land_at_closest_planet(self.player_ship)
+                landed, message, planet_index = self.sector.land_at_closest_planet(self.player_ship)
                 if message:
                     if len(self.messages) == self.message_height:
                         self.messages.popleft()
                     self.messages.append(message)
+                if landed:
+                    self.landed_loop(planet_index)
+
+    def landed_loop(self, planet_index):
+        done = False
+        planet = self.sector.planets[planet_index]
+        while not done:
+            libtcod.sys_check_for_event(libtcod.KEY_PRESSED|libtcod.KEY_RELEASED|libtcod.EVENT_MOUSE, self.key, self.mouse)
+
+            for star in self.starfield:
+                color = 255
+                if star[2] > 0.9:
+                    color = 255
+                elif 0.5 < star[2] < 0.7:
+                    color = 170
+                elif 0.2 < star[2] < 0.4:
+                    color = 85
+                self.buffer.set_fore(int(round(star[0])), self.sector.mirror_y_coordinate(int(round(star[1]))), color, color, color, star[3])
+            planet.render_detail()
+            self.buffer.blit(self.console)
+
+            libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
+
+            libtcod.console_print_frame(self.landing_console, 0, 0, self.landing_screen_width, self.landing_screen_height, clear=True, flag=libtcod.BKGND_SET, fmt=0)
+            libtcod.console_print_ex(self.landing_console, 1, 1, libtcod.BKGND_SET, libtcod.LEFT, "Landed at Planet X")
+            libtcod.console_blit(self.landing_console, 0, 0, self.landing_screen_width, self.landing_screen_height, 0, self.screen_width/2, 0, 0.75, 0.75)
+
+            libtcod.console_flush()
+            self.buffer.clear(self.sector.background[0], self.sector.background[1], self.sector.background[2])
+
+            player_action = self.handle_keys()
+            if player_action == 1:
+                done = True
 
     def main_loop(self):
         while not libtcod.console_is_window_closed():
