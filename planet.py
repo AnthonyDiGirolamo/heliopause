@@ -112,6 +112,24 @@ class Planet:
             ))
             self.noise_octaves = 6.0
             self.noise_zoom = 6.0
+
+        elif self.planet_class == 'tundra':
+            self.height_colormap = collections.deque( libtcod.color_gen_map(
+                [
+                  libtcod.Color(121, 183, 170),
+                  libtcod.Color(167, 206, 174),
+                  libtcod.Color(145, 150, 117),
+                  libtcod.Color(110, 116, 93),
+                  libtcod.Color(167, 157, 109),
+                  libtcod.Color(86,  111, 95),
+                  libtcod.Color(210, 199, 132),
+                  libtcod.Color(255, 255, 200),
+                ],
+                [0, 60, 75, 105, 140, 200, 235, 255]
+            ))
+            self.noise_octaves = 6.0
+            self.noise_zoom = 2.0
+
         elif self.planet_class == 'star':
             star_colors = random.choice([
                 [libtcod.Color(255, 222, 0), libtcod.Color(232, 112, 26)],
@@ -196,7 +214,7 @@ class Planet:
         return hm
 
     def build_atmosphere(self, width, height):
-        if self.planet_class == 'terran' or self.planet_class == 'ocean' or self.planet_class == 'jungle' :
+        if self.planet_class in ['terran', 'ocean', 'jungle', 'tundra'] :
             atmosphere = self.spherical_noise(
                     noise_dx=10.0,
                     noise_dy=10.0,
@@ -251,6 +269,13 @@ class Planet:
         elif self.planet_class == 'lava':
             libtcod.heightmap_normalize(hm, 0, 1.0)
             libtcod.heightmap_rain_erosion(hm,1000,0.65,0.05,self.rnd)
+            libtcod.heightmap_normalize(hm, 0, 255)
+
+        elif self.planet_class == 'tundra':
+            libtcod.heightmap_normalize(hm, 0, 1.0)
+            # libtcod.heightmap_add(hm,0.20)
+            # libtcod.heightmap_clamp(hm,0.0,1.0)
+            libtcod.heightmap_rain_erosion(hm,2000,0.45,0.05,self.rnd)
             libtcod.heightmap_normalize(hm, 0, 255)
 
         else:
