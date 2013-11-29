@@ -47,14 +47,16 @@ class Planet:
 
         if self.planet_class == 'terran':
             self.height_colormap = collections.deque( libtcod.color_gen_map(
-                [ libtcod.Color(39,  62,  90),
+                [
+                  libtcod.Color(39,  62,  90),
                   libtcod.Color(50,  72,  88),
                   libtcod.Color(116, 184, 164),
                   libtcod.Color(142, 163, 164),
                   libtcod.Color(71,  97,  81),
                   libtcod.Color(149, 138, 115),
                   libtcod.Color(199, 197, 150),
-                  libtcod.Color(220, 197, 173)],
+                  libtcod.Color(220, 197, 173)
+                ],
                 [ 0, 15, 70, 80, 90, 200, 233, 255]
             ))
             self.noise_octaves = 6.0
@@ -88,8 +90,6 @@ class Planet:
                   libtcod.Color(29,  47,  18),
                   libtcod.Color(75,  118, 33),
                   libtcod.Color(100, 173, 22),
-                  # libtcod.Color(61,  71,  33),
-                  # libtcod.Color(141, 132, 56),
                 ],
                 [0, 60, 80, 110, 150, 205, 235, 255]
             ))
@@ -163,6 +163,23 @@ class Planet:
             ))
             self.noise_octaves = 6.0
             self.noise_zoom = 3.0
+
+        elif self.planet_class == 'artic':
+            self.height_colormap = collections.deque( libtcod.color_gen_map(
+                [
+                  libtcod.Color(255, 255, 240),
+                  libtcod.Color(221, 245, 193),
+                  libtcod.Color(157, 198, 160),
+                  libtcod.Color(134, 152, 113),
+                  libtcod.Color(154, 166, 116),
+                  libtcod.Color(208, 211, 156),
+                  libtcod.Color(172, 198, 155),
+                  libtcod.Color(255, 255, 255),
+                ],
+                [0, 60, 100, 120, 140, 170, 175, 255]
+            ))
+            self.noise_octaves = 6.0
+            self.noise_zoom = 1.0
 
         elif self.planet_class == 'star':
             star_colors = random.choice([
@@ -347,6 +364,14 @@ class Planet:
             libtcod.heightmap_clamp(hm,0.0,1.0)
             raindrops = 1000 if width == self.detail_heightmap_width else 50
             libtcod.heightmap_rain_erosion(hm,raindrops,0.10,0.10,self.rnd)
+            libtcod.heightmap_normalize(hm, 0, 255)
+
+        elif self.planet_class == 'artic':
+            libtcod.heightmap_normalize(hm, 0, 1.0)
+            libtcod.heightmap_add(hm,0.40)
+            libtcod.heightmap_clamp(hm,0.0,1.0)
+            raindrops = 1000 if width == self.detail_heightmap_width else 100
+            libtcod.heightmap_rain_erosion(hm,raindrops,0.45,0.05,self.rnd)
             libtcod.heightmap_normalize(hm, 0, 255)
 
         else:

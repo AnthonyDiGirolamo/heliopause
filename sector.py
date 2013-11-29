@@ -29,6 +29,7 @@ class Sector:
         self.add_planet(planet_class='tundra', position_x=75,  position_y=-15, diameter=30, seed=958492104)
         self.add_planet(planet_class='arid',   position_x=85,  position_y=15,  diameter=30, seed=393859601)
         self.add_planet(planet_class='desert', position_x=110, position_y=-15, diameter=30, seed=123753278)
+        self.add_planet(planet_class='artic',  position_x=120, position_y=15,  diameter=30, seed=754367994)
 
         self.planet_distances = [None for p in self.planets]
 
