@@ -32,7 +32,7 @@ class Planet:
         #     artic
         #     barren
         #     desert
-        #     gas giant
+        #     gas giants
         #     junlge
         #     lava
         #     ocean
@@ -147,6 +147,23 @@ class Planet:
             self.noise_octaves = 6.0
             self.noise_zoom = 3.0
 
+        elif self.planet_class == 'desert':
+            self.height_colormap = collections.deque( libtcod.color_gen_map(
+                [
+                  libtcod.Color(255, 178, 58),
+                  libtcod.Color(229, 163, 78),
+                  libtcod.Color(255, 150, 61),
+                  libtcod.Color(235, 131, 44),
+                  libtcod.Color(174, 115, 29),
+                  libtcod.Color(163, 94,  45),
+                  libtcod.Color(112, 69,  35),
+                  libtcod.Color(68,  47,  49),
+                ],
+                [0, 30, 40, 80, 140, 200, 244, 255]
+            ))
+            self.noise_octaves = 6.0
+            self.noise_zoom = 3.0
+
         elif self.planet_class == 'star':
             star_colors = random.choice([
                 [libtcod.Color(255, 222, 0), libtcod.Color(232, 112, 26)],
@@ -245,7 +262,7 @@ class Planet:
 
             libtcod.heightmap_normalize(atmosphere, 0, 1.0)
             libtcod.heightmap_add(atmosphere,0.30)
-            libtcod.heightmap_clamp(atmosphere,0.0,1.0)
+            libtcod.heightmap_clamp(atmosphere,0.4,1.0)
             return atmosphere
 
         elif self.planet_class in ['arid', 'desert']:
@@ -322,6 +339,14 @@ class Planet:
             libtcod.heightmap_clamp(hm,0.0,1.0)
             raindrops = 2000 if width == self.detail_heightmap_width else 50
             libtcod.heightmap_rain_erosion(hm,raindrops,0.45,0.05,self.rnd)
+            libtcod.heightmap_normalize(hm, 0, 255)
+
+        elif self.planet_class == 'desert':
+            libtcod.heightmap_normalize(hm, 0, 1.0)
+            libtcod.heightmap_add(hm,0.15)
+            libtcod.heightmap_clamp(hm,0.0,1.0)
+            raindrops = 1000 if width == self.detail_heightmap_width else 50
+            libtcod.heightmap_rain_erosion(hm,raindrops,0.10,0.10,self.rnd)
             libtcod.heightmap_normalize(hm, 0, 255)
 
         else:
