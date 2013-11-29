@@ -323,8 +323,8 @@ class Planet:
                     if self.planet_class == 'star':
                         r, g, b = self.blend_layers(maskx, masky)
                     else:
-                        # r, g, b = self.sprite[maskx][masky][0], self.sprite[maskx][masky][1], self.sprite[maskx][masky][2]
-                        r, g, b = self.blend_layers(maskx, masky, terrain_rotation=self.terrain_rotation_index, atmosphere_rotation=self.atmosphere_rotation_index)
+                        r, g, b = self.sprite[maskx][masky][0], self.sprite[maskx][masky][1], self.sprite[maskx][masky][2]
+                        # r, g, b = self.blend_layers(maskx, masky, terrain_rotation=self.terrain_rotation_index, atmosphere_rotation=self.atmosphere_rotation_index)
 
                     self.sector.buffer.set(x, self.sector.mirror_y_coordinate(y), r, g, b, r, g, b, ord(' ') )
                 maskx += 1

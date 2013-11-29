@@ -41,8 +41,8 @@ class Game:
         libtcod.console_set_default_foreground(self.message_console, libtcod.white)
         libtcod.console_set_default_background(self.message_console, self.sector.background)
 
-        self.landing_screen_width = self.screen_width / 2
-        self.landing_screen_height = self.screen_height
+        self.landing_screen_width = self.screen_width / 2 - 2
+        self.landing_screen_height = self.screen_height - 4
         self.landing_console = libtcod.console_new(self.landing_screen_width, self.landing_screen_height)
         libtcod.console_set_default_foreground(self.landing_console, libtcod.white)
         libtcod.console_set_default_background(self.landing_console, self.sector.background)
@@ -100,10 +100,6 @@ class Game:
                   "    Particles: {3}\n"
                   "Sector Position:\n"
                   " {4}, {5}\n"
-                  "Top Left:\n"
-                  " {6}, {7}\n"
-                  "Bottom Right:\n"
-                  " {8}, {9}\n"
                 ).format(
                     round(math.degrees(self.player_ship.heading),2),
                     round(self.player_ship.velocity,2),
@@ -111,18 +107,14 @@ class Game:
                     len(self.sector.particles),
                     round(self.player_ship.sector_position_x),
                     round(self.player_ship.sector_position_y),
-                    round(self.sector.visible_space_left),
-                    round(self.sector.visible_space_top),
-                    round(self.sector.visible_space_right),
-                    round(self.sector.visible_space_bottom),
             ).ljust(self.hud_width)
         )
-        libtcod.console_blit(self.panel_console, 0, 0, self.hud_width, self.hud_height, 0, 0, 0, 0.75, 0.75)
+        libtcod.console_blit(self.panel_console, 0, 0, self.hud_width, self.hud_height, 0, 0, 0, 1.0, 0.25)
 
         if len(self.messages) > 0:
             libtcod.console_print_ex(self.message_console, 0, 0, libtcod.BKGND_SET, libtcod.LEFT,
                     "\n".join([message.ljust(self.message_width) for message in self.messages]) )
-            libtcod.console_blit(self.message_console, 0, 0, self.message_width, self.message_height, 0, 0, self.screen_height-self.message_height, 0.75, 0.75)
+            libtcod.console_blit(self.message_console, 0, 0, self.message_width, self.message_height, 0, 0, self.screen_height-self.message_height, 1.0, 0.25)
 
         # for i in range(2):
         #     self.sector.add_particle(
@@ -160,11 +152,14 @@ class Game:
             if key_character == 'l':
                 landed, message, planet_index = self.sector.land_at_closest_planet(self.player_ship)
                 if message:
-                    if len(self.messages) == self.message_height:
-                        self.messages.popleft()
-                    self.messages.append(message)
+                    self.add_message(message)
                 if landed:
                     self.landed_loop(planet_index)
+
+    def add_message(self, message):
+        if len(self.messages) == self.message_height:
+            self.messages.popleft()
+        self.messages.append(message)
 
     def landed_loop(self, planet_index):
         done = False
@@ -187,14 +182,18 @@ class Game:
             libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
 
             libtcod.console_print_frame(self.landing_console, 0, 0, self.landing_screen_width, self.landing_screen_height, clear=True, flag=libtcod.BKGND_SET, fmt=0)
-            libtcod.console_print_ex(self.landing_console, 1, 1, libtcod.BKGND_SET, libtcod.LEFT, "Landed at Planet X")
-            libtcod.console_blit(self.landing_console, 0, 0, self.landing_screen_width, self.landing_screen_height, 0, self.screen_width/2, 0, 0.75, 0.75)
+            title = "[ Landed at Planet X ]"
+            libtcod.console_print_ex(self.landing_console,
+                    (self.landing_screen_width/2) - (len(title)/2),
+                    0, libtcod.BKGND_SET, libtcod.LEFT, title)
+            libtcod.console_blit(self.landing_console, 0, 0, self.landing_screen_width, self.landing_screen_height, 0, self.screen_width/2, 2, 1.0, 0.25)
 
             libtcod.console_flush()
             self.buffer.clear(self.sector.background[0], self.sector.background[1], self.sector.background[2])
 
             player_action = self.handle_keys()
             if player_action == 1:
+                self.add_message("Taking off from Planet X")
                 done = True
 
     def main_loop(self):
