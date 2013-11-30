@@ -181,6 +181,41 @@ class Planet:
             self.noise_octaves = 6.0
             self.noise_zoom = 1.0
 
+        elif self.planet_class == 'barren':
+            self.height_colormap = collections.deque( libtcod.color_gen_map(
+                [
+                  libtcod.Color(39,  41,  44 ),
+                  libtcod.Color(88,  93,  67 ),
+                  libtcod.Color(111, 109, 78 ),
+                  libtcod.Color(151, 152, 113),
+                  libtcod.Color(151, 141, 101),
+                  libtcod.Color(198, 189, 133),
+                  libtcod.Color(100, 101, 81 ),
+                  libtcod.Color(247, 236, 177),
+                ],
+                [0, 30, 60, 85, 100, 120, 180, 255]
+            ))
+            self.noise_octaves = 6.0
+            self.noise_zoom = 2.5
+
+        if self.planet_class == 'gas giant':
+            self.height_colormap = collections.deque( libtcod.color_gen_map(
+                [
+                  libtcod.Color(62,  99,  120),
+                  libtcod.Color(86,  137, 173),
+                  libtcod.Color(112, 199, 242),
+                  libtcod.Color(115, 214, 255),
+                  libtcod.Color(162, 212, 234),
+                  libtcod.Color(237, 236, 255),
+                  libtcod.Color(222, 255, 255),
+                  libtcod.Color(255, 255, 255)
+                ],
+                [ 0, 40, 80, 100, 120, 190, 210, 255]
+            ))
+            self.noise_octaves = 4.0
+            self.noise_zoom = 3.0
+
+
         elif self.planet_class == 'star':
             star_colors = random.choice([
                 [libtcod.Color(255, 222, 0), libtcod.Color(232, 112, 26)],
@@ -297,6 +332,7 @@ class Planet:
             libtcod.heightmap_add(atmosphere,0.7)
             libtcod.heightmap_clamp(atmosphere,0.8,1.0)
             return atmosphere
+
         else:
             return None
 
@@ -374,36 +410,62 @@ class Planet:
             libtcod.heightmap_rain_erosion(hm,raindrops,0.45,0.05,self.rnd)
             libtcod.heightmap_normalize(hm, 0, 255)
 
+        elif self.planet_class == 'barren':
+            libtcod.heightmap_normalize(hm, 0, 1.0)
+            # libtcod.heightmap_add(hm,0.40)
+            # libtcod.heightmap_clamp(hm,0.0,1.0)
+            raindrops = 2000 if width == self.detail_heightmap_width else 500
+            libtcod.heightmap_rain_erosion(hm,raindrops,0.45,0.05,self.rnd)
+            libtcod.heightmap_normalize(hm, 0, 255)
+
+        elif self.planet_class == 'gas giant':
+            libtcod.heightmap_normalize(hm, 0, 1.0)
+            # libtcod.heightmap_add(hm,0.40)
+            # libtcod.heightmap_clamp(hm,0.0,1.0)
+            # # 3x3 kernel for smoothing operations
+            smoothKernelSize = 9
+            smoothKernelDx = [
+                -1, 0, 1,
+                -1, 0, 1,
+                -1, 0, 1
+            ]
+            # smoothKernelDy = [
+            #     -1, -1, -1,
+            #     0,  0,  0,
+            #     1,  1,  1
+            # ]
+            smoothKernelDy = [
+                0,  0,  0,
+                0,  0,  0,
+                0,  0,  0,
+            ]
+            smoothKernelWeight = [
+                1.0, 2.0,  1.0,
+                4.0, 20.0, 4.0,
+                1.0, 2.0,  1.0
+            ]
+            for i in range(20,-1,-1) :
+                libtcod.heightmap_kernel_transform(hm,smoothKernelSize,smoothKernelDx,smoothKernelDy,smoothKernelWeight,0,1.0)
+
+            libtcod.heightmap_normalize(hm, 0, 255)
+
         else:
             libtcod.heightmap_normalize(hm, 0, 255)
 
         return hm
 
-        # # self.rnd=libtcod.random_new_from_seed(1094911894)
-        # self.rnd=libtcod.random_get_instance()
-        # # 3x3 kernel for smoothing operations
-        # smoothKernelSize=9
-        # smoothKernelDx=[-1,0,1,-1,0,1,-1,0,1]
-        # smoothKernelDy=[-1,-1,-1,0,0,0,1,1,1]
-        # smoothKernelWeight=[1.0,2.0,1.0,2.0,20.0,2.0,1.0,2.0,1.0]
-
-        # hm=libtcod.heightmap_new(self.heightmap_width, self.heightmap_height)
         # coef=[0.11,0.22,-0.22,0.18,]
         # tmp =libtcod.heightmap_new(self.heightmap_width, self.heightmap_height)
         # libtcod.heightmap_add_voronoi(tmp,100,4,coef,self.rnd)
         # libtcod.heightmap_normalize(tmp)
         # libtcod.heightmap_add_hm(hm,tmp,hm)
         # libtcod.heightmap_delete(tmp)
-        # # self.addHill(hm,40,11.4,0.31,0.09)
+
         # libtcod.heightmap_add(hm,-0.2)
         # libtcod.heightmap_clamp(hm,0.0,1.0)
-        # smoothKernelWeight[4] = 20
-        # for i in range(2,-1,-1) :
-        #     libtcod.heightmap_kernel_transform(hm,smoothKernelSize,smoothKernelDx,smoothKernelDy,smoothKernelWeight,0,0.86)
+
         # libtcod.heightmap_rain_erosion(hm,1000,0.46,0.12,self.rnd)
         # libtcod.heightmap_normalize(hm,0,255)
-        # self.heightmap = hm
-        # # print(repr(libtcod.heightmap_get_minmax(self.heightmap)))
 
     def normalize(self, v):
         len = math.sqrt(v[0]**2 + v[1]**2 + v[2]**2)
