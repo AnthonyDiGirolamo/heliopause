@@ -106,10 +106,15 @@ class Sector:
     def draw_minimap(self, buffer, width, height, ship):
         zoom = 1.0
         distance = 1000.0
-        if ship.sector_position_x >  distance or \
-           ship.sector_position_x < -distance or \
-           ship.sector_position_y >  distance or \
-           ship.sector_position_y < -distance:
+        if ship.sector_position_x >  distance*2 or \
+           ship.sector_position_x < -distance*2 or \
+           ship.sector_position_y >  distance*2 or \
+           ship.sector_position_y < -distance*2:
+            zoom = 4.0
+        elif ship.sector_position_x >  distance or \
+             ship.sector_position_x < -distance or \
+             ship.sector_position_y >  distance or \
+             ship.sector_position_y < -distance:
             zoom = 2.0
 
         buffer.clear(self.background[0], self.background[1], self.background[2])
