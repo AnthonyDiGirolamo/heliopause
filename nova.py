@@ -173,10 +173,12 @@ class Game:
                     self.landed_loop(planet_index)
 
             elif key_character == 'm':
-                if self.minimap_width < 60:
-                    self.set_minimap(60)
-                else:
+                if self.minimap_width == 63:
                     self.set_minimap(20)
+                elif self.minimap_width == 23:
+                    self.set_minimap(40)
+                else:
+                    self.set_minimap(60)
 
     def add_message(self, message):
         if len(self.messages) == self.message_height:
@@ -246,7 +248,10 @@ class Game:
 
 # libtcod setup
 
-libtcod.sys_set_fps(30)
+libtcod.sys_set_fps(60)
+libtcod.sys_set_renderer(libtcod.RENDERER_GLSL)
+# libtcod.sys_set_renderer(libtcod.RENDERER_OPENGL)
+# libtcod.sys_set_renderer(libtcod.RENDERER_SDL)
 libtcod.console_set_keyboard_repeat(1, 10)
 # libtcod.console_set_custom_font('fonts/8x8.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)
 # libtcod.console_set_custom_font('fonts/12x12.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)

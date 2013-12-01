@@ -103,11 +103,19 @@ class Sector:
                 if particle.index < 0:
                     particle.valid = False
 
-    def draw_minimap(self, buffer, width, height, ship, zoom=1.0):
+    def draw_minimap(self, buffer, width, height, ship):
+        zoom = 1.0
+        distance = 1000.0
+        if ship.sector_position_x >  distance or \
+           ship.sector_position_x < -distance or \
+           ship.sector_position_y >  distance or \
+           ship.sector_position_y < -distance:
+            zoom = 2.0
+
         buffer.clear(self.background[0], self.background[1], self.background[2])
 
         size = int((width-3) / 2.0)
-        size_reduction = 1000.0 / size
+        size_reduction = (zoom*distance)/size
 
         for p in self.planets:
             x = size + 1 + int(p.sector_position_x / (size_reduction))
@@ -119,6 +127,4 @@ class Sector:
         y = size + 1 - int(ship.sector_position_y / (size_reduction))
         if 0 < x < width-1 and 0 < y < height-1:
             buffer.set_fore(x, y, 255, 255, 255, ship.icon())
-
-
 
