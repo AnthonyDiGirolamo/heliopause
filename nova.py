@@ -103,25 +103,27 @@ class Game:
         self.buffer.blit(self.console)
         libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
 
-        # Target window
-        libtcod.console_print_frame(self.targeting_console, 0, 0, self.targeting_width, self.targeting_height, clear=True, flag=libtcod.BKGND_SET, fmt=0)
-        libtcod.console_print_ex(self.targeting_console, 1, 1, libtcod.BKGND_SET, libtcod.LEFT,
-                ( " Ship Heading: {0}\n"
-                  "     Velocity: {1}\n"
-                  "VelocityAngle: {2}\n"
-                  "    Particles: {3}\n"
-                ).format(
-                    round(math.degrees(self.player_ship.heading),2),
-                    round(self.player_ship.velocity,2),
-                    round(math.degrees(self.player_ship.velocity_angle),2),
-                    len(self.sector.particles),
-            ).ljust(self.targeting_width)
-        )
         if self.sector.selected_planet is not None:
+            # Target window
+            libtcod.console_print_frame(self.targeting_console, 0, 0, self.targeting_width, self.targeting_height, clear=True, flag=libtcod.BKGND_SET, fmt=0)
+
             self.sector.update_selected_planet_distance(self.player_ship)
-            libtcod.console_print_ex(self.targeting_console, 1, 5, libtcod.BKGND_SET, libtcod.LEFT,
-                "Distance: {0} {1}\n".format( round(self.sector.selected_planet_distance()), self.sector.selected_planet ).ljust(self.targeting_width))
-        libtcod.console_blit(self.targeting_console, 0, 0, self.targeting_width, self.targeting_height, 0, 0, 0, 1.0, 0.25)
+            libtcod.console_print_ex(self.targeting_console, 1, 1, libtcod.BKGND_SET, libtcod.LEFT,
+                "Distance: {0}".format( round(self.sector.selected_planet_distance()) ).ljust(self.targeting_width-2))
+
+            libtcod.console_print_ex(self.targeting_console, 1, 2, libtcod.BKGND_SET, libtcod.LEFT,
+                    ( " Ship Heading: {0}\n"
+                      "     Velocity: {1}\n"
+                      "VelocityAngle: {2}\n"
+                      "    Particles: {3}\n"
+                    ).format(
+                        round(math.degrees(self.player_ship.heading),2),
+                        round(self.player_ship.velocity,2),
+                        round(math.degrees(self.player_ship.velocity_angle),2),
+                        len(self.sector.particles),
+                ).ljust(self.targeting_width-2)
+            )
+            libtcod.console_blit(self.targeting_console, 0, 0, self.targeting_width, self.targeting_height, 0, 0, 0, 1.0, 0.25)
 
         # Bottom Messages
         if len(self.messages) > 0:
