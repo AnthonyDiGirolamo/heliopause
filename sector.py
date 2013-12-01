@@ -22,7 +22,7 @@ class Sector:
         self.visible_space_bottom = 0
 
         self.planets = []
-        self.add_planet(planet_class='star',      position_x=0, position_y=0,       diameter=60)
+        self.add_planet(planet_class='star',      position_x=0, position_y=0,       diameter=50)
         self.add_planet(planet_class='terran',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height))
         self.add_planet(planet_class='ocean',     position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height), seed=987213314)
         self.add_planet(planet_class='jungle',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height), seed=876535609)
@@ -105,15 +105,16 @@ class Sector:
 
     def draw_minimap(self, buffer, width, height, ship, zoom=1.0):
         buffer.clear(self.background[0], self.background[1], self.background[2])
+        ratio = int((width-3) / 2)
 
         for p in self.planets:
-            x = 11 + int(p.sector_position_x / 100.0)
-            y = 11 - int(p.sector_position_y / 100.0)
+            x = ratio + 1 + int(p.sector_position_x / (ratio*10.0))
+            y = ratio + 1 - int(p.sector_position_y / (ratio*10.0))
             if 0 < x < width-1 and 0 < y < height-1:
                 buffer.set_fore(x, y, p.icon_color[0], p.icon_color[1], p.icon_color[2], p.icon)
 
-        x = 11 + int(ship.sector_position_x / 100.0)
-        y = 11 - int(ship.sector_position_y / 100.0)
+        x = ratio + 1 + int(ship.sector_position_x / (ratio*10.0))
+        y = ratio + 1 - int(ship.sector_position_y / (ratio*10.0))
         if 0 < x < width-1 and 0 < y < height-1:
             if 0 <= ship.heading < 0.39269908169872414 or 5.8904862254808625 <= ship.heading < 6.283185307179586:
                 ship_icon = 173
