@@ -602,11 +602,36 @@ class Planet:
             start_masky += self.height - (startingy - endingy)
         masky = start_masky
 
+        if self.selected:
+            self.sector.buffer.set(startingx,   self.sector.mirror_y_coordinate(startingy),   0, 0, 0, 0, 255, 255, 218)
+            self.sector.buffer.set(startingx+1, self.sector.mirror_y_coordinate(startingy),   0, 0, 0, 0, 255, 255, 196)
+            self.sector.buffer.set(startingx+2, self.sector.mirror_y_coordinate(startingy),   0, 0, 0, 0, 255, 255, 196)
+            self.sector.buffer.set(startingx,   self.sector.mirror_y_coordinate(startingy-1), 0, 0, 0, 0, 255, 255, 179)
+            self.sector.buffer.set(startingx,   self.sector.mirror_y_coordinate(startingy-2), 0, 0, 0, 0, 255, 255, 179)
+
+            self.sector.buffer.set(endingx,     self.sector.mirror_y_coordinate(endingy),     0, 0, 0, 0, 255, 255, 217)
+            self.sector.buffer.set(endingx-1,   self.sector.mirror_y_coordinate(endingy),     0, 0, 0, 0, 255, 255, 196)
+            self.sector.buffer.set(endingx-2,   self.sector.mirror_y_coordinate(endingy),     0, 0, 0, 0, 255, 255, 196)
+            self.sector.buffer.set(endingx,     self.sector.mirror_y_coordinate(endingy+1),   0, 0, 0, 0, 255, 255, 179)
+            self.sector.buffer.set(endingx,     self.sector.mirror_y_coordinate(endingy+2),   0, 0, 0, 0, 255, 255, 179)
+
+            self.sector.buffer.set(endingx,     self.sector.mirror_y_coordinate(startingy),   0, 0, 0, 0, 255, 255, 191)
+            self.sector.buffer.set(endingx-1,   self.sector.mirror_y_coordinate(startingy),   0, 0, 0, 0, 255, 255, 196)
+            self.sector.buffer.set(endingx-2,   self.sector.mirror_y_coordinate(startingy),   0, 0, 0, 0, 255, 255, 196)
+            self.sector.buffer.set(endingx,     self.sector.mirror_y_coordinate(startingy-1), 0, 0, 0, 0, 255, 255, 179)
+            self.sector.buffer.set(endingx,     self.sector.mirror_y_coordinate(startingy-2), 0, 0, 0, 0, 255, 255, 179)
+
+            self.sector.buffer.set(startingx,   self.sector.mirror_y_coordinate(endingy),     0, 0, 0, 0, 255, 255, 192)
+            self.sector.buffer.set(startingx+1, self.sector.mirror_y_coordinate(endingy),     0, 0, 0, 0, 255, 255, 196)
+            self.sector.buffer.set(startingx+2, self.sector.mirror_y_coordinate(endingy),     0, 0, 0, 0, 255, 255, 196)
+            self.sector.buffer.set(startingx,   self.sector.mirror_y_coordinate(endingy+1),   0, 0, 0, 0, 255, 255, 179)
+            self.sector.buffer.set(startingx,   self.sector.mirror_y_coordinate(endingy+2),   0, 0, 0, 0, 255, 255, 179)
+
         for y in range(startingy, endingy, -1):
             for x in range(startingx, endingx):
-                if self.selected:
-                    if ((y==startingy or y==endingy+1) and (x>endingx-5 or x<startingx+4)) or ((x==startingx or x==endingx-1) and (y>startingy-4 or y<endingy+5)):
-                        self.sector.buffer.set(x, self.sector.mirror_y_coordinate(y), 0, 255, 0, 0, 255, 0, ord(' ') )
+                # if self.selected:
+                #     if ((y==startingy or y==endingy+1) and (x>endingx-5 or x<startingx+4)) or ((x==startingx or x==endingx-1) and (y>startingy-4 or y<endingy+5)):
+                #         self.sector.buffer.set(x, self.sector.mirror_y_coordinate(y), 0, 255, 0, 0, 255, 0, ord(' ') )
 
                 if self.circle_mask[maskx][masky]:
                     if self.planet_class == 'star':

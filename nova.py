@@ -30,11 +30,11 @@ class Game:
 
         self.set_minimap(20)
 
-        self.hud_height = 14
-        self.hud_width = 26
-        self.panel_console = libtcod.console_new(self.hud_width, self.hud_height)
-        libtcod.console_set_default_foreground(self.panel_console, libtcod.white)
-        libtcod.console_set_default_background(self.panel_console, self.sector.background)
+        self.targeting_height = 14
+        self.targeting_width = 26
+        self.targeting_console = libtcod.console_new(self.targeting_width, self.targeting_height)
+        libtcod.console_set_default_foreground(self.targeting_console, libtcod.white)
+        libtcod.console_set_default_background(self.targeting_console, self.sector.background)
 
         self.message_height = 4
         self.message_width = self.screen_width
@@ -103,8 +103,8 @@ class Game:
         self.buffer.blit(self.console)
         libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
 
-        libtcod.console_print_frame(self.panel_console, 0, 0, self.hud_width, self.hud_height, clear=True, flag=libtcod.BKGND_SET, fmt=0)
-        libtcod.console_print_ex(self.panel_console, 1, 1, libtcod.BKGND_SET, libtcod.LEFT,
+        libtcod.console_print_frame(self.targeting_console, 0, 0, self.targeting_width, self.targeting_height, clear=True, flag=libtcod.BKGND_SET, fmt=0)
+        libtcod.console_print_ex(self.targeting_console, 1, 1, libtcod.BKGND_SET, libtcod.LEFT,
                 ( " Ship Heading: {0}\n"
                   "     Velocity: {1}\n"
                   "VelocityAngle: {2}\n"
@@ -118,9 +118,9 @@ class Game:
                     len(self.sector.particles),
                     round(self.player_ship.sector_position_x),
                     round(self.player_ship.sector_position_y),
-            ).ljust(self.hud_width)
+            ).ljust(self.targeting_width)
         )
-        libtcod.console_blit(self.panel_console, 0, 0, self.hud_width, self.hud_height, 0, 0, 0, 1.0, 0.25)
+        libtcod.console_blit(self.targeting_console, 0, 0, self.targeting_width, self.targeting_height, 0, 0, 0, 1.0, 0.25)
 
         if len(self.messages) > 0:
             libtcod.console_print_ex(self.message_console, 0, 0, libtcod.BKGND_SET, libtcod.LEFT,
