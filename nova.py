@@ -28,12 +28,7 @@ class Game:
         self.starfield = Starfield(self.sector, max_stars=50)
         self.player_ship = Ship(self.sector)
 
-        self.minimap_width  = 23
-        self.minimap_height = 23
-        self.minimap_buffer  = libtcod.ConsoleBuffer(self.minimap_width, self.minimap_height)
-        self.minimap_console = libtcod.console_new(self.minimap_width, self.minimap_height)
-        libtcod.console_set_default_foreground(self.minimap_console, libtcod.white)
-        libtcod.console_set_default_background(self.minimap_console, self.sector.background)
+        self.set_minimap(20)
 
         self.hud_height = 14
         self.hud_width = 26
@@ -53,6 +48,15 @@ class Game:
         self.landing_console = libtcod.console_new(self.landing_screen_width, self.landing_screen_height)
         libtcod.console_set_default_foreground(self.landing_console, libtcod.white)
         libtcod.console_set_default_background(self.landing_console, self.sector.background)
+
+    def set_minimap(self, size):
+        self.minimap_width  = size+3
+        self.minimap_height = size+3
+        self.minimap_buffer  = libtcod.ConsoleBuffer(self.minimap_width, self.minimap_height)
+        self.minimap_console = libtcod.console_new(self.minimap_width, self.minimap_height)
+        libtcod.console_set_default_foreground(self.minimap_console, libtcod.white)
+        libtcod.console_set_default_background(self.minimap_console, self.sector.background)
+
 
     def render_all(self):
         if self.player_ship.velocity > 0.0:
@@ -167,6 +171,12 @@ class Game:
                     self.add_message(message)
                 if landed:
                     self.landed_loop(planet_index)
+
+            elif key_character == 'm':
+                if self.minimap_width < 60:
+                    self.set_minimap(60)
+                else:
+                    self.set_minimap(20)
 
     def add_message(self, message):
         if len(self.messages) == self.message_height:
