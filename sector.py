@@ -22,6 +22,7 @@ class Sector:
         self.visible_space_bottom = 0
 
         self.planets = []
+
         self.add_planet(planet_class='star',      position_x=0, position_y=0,       diameter=50)
         self.add_planet(planet_class='terran',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height))
         self.add_planet(planet_class='ocean',     position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height), seed=987213314)
@@ -38,6 +39,8 @@ class Sector:
 
         self.particles = []
 
+        self.selected_planet = None
+
     def mirror_y_coordinate(self, y):
         return (self.screen_height- 1 - y)
 
@@ -50,11 +53,17 @@ class Sector:
         self.visible_space_right  = self.visible_space_left + self.screen_width
         self.visible_space_bottom = self.visible_space_top - self.screen_height
 
-    def update_planet_distances(self, shipx, shipy):
+    def update_selected_planet_distance(self, ship):
+        self.planet_distances[self.selected_planet] = math.sqrt((ship.sector_position_x - self.planets[self.selected_planet].sector_position_x)**2.0 + (ship.sector_position_y - self.planets[self.selected_planet].sector_position_y)**2.0)
+
+    def selected_planet_distance(self):
+        return self.planet_distances[self.selected_planet]
+
+    def update_all_planet_distances(self, shipx, shipy):
         self.planet_distances = [ math.sqrt((shipx - planet.sector_position_x)**2.0 + (shipy - planet.sector_position_y)**2.0) for planet in self.planets]
 
     def closest_planet(self, shipx, shipy):
-        self.update_planet_distances(shipx, shipy)
+        self.update_all_planet_distances(shipx, shipy)
         nearest_planet_index = 0
         smallest_distance = None
         for index, distance in enumerate(self.planet_distances):
@@ -122,14 +131,32 @@ class Sector:
         size = int((width-3) / 2.0)
         size_reduction = (zoom*distance)/size
 
-        for p in self.planets:
+        for index, p in enumerate(self.planets):
             x = size + 1 + int(p.sector_position_x / (size_reduction))
             y = size + 1 - int(p.sector_position_y / (size_reduction))
             if 0 < x < width-1 and 0 < y < height-1:
-                buffer.set_fore(x, y, p.icon_color[0], p.icon_color[1], p.icon_color[2], p.icon)
+                buffer.set(x, y, 0, 0, 0, p.icon_color[0], p.icon_color[1], p.icon_color[2], p.icon)
+                if self.selected_planet is not None and index == self.selected_planet:
+                    buffer.set(x, y-1, 0, 0, 0, 255, 255, 255, 193)
+                    buffer.set(x, y+1, 0, 0, 0, 255, 255, 255, 194)
 
         x = size + 1 + int(ship.sector_position_x / (size_reduction))
         y = size + 1 - int(ship.sector_position_y / (size_reduction))
         if 0 < x < width-1 and 0 < y < height-1:
             buffer.set_fore(x, y, 255, 255, 255, ship.icon())
+
+    def cycle_planet_target(self, ship):
+        if self.selected_planet == None:
+            self.selected_planet = 0
+        else:
+            self.selected_planet += 1
+
+        if self.selected_planet == len(self.planets):
+            self.selected_planet = None
+
+        if self.selected_planet is not None:
+            for p in self.planets:
+                p.selected = False
+            self.planets[self.selected_planet].selected = True
+            self.update_selected_planet_distance(ship)
 

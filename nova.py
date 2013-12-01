@@ -103,33 +103,42 @@ class Game:
         self.buffer.blit(self.console)
         libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
 
+        # Target window
         libtcod.console_print_frame(self.targeting_console, 0, 0, self.targeting_width, self.targeting_height, clear=True, flag=libtcod.BKGND_SET, fmt=0)
         libtcod.console_print_ex(self.targeting_console, 1, 1, libtcod.BKGND_SET, libtcod.LEFT,
                 ( " Ship Heading: {0}\n"
                   "     Velocity: {1}\n"
                   "VelocityAngle: {2}\n"
                   "    Particles: {3}\n"
-                  "Sector Position:\n"
-                  " {4}, {5}\n"
                 ).format(
                     round(math.degrees(self.player_ship.heading),2),
                     round(self.player_ship.velocity,2),
                     round(math.degrees(self.player_ship.velocity_angle),2),
                     len(self.sector.particles),
-                    round(self.player_ship.sector_position_x),
-                    round(self.player_ship.sector_position_y),
             ).ljust(self.targeting_width)
         )
+        if self.sector.selected_planet is not None:
+            self.sector.update_selected_planet_distance(self.player_ship)
+            libtcod.console_print_ex(self.targeting_console, 1, 5, libtcod.BKGND_SET, libtcod.LEFT,
+                "Distance: {0} {1}\n".format( round(self.sector.selected_planet_distance()), self.sector.selected_planet ).ljust(self.targeting_width))
         libtcod.console_blit(self.targeting_console, 0, 0, self.targeting_width, self.targeting_height, 0, 0, 0, 1.0, 0.25)
 
+        # Bottom Messages
         if len(self.messages) > 0:
             libtcod.console_print_ex(self.message_console, 0, 0, libtcod.BKGND_SET, libtcod.LEFT,
                     "\n".join([message.ljust(self.message_width) for message in self.messages]) )
             libtcod.console_blit(self.message_console, 0, 0, self.message_width, self.message_height, 0, 0, self.screen_height-self.message_height, 1.0, 0.25)
 
+        # Minimap
         self.sector.draw_minimap(self.minimap_buffer, self.minimap_width, self.minimap_height, self.player_ship)
         self.minimap_buffer.blit(self.minimap_console)
         libtcod.console_print_frame(self.minimap_console, 0, 0, self.minimap_width, self.minimap_height, clear=False, flag=libtcod.BKGND_SET, fmt=0)
+        libtcod.console_print_ex(self.minimap_console, 1, self.minimap_height-1, libtcod.BKGND_SET, libtcod.LEFT,
+            ("[ {0} {1} ]").format(
+                int(self.player_ship.sector_position_x),
+                int(self.player_ship.sector_position_y),
+            ).center(self.minimap_width-2, chr(196))
+        )
         libtcod.console_blit(self.minimap_console, 0, 0, self.minimap_width, self.minimap_height, 0, self.screen_width-self.minimap_width, 0, 1.0, 0.25)
 
         # for i in range(2):
@@ -179,6 +188,9 @@ class Game:
                     self.set_minimap(40)
                 else:
                     self.set_minimap(60)
+
+            elif key_character == 'p':
+                self.sector.cycle_planet_target(self.player_ship)
 
     def add_message(self, message):
         if len(self.messages) == self.message_height:
