@@ -105,36 +105,20 @@ class Sector:
 
     def draw_minimap(self, buffer, width, height, ship, zoom=1.0):
         buffer.clear(self.background[0], self.background[1], self.background[2])
-        ratio = int((width-3) / 2)
+
+        size = int((width-3) / 2.0)
+        size_reduction = 1000.0 / size
 
         for p in self.planets:
-            x = ratio + 1 + int(p.sector_position_x / (ratio*10.0))
-            y = ratio + 1 - int(p.sector_position_y / (ratio*10.0))
+            x = size + 1 + int(p.sector_position_x / (size_reduction))
+            y = size + 1 - int(p.sector_position_y / (size_reduction))
             if 0 < x < width-1 and 0 < y < height-1:
                 buffer.set_fore(x, y, p.icon_color[0], p.icon_color[1], p.icon_color[2], p.icon)
 
-        x = ratio + 1 + int(ship.sector_position_x / (ratio*10.0))
-        y = ratio + 1 - int(ship.sector_position_y / (ratio*10.0))
+        x = size + 1 + int(ship.sector_position_x / (size_reduction))
+        y = size + 1 - int(ship.sector_position_y / (size_reduction))
         if 0 < x < width-1 and 0 < y < height-1:
-            if 0 <= ship.heading < 0.39269908169872414 or 5.8904862254808625 <= ship.heading < 6.283185307179586:
-                ship_icon = 173
-            elif 0.39269908169872414 <= ship.heading < 1.1780972450961724:
-                ship_icon = 168
-            elif 1.1780972450961724 <= ship.heading < 1.9634954084936207:
-                ship_icon = 170
-            elif 1.9634954084936207 <= ship.heading < 2.748893571891069:
-                ship_icon = 167
-            elif 2.748893571891069 <= ship.heading < 3.5342917352885173:
-                ship_icon = 172
-            elif 3.5342917352885173 <= ship.heading < 4.319689898685966:
-                ship_icon = 166
-            elif 4.319689898685966 <= ship.heading < 5.105088062083414:
-                ship_icon = 171
-            elif 5.105088062083414 <= ship.heading < 5.8904862254808625:
-                ship_icon = 169
-            else:
-                ship_icon = ord('>')
-            buffer.set_fore(x, y, 255, 255, 255, ship_icon)
+            buffer.set_fore(x, y, 255, 255, 255, ship.icon())
 
 
 

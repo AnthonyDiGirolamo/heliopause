@@ -48,6 +48,26 @@ class Ship:
         # self.ship = [libtcod.image_load('images/ship_{0}.png'.format(str(angle).zfill(3))) for angle in range(0, 360, 10)]
         self.load_ship_sprites()
 
+    def icon(self):
+        if 0 <= self.heading < 0.39269908169872414 or 5.8904862254808625 <= self.heading < 6.283185307179586:
+            return 173
+        elif 0.39269908169872414 <= self.heading < 1.1780972450961724:
+            return 168
+        elif 1.1780972450961724 <= self.heading < 1.9634954084936207:
+            return 170
+        elif 1.9634954084936207 <= self.heading < 2.748893571891069:
+            return 167
+        elif 2.748893571891069 <= self.heading < 3.5342917352885173:
+            return 172
+        elif 3.5342917352885173 <= self.heading < 4.319689898685966:
+            return 166
+        elif 4.319689898685966 <= self.heading < 5.105088062083414:
+            return 171
+        elif 5.105088062083414 <= self.heading < 5.8904862254808625:
+            return 169
+        else:
+            return ord('>')
+
     def load_ship_sprites(self):
         console = libtcod.console_new(16, 16)
         self.ship = []
