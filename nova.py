@@ -28,6 +28,13 @@ class Game:
         self.starfield = Starfield(self.sector, max_stars=50)
         self.player_ship = Ship(self.sector)
 
+        self.minimap_width  = 23
+        self.minimap_height = 23
+        self.minimap_buffer  = libtcod.ConsoleBuffer(self.minimap_width, self.minimap_height)
+        self.minimap_console = libtcod.console_new(self.minimap_width, self.minimap_height)
+        libtcod.console_set_default_foreground(self.minimap_console, libtcod.white)
+        libtcod.console_set_default_background(self.minimap_console, self.sector.background)
+
         self.hud_height = 14
         self.hud_width = 26
         self.panel_console = libtcod.console_new(self.hud_width, self.hud_height)
@@ -115,6 +122,11 @@ class Game:
             libtcod.console_print_ex(self.message_console, 0, 0, libtcod.BKGND_SET, libtcod.LEFT,
                     "\n".join([message.ljust(self.message_width) for message in self.messages]) )
             libtcod.console_blit(self.message_console, 0, 0, self.message_width, self.message_height, 0, 0, self.screen_height-self.message_height, 1.0, 0.25)
+
+        self.sector.draw_minimap(self.minimap_buffer, self.minimap_width, self.minimap_height, self.player_ship)
+        self.minimap_buffer.blit(self.minimap_console)
+        libtcod.console_print_frame(self.minimap_console, 0, 0, self.minimap_width, self.minimap_height, clear=False, flag=libtcod.BKGND_SET, fmt=0)
+        libtcod.console_blit(self.minimap_console, 0, 0, self.minimap_width, self.minimap_height, 0, self.screen_width-1-self.minimap_width, 0, 1.0, 0.25)
 
         # for i in range(2):
         #     self.sector.add_particle(
@@ -228,8 +240,8 @@ libtcod.sys_set_fps(30)
 libtcod.console_set_keyboard_repeat(1, 10)
 # libtcod.console_set_custom_font('fonts/8x8.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)
 # libtcod.console_set_custom_font('fonts/12x12.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)
-libtcod.console_set_custom_font('fonts/terminal8x8_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
-# libtcod.console_set_custom_font('fonts/terminal12x12_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+# libtcod.console_set_custom_font('fonts/terminal8x8_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+libtcod.console_set_custom_font('fonts/terminal12x12_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 # libtcod.console_set_custom_font('fonts/terminal16x16_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 
 # game = Game(90, 53)

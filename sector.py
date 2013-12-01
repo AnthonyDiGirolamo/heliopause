@@ -1,5 +1,6 @@
 import libtcodpy as libtcod
 import math
+from random import randrange
 import pprint
 pp = pprint.PrettyPrinter(indent=4, width=200).pprint
 
@@ -21,17 +22,17 @@ class Sector:
         self.visible_space_bottom = 0
 
         self.planets = []
-        self.add_planet(planet_class='star',   position_x=-35, position_y=0,   diameter=50)
-        self.add_planet(planet_class='terran', position_x=40,  position_y=-15, diameter=30)
-        self.add_planet(planet_class='ocean',  position_x=15,  position_y=15,  diameter=30, seed=987213314)
-        self.add_planet(planet_class='jungle', position_x=5,   position_y=-15, diameter=30, seed=876535609)
-        self.add_planet(planet_class='lava',   position_x=50,  position_y=15,  diameter=30, seed=567835322)
-        self.add_planet(planet_class='tundra', position_x=75,  position_y=-15, diameter=30, seed=958492104)
-        self.add_planet(planet_class='arid',   position_x=85,  position_y=15,  diameter=30, seed=393859601)
-        self.add_planet(planet_class='desert', position_x=110, position_y=-15, diameter=30, seed=123753278)
-        self.add_planet(planet_class='artic',  position_x=120, position_y=15,  diameter=30, seed=754367994)
-        self.add_planet(planet_class='barren', position_x=145, position_y=-15, diameter=30, seed=294958204)
-        self.add_planet(planet_class='gas giant', position_x=155, position_y=15, diameter=30, seed=294958204)
+        self.add_planet(planet_class='star',      position_x=0, position_y=0,       diameter=60)
+        self.add_planet(planet_class='terran',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height))
+        self.add_planet(planet_class='ocean',     position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height), seed=987213314)
+        self.add_planet(planet_class='jungle',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height), seed=876535609)
+        self.add_planet(planet_class='lava',      position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height), seed=567835322)
+        self.add_planet(planet_class='tundra',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height), seed=958492104)
+        self.add_planet(planet_class='arid',      position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height), seed=393859601)
+        self.add_planet(planet_class='desert',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height), seed=123753278)
+        self.add_planet(planet_class='artic',     position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height), seed=754367994)
+        self.add_planet(planet_class='barren',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height), seed=294958204)
+        self.add_planet(planet_class='gas giant', position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height), seed=294958204)
 
         self.planet_distances = [None for p in self.planets]
 
@@ -101,4 +102,38 @@ class Sector:
                 particle.index -= 1
                 if particle.index < 0:
                     particle.valid = False
+
+    def draw_minimap(self, buffer, width, height, ship, zoom=1.0):
+        buffer.clear(self.background[0], self.background[1], self.background[2])
+
+        for p in self.planets:
+            x = 11 + int(p.sector_position_x / 100.0)
+            y = 11 - int(p.sector_position_y / 100.0)
+            if 0 < x < width-1 and 0 < y < height-1:
+                buffer.set_fore(x, y, p.icon_color[0], p.icon_color[1], p.icon_color[2], p.icon)
+
+        x = 11 + int(ship.sector_position_x / 100.0)
+        y = 11 - int(ship.sector_position_y / 100.0)
+        if 0 < x < width-1 and 0 < y < height-1:
+            if 0 <= ship.heading < 0.39269908169872414 or 5.8904862254808625 <= ship.heading < 6.283185307179586:
+                ship_icon = 173
+            elif 0.39269908169872414 <= ship.heading < 1.1780972450961724:
+                ship_icon = 168
+            elif 1.1780972450961724 <= ship.heading < 1.9634954084936207:
+                ship_icon = 170
+            elif 1.9634954084936207 <= ship.heading < 2.748893571891069:
+                ship_icon = 167
+            elif 2.748893571891069 <= ship.heading < 3.5342917352885173:
+                ship_icon = 172
+            elif 3.5342917352885173 <= ship.heading < 4.319689898685966:
+                ship_icon = 166
+            elif 4.319689898685966 <= ship.heading < 5.105088062083414:
+                ship_icon = 171
+            elif 5.105088062083414 <= ship.heading < 5.8904862254808625:
+                ship_icon = 169
+            else:
+                ship_icon = ord('>')
+            buffer.set_fore(x, y, 255, 255, 255, ship_icon)
+
+
 

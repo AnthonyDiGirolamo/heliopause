@@ -20,6 +20,21 @@ class Planet:
             self.width += 1
         self.height = self.width
 
+        if self.width < 13:
+            self.icon = 15
+        elif 14 <= self.width < 24:
+            self.icon = 14
+        elif 24 <= self.width < 34:
+            self.icon = 13
+        elif 34 <= self.width < 44:
+            self.icon = 12
+        elif 44 <= self.width < 54:
+            self.icon = 11
+        elif 54 <= self.width < 64:
+            self.icon = 10
+        elif self.width >= 64:
+            self.icon = 9
+
         self.terrain_rotation_index = 0
         self.atmosphere_rotation_index = 0
         self.last_terrain_rotation = 0.0
@@ -45,7 +60,10 @@ class Planet:
         self.noise_hurst = libtcod.NOISE_DEFAULT_HURST
         self.noise_lacunarity = libtcod.NOISE_DEFAULT_LACUNARITY
 
+        self.icon_color = libtcod.Color(255, 255, 255)
+
         if self.planet_class == 'terran':
+            self.icon_color = libtcod.Color(50,  72,  88)
             self.height_colormap = collections.deque( libtcod.color_gen_map(
                 [
                   libtcod.Color(39,  62,  90),
@@ -63,6 +81,7 @@ class Planet:
             self.noise_zoom = 1.0
 
         elif self.planet_class == 'ocean':
+            self.icon_color = libtcod.Color(27,  75,  174)
             self.height_colormap = collections.deque( libtcod.color_gen_map(
                 [
                   libtcod.Color(13,  44,  53),
@@ -80,6 +99,7 @@ class Planet:
             self.noise_zoom = 1.0
 
         elif self.planet_class == 'jungle':
+            self.icon_color = libtcod.Color(100, 173, 22)
             self.height_colormap = collections.deque( libtcod.color_gen_map(
                 [
                   libtcod.Color(29,  53,  112),
@@ -97,6 +117,7 @@ class Planet:
             self.noise_zoom = 3.0
 
         elif self.planet_class == 'lava':
+            self.icon_color = libtcod.Color(255, 52,  0)
             self.height_colormap = collections.deque( libtcod.color_gen_map(
                 [
                   libtcod.Color(255, 151, 19),
@@ -114,6 +135,7 @@ class Planet:
             self.noise_zoom = 6.0
 
         elif self.planet_class == 'tundra':
+            # self.icon_color = libtcod.Color(145, 150, 117)
             self.height_colormap = collections.deque( libtcod.color_gen_map(
                 [
                   libtcod.Color(121, 183, 170),
@@ -165,6 +187,7 @@ class Planet:
             self.noise_zoom = 3.0
 
         elif self.planet_class == 'artic':
+            self.icon_color = libtcod.Color(157, 198, 217)
             self.height_colormap = collections.deque( libtcod.color_gen_map(
                 [
                   libtcod.Color(255, 255, 240),
@@ -221,6 +244,8 @@ class Planet:
                 [libtcod.Color(255, 222, 0), libtcod.Color(232, 112, 26)],
                 [libtcod.Color(211, 230, 255), libtcod.Color(128, 181, 255)],
             ])
+            self.icon = 8
+            self.icon_color = star_colors[0]
 
             self.height_colormap = collections.deque( libtcod.color_gen_map(
                 star_colors * 2 + [star_colors[0]],
@@ -300,7 +325,7 @@ class Planet:
         return hm
 
     def build_atmosphere(self, width, height):
-        if self.planet_class in ['terran', 'ocean', 'jungle', 'tundra'] :
+        if self.planet_class in ['terran', 'ocean', 'jungle', 'tundra', 'artic'] :
             atmosphere = self.spherical_noise(
                     noise_dx=10.0,
                     noise_dy=10.0,

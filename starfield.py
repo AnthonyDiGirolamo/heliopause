@@ -7,7 +7,7 @@ class Starfield:
         self.max_stars = max_stars
         self.parallax_speeds = [0.3, 0.6, 1.0]
         # self.star_characters = [7, ord('*'), 15]
-        self.star_characters = [ord('.'), 7]
+        self.star_characters = [ord('.'), 15]
         self.stars = [
             [float(randrange(0, self.sector.screen_width)), float(randrange(0, self.sector.screen_height)),
                 choice(self.parallax_speeds), choice(self.star_characters)]
