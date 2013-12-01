@@ -135,7 +135,7 @@ class Planet:
             self.noise_zoom = 6.0
 
         elif self.planet_class == 'tundra':
-            # self.icon_color = libtcod.Color(145, 150, 117)
+            self.icon_color = libtcod.Color(167, 157, 109)
             self.height_colormap = collections.deque( libtcod.color_gen_map(
                 [
                   libtcod.Color(121, 183, 170),
@@ -153,6 +153,7 @@ class Planet:
             self.noise_zoom = 2.0
 
         elif self.planet_class == 'arid':
+            self.icon_color = libtcod.Color(235, 131, 44)
             self.height_colormap = collections.deque( libtcod.color_gen_map(
                 [
                   libtcod.Color(121, 183, 170),
@@ -170,6 +171,7 @@ class Planet:
             self.noise_zoom = 3.0
 
         elif self.planet_class == 'desert':
+            self.icon_color = libtcod.Color(255, 178, 58)
             self.height_colormap = collections.deque( libtcod.color_gen_map(
                 [
                   libtcod.Color(255, 178, 58),
@@ -187,7 +189,7 @@ class Planet:
             self.noise_zoom = 3.0
 
         elif self.planet_class == 'artic':
-            self.icon_color = libtcod.Color(157, 198, 217)
+            self.icon_color = libtcod.Color(255, 255, 240)
             self.height_colormap = collections.deque( libtcod.color_gen_map(
                 [
                   libtcod.Color(255, 255, 240),
@@ -205,6 +207,7 @@ class Planet:
             self.noise_zoom = 1.0
 
         elif self.planet_class == 'barren':
+            self.icon_color = libtcod.Color(151, 152, 113)
             self.height_colormap = collections.deque( libtcod.color_gen_map(
                 [
                   libtcod.Color(39,  41,  44 ),
@@ -222,6 +225,7 @@ class Planet:
             self.noise_zoom = 2.5
 
         if self.planet_class == 'gas giant':
+            self.icon_color = libtcod.Color(112, 199, 242)
             self.height_colormap = collections.deque( libtcod.color_gen_map(
                 [
                   libtcod.Color(62,  99,  120),
