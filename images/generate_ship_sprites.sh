@@ -44,7 +44,7 @@ do
   convert \
     -size 32x32 xc:blue -fill red -stroke black -strokewidth 1.5 \
     -draw "stroke-linecap round affine `./affine_rotate -$angle 15,15, 15,15`
-        polygon 31,15 24,10 24,20 31,15" \
+        polygon 31,15 24,12 24,18 31,15" \
     -fuzz 55% \
     -fill blue \
       -draw 'color 0,0 floodfill' \
