@@ -109,9 +109,15 @@ class Game:
 
             self.sector.update_selected_planet_distance(self.player_ship)
             libtcod.console_print_ex(self.targeting_console, 1, 1, libtcod.BKGND_SET, libtcod.LEFT,
-                "Distance: {0}".format( round(self.sector.selected_planet_distance()) ).ljust(self.targeting_width-2))
+                ( "Distance: {0}\n"
+                  "Angle: {1}"
+                ).format(
+                    round(self.sector.selected_planet_distance()),
+                    round(math.degrees(self.sector.selected_planet_angle))
+                ).ljust(self.targeting_width-2)
+            )
 
-            libtcod.console_print_ex(self.targeting_console, 1, 2, libtcod.BKGND_SET, libtcod.LEFT,
+            libtcod.console_print_ex(self.targeting_console, 1, 3, libtcod.BKGND_SET, libtcod.LEFT,
                     ( " Ship Heading: {0}\n"
                       "     Velocity: {1}\n"
                       "VelocityAngle: {2}\n"

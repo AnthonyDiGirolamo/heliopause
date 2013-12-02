@@ -1,6 +1,7 @@
 import libtcodpy as libtcod
 import math
 from random import randrange
+import time
 import pprint
 pp = pprint.PrettyPrinter(indent=4, width=200).pprint
 
@@ -9,6 +10,7 @@ from planet import Planet
 
 class Sector:
     def __init__(self, screen_width, screen_height, buffer):
+        self.twopi = 2 * math.pi
         self.background = libtcod.Color(0,0,0)
         # self.background = libtcod.Color(32,32,64)
 
@@ -40,6 +42,7 @@ class Sector:
         self.particles = []
 
         self.selected_planet = None
+        self.selected_blink = 0
 
     def mirror_y_coordinate(self, y):
         return (self.screen_height- 1 - y)
@@ -54,7 +57,20 @@ class Sector:
         self.visible_space_bottom = self.visible_space_top - self.screen_height
 
     def update_selected_planet_distance(self, ship):
-        self.planet_distances[self.selected_planet] = math.sqrt((ship.sector_position_x - self.planets[self.selected_planet].sector_position_x)**2.0 + (ship.sector_position_y - self.planets[self.selected_planet].sector_position_y)**2.0)
+        planet = self.planets[self.selected_planet]
+        self.planet_distances[self.selected_planet] = math.sqrt((ship.sector_position_x - planet.sector_position_x)**2.0 + (ship.sector_position_y - planet.sector_position_y)**2.0)
+
+        newx = planet.sector_position_x - ship.sector_position_x
+        newy = planet.sector_position_y - ship.sector_position_y
+        try:
+            self.selected_planet_angle = math.atan(newy / newx)
+        except:
+            self.selected_planet_angle = 0.0
+
+        if newx > 0.0 and newy < 0.0:
+            self.selected_planet_angle += self.twopi
+        elif newx < 0.0:
+            self.selected_planet_angle += math.pi
 
     def selected_planet_distance(self):
         return self.planet_distances[self.selected_planet]
@@ -137,8 +153,12 @@ class Sector:
             if 0 < x < width-1 and 0 < y < height-1:
                 buffer.set(x, y, 0, 0, 0, p.icon_color[0], p.icon_color[1], p.icon_color[2], p.icon)
                 if self.selected_planet is not None and index == self.selected_planet:
-                    buffer.set(x, y-1, 0, 0, 0, 255, 255, 255, 193)
-                    buffer.set(x, y+1, 0, 0, 0, 255, 255, 255, 194)
+                    t = time.clock()
+                    if t > self.selected_blink + 0.5:
+                        if t > self.selected_blink + 1.0:
+                            self.selected_blink = t
+                        buffer.set(x+1, y, 0, 0, 0, 255, 255, 255, ord('>'))
+                        buffer.set(x-1, y, 0, 0, 0, 255, 255, 255, ord('<'))
 
         x = size + 1 + int(ship.sector_position_x / (size_reduction))
         y = size + 1 - int(ship.sector_position_y / (size_reduction))
