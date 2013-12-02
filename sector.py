@@ -26,16 +26,16 @@ class Sector:
         self.planets = []
 
         self.add_planet(planet_class='star',      position_x=0, position_y=0,       diameter=50)
-        self.add_planet(planet_class='terran',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height))
-        self.add_planet(planet_class='ocean',     position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height), seed=987213314)
-        self.add_planet(planet_class='jungle',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height), seed=876535609)
-        self.add_planet(planet_class='lava',      position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height), seed=567835322)
-        self.add_planet(planet_class='tundra',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height), seed=958492104)
-        self.add_planet(planet_class='arid',      position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height), seed=393859601)
-        self.add_planet(planet_class='desert',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height), seed=123753278)
-        self.add_planet(planet_class='artic',     position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height), seed=754367994)
-        self.add_planet(planet_class='barren',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height), seed=294958204)
-        self.add_planet(planet_class='gas giant', position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(10, self.screen_height), seed=294958204)
+        self.add_planet(planet_class='terran',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height))
+        self.add_planet(planet_class='ocean',     position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=987213314)
+        self.add_planet(planet_class='jungle',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=876535609)
+        self.add_planet(planet_class='lava',      position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=567835322)
+        self.add_planet(planet_class='tundra',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=958492104)
+        self.add_planet(planet_class='arid',      position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=393859601)
+        self.add_planet(planet_class='desert',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=123753278)
+        self.add_planet(planet_class='artic',     position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=754367994)
+        self.add_planet(planet_class='barren',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=294958204)
+        self.add_planet(planet_class='gas giant', position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=294958204)
 
         self.planet_distances = [None for p in self.planets]
 
@@ -179,4 +179,14 @@ class Sector:
                 p.selected = False
             self.planets[self.selected_planet].selected = True
             self.update_selected_planet_distance(ship)
+
+    # def draw_target_arrow(self, ship):
+    #     x_component = math.cos(self.selected_planet_angle)
+    #     y_component = math.sin(self.selected_planet_angle)
+    #     x = ship.x+3
+    #     y = ship.y+3
+    #     self.buffer.set_fore(
+    #         int(round(x+x_component*8)),
+    #         int(round(y+y_component*-8)),
+    #         64, 255, 64, 219)
 

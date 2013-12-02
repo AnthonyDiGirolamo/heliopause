@@ -275,12 +275,17 @@ class Planet:
         self.circle_mask = self.build_circle_mask(self.width)
         self.heightmap = self.build_heightmap(self.heightmap_width, self.heightmap_height)
         self.atmosphere = self.build_atmosphere(self.heightmap_width, self.heightmap_height)
-        self.build_sprite()
+        self.sprite = self.build_sprite(self.width)
 
         self.detail_circle_mask = self.build_circle_mask(self.detail_width)
         self.detail_heightmap = self.build_heightmap(self.detail_heightmap_width, self.detail_heightmap_height)
         self.detail_atmosphere = self.build_atmosphere(self.detail_heightmap_width, self.detail_heightmap_height)
 
+        self.target_width = 12
+        self.target_circle_mask = self.build_circle_mask(self.target_width)
+        self.target_heightmap = self.build_heightmap(self.target_width*2, self.target_width)
+        self.target_atmosphere = self.build_atmosphere(self.target_width*2, self.target_width)
+        self.target_sprite = self.build_sprite(self.target_width, circle_mask=self.target_circle_mask, heightmap=self.target_heightmap, atmosphere=self.target_atmosphere, width=self.target_width)
 
     def spherical_noise(self,
             noise_dx=0.0,
@@ -544,14 +549,16 @@ class Planet:
                  int(alpha * g1 + (1-alpha) * g2),
                  int(alpha * b1 + (1-alpha) * b2) )
 
-    def build_sprite(self):
-        self.sprite = []
-        for x in range(0, self.width):
+    def build_sprite(self, diameter, **kwargs):
+        sprite = []
+        for x in range(0, diameter):
             column = []
-            for y in range(0, self.height):
-                r, g, b = self.blend_layers(x, y)
+            for y in range(0, diameter):
+                r, g, b = self.blend_layers(x, y, **kwargs)
+                # self.blend_layers(x, y, terrain_rotation=0, atmosphere_rotation=0, circle_mask=None, heightmap=None, atmosphere=None, width=None)
                 column.append( [r, g, b] )
-            self.sprite.append(column)
+            sprite.append(column)
+        return sprite
 
     def blend_layers(self, x, y, terrain_rotation=0, atmosphere_rotation=0, circle_mask=None, heightmap=None, atmosphere=None, width=None):
         if width is None:
@@ -621,29 +628,29 @@ class Planet:
             masky += 1
 
         if self.selected and startingx < endingx and endingy < startingy:
-            self.sector.buffer.set(startingx,   self.sector.mirror_y_coordinate(startingy),   0, 0, 0, 0, 255, 0, 201)#218
-            # self.sector.buffer.set(startingx+1, self.sector.mirror_y_coordinate(startingy),   0, 0, 0, 0, 255, 0, 196)
-            # self.sector.buffer.set(startingx+2, self.sector.mirror_y_coordinate(startingy),   0, 0, 0, 0, 255, 0, 196)
-            # self.sector.buffer.set(startingx,   self.sector.mirror_y_coordinate(startingy-1), 0, 0, 0, 0, 255, 0, 179)
-            # self.sector.buffer.set(startingx,   self.sector.mirror_y_coordinate(startingy-2), 0, 0, 0, 0, 255, 0, 179)
+            self.sector.buffer.set(startingx,   self.sector.mirror_y_coordinate(startingy),   0, 0, 0, 64, 255, 64, 201)#218
+            # self.sector.buffer.set(startingx+1, self.sector.mirror_y_coordinate(startingy),   0, 0, 0, 64, 255, 64, 196)
+            # self.sector.buffer.set(startingx+2, self.sector.mirror_y_coordinate(startingy),   0, 0, 0, 64, 255, 64, 196)
+            # self.sector.buffer.set(startingx,   self.sector.mirror_y_coordinate(startingy-1), 0, 0, 0, 64, 255, 64, 179)
+            # self.sector.buffer.set(startingx,   self.sector.mirror_y_coordinate(startingy-2), 0, 0, 0, 64, 255, 64, 179)
 
-            self.sector.buffer.set(endingx-1,   self.sector.mirror_y_coordinate(endingy+1),   0, 0, 0, 0, 255, 0, 188)#217
-            # self.sector.buffer.set(endingx-1-1, self.sector.mirror_y_coordinate(endingy+1),   0, 0, 0, 0, 255, 0, 196)
-            # self.sector.buffer.set(endingx-1-2, self.sector.mirror_y_coordinate(endingy+1),   0, 0, 0, 0, 255, 0, 196)
-            # self.sector.buffer.set(endingx-1,   self.sector.mirror_y_coordinate(endingy+1+1), 0, 0, 0, 0, 255, 0, 179)
-            # self.sector.buffer.set(endingx-1,   self.sector.mirror_y_coordinate(endingy+1+2), 0, 0, 0, 0, 255, 0, 179)
+            self.sector.buffer.set(endingx-1,   self.sector.mirror_y_coordinate(endingy+1),   0, 0, 0, 64, 255, 64, 188)#217
+            # self.sector.buffer.set(endingx-1-1, self.sector.mirror_y_coordinate(endingy+1),   0, 0, 0, 64, 255, 64, 196)
+            # self.sector.buffer.set(endingx-1-2, self.sector.mirror_y_coordinate(endingy+1),   0, 0, 0, 64, 255, 64, 196)
+            # self.sector.buffer.set(endingx-1,   self.sector.mirror_y_coordinate(endingy+1+1), 0, 0, 0, 64, 255, 64, 179)
+            # self.sector.buffer.set(endingx-1,   self.sector.mirror_y_coordinate(endingy+1+2), 0, 0, 0, 64, 255, 64, 179)
 
-            self.sector.buffer.set(endingx-1,   self.sector.mirror_y_coordinate(startingy),   0, 0, 0, 0, 255, 0, 187)#191
-            # self.sector.buffer.set(endingx-1-1, self.sector.mirror_y_coordinate(startingy),   0, 0, 0, 0, 255, 0, 196)
-            # self.sector.buffer.set(endingx-1-2, self.sector.mirror_y_coordinate(startingy),   0, 0, 0, 0, 255, 0, 196)
-            # self.sector.buffer.set(endingx-1,   self.sector.mirror_y_coordinate(startingy-1), 0, 0, 0, 0, 255, 0, 179)
-            # self.sector.buffer.set(endingx-1,   self.sector.mirror_y_coordinate(startingy-2), 0, 0, 0, 0, 255, 0, 179)
+            self.sector.buffer.set(endingx-1,   self.sector.mirror_y_coordinate(startingy),   0, 0, 0, 64, 255, 64, 187)#191
+            # self.sector.buffer.set(endingx-1-1, self.sector.mirror_y_coordinate(startingy),   0, 0, 0, 64, 255, 64, 196)
+            # self.sector.buffer.set(endingx-1-2, self.sector.mirror_y_coordinate(startingy),   0, 0, 0, 64, 255, 64, 196)
+            # self.sector.buffer.set(endingx-1,   self.sector.mirror_y_coordinate(startingy-1), 0, 0, 0, 64, 255, 64, 179)
+            # self.sector.buffer.set(endingx-1,   self.sector.mirror_y_coordinate(startingy-2), 0, 0, 0, 64, 255, 64, 179)
 
-            self.sector.buffer.set(startingx,   self.sector.mirror_y_coordinate(endingy+1),   0, 0, 0, 0, 255, 0, 200)#192
-            # self.sector.buffer.set(startingx+1, self.sector.mirror_y_coordinate(endingy+1),   0, 0, 0, 0, 255, 0, 196)
-            # self.sector.buffer.set(startingx+2, self.sector.mirror_y_coordinate(endingy+1),   0, 0, 0, 0, 255, 0, 196)
-            # self.sector.buffer.set(startingx,   self.sector.mirror_y_coordinate(endingy+1+1), 0, 0, 0, 0, 255, 0, 179)
-            # self.sector.buffer.set(startingx,   self.sector.mirror_y_coordinate(endingy+1+2), 0, 0, 0, 0, 255, 0, 179)
+            self.sector.buffer.set(startingx,   self.sector.mirror_y_coordinate(endingy+1),   0, 0, 0, 64, 255, 64, 200)#192
+            # self.sector.buffer.set(startingx+1, self.sector.mirror_y_coordinate(endingy+1),   0, 0, 0, 64, 255, 64, 196)
+            # self.sector.buffer.set(startingx+2, self.sector.mirror_y_coordinate(endingy+1),   0, 0, 0, 64, 255, 64, 196)
+            # self.sector.buffer.set(startingx,   self.sector.mirror_y_coordinate(endingy+1+1), 0, 0, 0, 64, 255, 64, 179)
+            # self.sector.buffer.set(startingx,   self.sector.mirror_y_coordinate(endingy+1+2), 0, 0, 0, 64, 255, 64, 179)
 
         if self.planet_class == 'star':
             self.height_colormap.rotate(1)
@@ -726,4 +733,11 @@ class Planet:
                 self.atmosphere_rotation_index += 1
                 if self.atmosphere_rotation_index >= self.detail_heightmap_width:
                     self.atmosphere_rotation_index = 0
+
+    def draw_target_picture(self, buffer, startx, starty):
+        for x in range(0, 12):
+            for y in range(0, 12):
+                if self.target_circle_mask[x][y]:
+                    r, g, b = self.target_sprite[x][y][0], self.target_sprite[x][y][1], self.target_sprite[x][y][2]
+                    buffer.set_fore(startx+x, starty+y, r, g, b, 219 )
 

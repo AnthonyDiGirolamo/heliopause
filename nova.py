@@ -30,8 +30,9 @@ class Game:
 
         self.set_minimap(20)
 
-        self.targeting_height = 14
-        self.targeting_width = 26
+        self.targeting_width = 20
+        self.targeting_height = 19
+        self.targeting_buffer  = libtcod.ConsoleBuffer(self.targeting_width, self.targeting_height)
         self.targeting_console = libtcod.console_new(self.targeting_width, self.targeting_height)
         libtcod.console_set_default_foreground(self.targeting_console, libtcod.white)
         libtcod.console_set_default_background(self.targeting_console, self.sector.background)
@@ -100,35 +101,42 @@ class Game:
 
         self.player_ship.draw()
 
+        if self.sector.selected_planet is not None:
+            self.sector.update_selected_planet_distance(self.player_ship)
+            if self.sector.selected_planet_distance() > (self.screen_height/1.5):
+                self.player_ship.draw_target_arrow(self.sector.selected_planet_angle)
+            # self.sector.draw_target_arrow(self.player_ship)
+
         self.buffer.blit(self.console)
         libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
 
         if self.sector.selected_planet is not None:
             # Target window
-            libtcod.console_print_frame(self.targeting_console, 0, 0, self.targeting_width, self.targeting_height, clear=True, flag=libtcod.BKGND_SET, fmt=0)
+            self.sector.planets[self.sector.selected_planet].draw_target_picture(self.targeting_buffer, 4, 2)
+            self.targeting_buffer.blit(self.targeting_console)
+            libtcod.console_print_frame(self.targeting_console, 0, 0, self.targeting_width, self.targeting_height, clear=False, flag=libtcod.BKGND_SET, fmt=0)
 
-            self.sector.update_selected_planet_distance(self.player_ship)
-            libtcod.console_print_ex(self.targeting_console, 1, 1, libtcod.BKGND_SET, libtcod.LEFT,
-                ( "Distance: {0}\n"
-                  "Angle: {1}"
+            libtcod.console_print_ex(self.targeting_console, 1, 16, libtcod.BKGND_SET, libtcod.LEFT,
+                ( " Distance: {0}\n"
+                  # "Angle: {1}"
                 ).format(
-                    round(self.sector.selected_planet_distance()),
-                    round(math.degrees(self.sector.selected_planet_angle))
+                    int(self.sector.selected_planet_distance()),
+                    # round(math.degrees(self.sector.selected_planet_angle))
                 ).ljust(self.targeting_width-2)
             )
 
-            libtcod.console_print_ex(self.targeting_console, 1, 3, libtcod.BKGND_SET, libtcod.LEFT,
-                    ( " Ship Heading: {0}\n"
-                      "     Velocity: {1}\n"
-                      "VelocityAngle: {2}\n"
-                      "    Particles: {3}\n"
-                    ).format(
-                        round(math.degrees(self.player_ship.heading),2),
-                        round(self.player_ship.velocity,2),
-                        round(math.degrees(self.player_ship.velocity_angle),2),
-                        len(self.sector.particles),
-                ).ljust(self.targeting_width-2)
-            )
+            # libtcod.console_print_ex(self.targeting_console, 1, 17, libtcod.BKGND_SET, libtcod.LEFT,
+            #         ( "  Heading: {0}\n"
+            #           " Velocity: {1}\n"
+            #           " VelAngle: {2}\n"
+            #           "Particles: {3}\n"
+            #         ).format(
+            #             round(math.degrees(self.player_ship.heading),2),
+            #             round(self.player_ship.velocity,2),
+            #             round(math.degrees(self.player_ship.velocity_angle),2),
+            #             len(self.sector.particles),
+            #     ).ljust(self.targeting_width-2)
+            # )
             libtcod.console_blit(self.targeting_console, 0, 0, self.targeting_width, self.targeting_height, 0, 0, 0, 1.0, 0.25)
 
         # Bottom Messages

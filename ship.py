@@ -47,6 +47,7 @@ class Ship:
 
         # self.ship = [libtcod.image_load('images/ship_{0}.png'.format(str(angle).zfill(3))) for angle in range(0, 360, 10)]
         self.load_ship_sprites()
+        self.load_pointer_sprites()
 
     def icon(self):
         if 0 <= self.heading < 0.39269908169872414 or 5.8904862254808625 <= self.heading < 6.283185307179586:
@@ -95,6 +96,35 @@ class Ship:
                         row.append( [b, f, c] )
                 frame.append(row)
             self.ship.append(frame)
+        libtcod.console_delete(console)
+
+    def load_pointer_sprites(self):
+        console = libtcod.console_new(32, 32)
+        self.pointer = []
+        color_masks = [[0, 0, 255], [68,68,196], [66,66,193]]
+        for angle in range(0, 360, 10):
+            pointer = libtcod.image_load('images/pointer_{0}.png'.format(str(angle).zfill(3)))
+            # libtcod.image_blit(ship, console, 8, 8, libtcod.BKGND_SET, 1.0, 1.0, 0)
+            # libtcod.image_blit_rect(ship, console, 0, 0, -1, -1, libtcod.BKGND_SET)
+            libtcod.image_blit_2x(pointer, console, 0, 0)
+            frame = []
+            for y in range(0, 32):
+                row = []
+                for x in range(0, 32):
+                    b = libtcod.console_get_char_background(console,x,y)
+                    f = libtcod.console_get_char_foreground(console,x,y)
+                    c = libtcod.console_get_char(console,x,y)
+                    if c == 32:
+                        f = b
+                        c = 219
+                    if [b[0], b[1], b[2]] in color_masks or [f[0], f[1], f[2]] in color_masks:
+                        row.append( None )
+                    elif [b[0], b[1], b[2]] == [0,0,0] and [f[0], f[1], f[2]] == [0,0,0]:
+                        row.append( None )
+                    else:
+                        row.append( [b, f, c] )
+                frame.append(row)
+            self.pointer.append(frame)
         libtcod.console_delete(console)
 
     def turn_left(self):
@@ -215,4 +245,21 @@ class Ship:
                 self.velocity_component_y
             )
         )
+
+    def draw_target_arrow(self, angle):
+        sprite_index = int(round(math.degrees(angle), -1)/10)
+        if sprite_index > 35 or sprite_index < 0:
+            sprite_index = 0
+
+        pointer = self.pointer[sprite_index]
+        startx = self.x-4
+        starty = self.y-4
+
+        for y, line in enumerate(pointer):
+            for x, cell in enumerate(line):
+                if cell != None:
+                    b = cell[0]
+                    f = cell[1]
+                    c = cell[2]
+                    self.sector.buffer.set(startx + x, starty + y, b[0], b[1], b[2], f[0], f[1], f[2], c)
 
