@@ -21,21 +21,42 @@
 
 # mv ship_00.png ship_000.png
 
-for angle in `seq -w 0 10 350`
+# for angle in `seq -w 0 10 350`
+# do
+#   convert \
+#     -alpha on \
+#     -background transparent \
+#     -rotate -$angle \
+#     -gravity NorthWest \
+#     -crop 16x16+0+0 \
+#     rocket.png rocket_$angle.png
+#     # -transparent-color blue \
+#     # -fuzz 0 -fill blue \
+#     #   -draw 'color 0,0 floodfill' \
+#     #   -draw 'color 0,15 floodfill' \
+#     #   -draw 'color 15,0 floodfill' \
+#     #   -draw 'color 15,15 floodfill' \
+#     # -distort ScaleRotateTranslate -$angle \
+# done
+
+for angle in `seq 0 10 350`
 do
   convert \
-    -alpha on \
-    -background transparent \
-    -rotate -$angle \
-    -gravity NorthWest \
-    -crop 16x16+0+0 \
-    rocket.png rocket_$angle.png
-    # -transparent-color blue \
-    # -fuzz 0 -fill blue \
-    #   -draw 'color 0,0 floodfill' \
-    #   -draw 'color 0,15 floodfill' \
-    #   -draw 'color 15,0 floodfill' \
-    #   -draw 'color 15,15 floodfill' \
-    # -distort ScaleRotateTranslate -$angle \
+    -size 32x32 xc:blue -fill red -stroke black -strokewidth 1.5 \
+    -draw "stroke-linecap round affine `./affine_rotate -$angle 15,15, 15,15`
+        polygon 31,15 24,10 24,20 31,15" \
+    -fuzz 55% \
+    -fill blue \
+      -draw 'color 0,0 floodfill' \
+      -draw 'color 0,31 floodfill' \
+      -draw 'color 31,0 floodfill' \
+      -draw 'color 31,31 floodfill' \
+    `if (( $angle < 100 ))
+    then
+      echo pointer_0$angle.png
+    else
+      echo pointer_$angle.png
+    fi`
 done
 
+mv pointer_00.png pointer_000.png
