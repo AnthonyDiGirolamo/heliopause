@@ -271,7 +271,7 @@ class Planet:
         self.detail_heightmap_height = self.detail_width
 
         # self.char_shades = ['.',':','!','*','o','e','&','#','%','@']
-        self.shades = [i/10.0 for i in range(10, -1, -1)]
+        self.shades = [i/20.0 for i in range(20, -1, -1)]
 
         self.circle_mask = self.build_circle_mask(self.width)
         self.heightmap = self.build_heightmap(self.heightmap_width, self.heightmap_height)
