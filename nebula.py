@@ -1,7 +1,7 @@
 import libtcodpy as libtcod
 
 class Nebula:
-    def __init__(self, sector, r_factor=0.1, g_factor=0.1, b_factor=0.1, seed=95837203):
+    def __init__(self, sector, r_factor=0.1, g_factor=0.1, b_factor=0.1, seed=95837203, size=512):
         self.sector = sector
 
         self.starting_left = 0 - self.sector.screen_width/2
@@ -13,6 +13,8 @@ class Nebula:
 
         self.noise_zoom = 6.0
         self.noise_octaves = 4.0
+
+        self.size = size
 
         self.r_rand = libtcod.random_new_from_seed(seed)
         self.g_rand = libtcod.random_new_from_seed(seed+1)
@@ -26,9 +28,9 @@ class Nebula:
 
     def build_sector_nebula(self):
         self.grid = []
-        for x in range(0, 1000):
+        for x in range(0, self.size):
             column = []
-            for y in range(0, 1000):
+            for y in range(0, self.size):
                 f = [self.noise_zoom * x / (2*self.sector.screen_width),
                      self.noise_zoom * y / (2*self.sector.screen_height)]
                 value = 0.0
@@ -42,12 +44,12 @@ class Nebula:
             self.grid.append(column)
 
     def draw(self):
-        left = int(500 + (self.sector.visible_space_left*0.1))
-        top = int(500 + (self.sector.visible_space_top*0.1))
+        left = int((self.size/2) + (self.sector.visible_space_left*0.1))
+        top = int((self.size/2) + (self.sector.visible_space_top*0.1))
 
         for y in range(0, self.sector.screen_height):
             for x in range(0, self.sector.screen_width):
-                r, g, b = self.grid[(left+x)%1000][(top+y)%1000]
+                r, g, b = self.grid[(left+x)%self.size][(top+y)%self.size]
                 self.sector.buffer.set_back(x, self.sector.mirror_y_coordinate(y), r, g, b)
 
 

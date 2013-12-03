@@ -22,12 +22,27 @@ class Game:
         self.buffer = libtcod.ConsoleBuffer(self.screen_width, self.screen_height)
         self.console = libtcod.console_new(self.screen_width, self.screen_height)
 
+        # Loading Screen
+        libtcod.console_set_default_background(self.console, libtcod.black)
+        libtcod.console_clear(self.console)
+        # libtcod.console_print_frame(self.console, 0, 0, self.screen_width, self.screen_height, clear=True, flag=libtcod.BKGND_SET, fmt=0)
+        libtcod.console_print_ex(self.console, 0, self.screen_height/2, libtcod.BKGND_SET, libtcod.LEFT, "Loading...".center(self.screen_width))
+        libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
+        libtcod.console_flush()
+
         self.mouse = libtcod.Mouse()
         self.key = libtcod.Key()
 
+        libtcod.console_print_ex(self.console, 0, self.screen_height/2, libtcod.BKGND_SET, libtcod.LEFT, "Generating Planets".center(self.screen_width))
+        libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
+        libtcod.console_flush()
         self.sector = Sector(self.screen_width, self.screen_height, self.buffer)
         self.starfield = Starfield(self.sector, max_stars=50)
-        self.nebula = Nebula(self.sector, 0.01, 0.01, 0.1)
+
+        libtcod.console_print_ex(self.console, 0, self.screen_height/2, libtcod.BKGND_SET, libtcod.LEFT, "Building Nebula".center(self.screen_width))
+        libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
+        libtcod.console_flush()
+        self.nebula = Nebula(self.sector, 0.01, 0.01, 0.2)
         self.player_ship = Ship(self.sector)
 
         self.set_minimap(20)
