@@ -16,6 +16,17 @@ class Starfield:
     def __getitem__(self, index):
         return self.stars[index]
 
+    def draw(self):
+        for star in self.stars:
+            color = 255
+            if star[2] > 0.9:
+                color = 255
+            elif 0.5 < star[2] < 0.7:
+                color = 170
+            elif 0.2 < star[2] < 0.4:
+                color = 85
+            self.sector.buffer.set_fore(int(round(star[0])), self.sector.mirror_y_coordinate(int(round(star[1]))), color, color, color, star[3])
+
     def scroll(self, heading=0.0, velocity=0.0):
         deltax = math.cos(heading) * velocity * -1
         deltay = math.sin(heading) * velocity * -1

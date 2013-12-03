@@ -31,7 +31,7 @@ class Game:
         self.set_minimap(20)
 
         self.targeting_width = 20
-        self.targeting_height = 19
+        self.targeting_height = 22
         self.targeting_buffer  = libtcod.ConsoleBuffer(self.targeting_width, self.targeting_height)
         self.targeting_console = libtcod.console_new(self.targeting_width, self.targeting_height)
         libtcod.console_set_default_foreground(self.targeting_console, libtcod.white)
@@ -63,18 +63,10 @@ class Game:
         if self.player_ship.velocity > 0.0:
             self.starfield.scroll( self.player_ship.velocity_angle, self.player_ship.velocity )
 
+        self.starfield.draw()
+
         self.sector.update_particle_positions()
         self.sector.scroll_particles( self.player_ship.velocity_angle, self.player_ship.velocity )
-
-        for star in self.starfield:
-            color = 255
-            if star[2] > 0.9:
-                color = 255
-            elif 0.5 < star[2] < 0.7:
-                color = 170
-            elif 0.2 < star[2] < 0.4:
-                color = 85
-            self.buffer.set_fore(int(round(star[0])), self.sector.mirror_y_coordinate(int(round(star[1]))), color, color, color, star[3])
 
         self.sector.update_visibility(self.player_ship.sector_position_x, self.player_ship.sector_position_y)
 
@@ -105,21 +97,29 @@ class Game:
             self.sector.update_selected_planet_distance(self.player_ship)
             if self.sector.selected_planet_distance() > (self.screen_height/1.5):
                 self.player_ship.draw_target_arrow(self.sector.selected_planet_angle)
-            # self.sector.draw_target_arrow(self.player_ship)
+                # self.sector.draw_target_arrow(self.player_ship)
 
         self.buffer.blit(self.console)
         libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
 
         if self.sector.selected_planet is not None:
             # Target window
-            self.sector.planets[self.sector.selected_planet].draw_target_picture(self.targeting_buffer, 4, 2)
+            planet = self.sector.get_selected_planet()
+            planet.draw_target_picture(self.targeting_buffer, 4, 2)
             self.targeting_buffer.blit(self.targeting_console)
             libtcod.console_print_frame(self.targeting_console, 0, 0, self.targeting_width, self.targeting_height, clear=False, flag=libtcod.BKGND_SET, fmt=0)
 
             libtcod.console_print_ex(self.targeting_console, 1, 16, libtcod.BKGND_SET, libtcod.LEFT,
-                ( " Distance: {0}\n"
+                (
+                  " Name: {0}\n"
+                  " Class: {1}\n"
+                  " Seed: {2}\n"
+                  " Distance: {3}\n"
                   # "Angle: {1}"
                 ).format(
+                    planet.name,
+                    planet.planet_class.title(),
+                    planet.seed,
                     int(self.sector.selected_planet_distance()),
                     # round(math.degrees(self.sector.selected_planet_angle))
                 ).ljust(self.targeting_width-2)
@@ -219,15 +219,8 @@ class Game:
         while not done:
             libtcod.sys_check_for_event(libtcod.KEY_PRESSED|libtcod.KEY_RELEASED|libtcod.EVENT_MOUSE, self.key, self.mouse)
 
-            for star in self.starfield:
-                color = 255
-                if star[2] > 0.9:
-                    color = 255
-                elif 0.5 < star[2] < 0.7:
-                    color = 170
-                elif 0.2 < star[2] < 0.4:
-                    color = 85
-                self.buffer.set_fore(int(round(star[0])), self.sector.mirror_y_coordinate(int(round(star[1]))), color, color, color, star[3])
+            self.starfield.draw()
+
             planet.render_detail()
             self.buffer.blit(self.console)
 

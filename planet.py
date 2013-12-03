@@ -9,7 +9,8 @@ import time
 import libtcodpy as libtcod
 
 class Planet:
-    def __init__(self, sector, planet_class='terran', position_x=-30, position_y=30, diameter=60, seed=3849058430):
+    def __init__(self, sector, planet_class='terran', position_x=-30, position_y=30, diameter=60, seed=3849058430, name="X"):
+        self.name = name
         self.planet_class = planet_class
         self.seed = seed
         self.sector = sector
