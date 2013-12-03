@@ -47,7 +47,7 @@ class Nebula:
 
         for y in range(0, self.sector.screen_height):
             for x in range(0, self.sector.screen_width):
-                r, g, b = self.grid[left+x][top+y]
+                r, g, b = self.grid[(left+x)%1000][(top+y)%1000]
                 self.sector.buffer.set_back(x, self.sector.mirror_y_coordinate(y), r, g, b)
 
 
