@@ -7,6 +7,7 @@ import math
 from particle import Particle
 from ship import Ship
 from starfield import Starfield
+from nebula import Nebula
 from sector import Sector
 from planet import Planet
 import collections
@@ -26,6 +27,7 @@ class Game:
 
         self.sector = Sector(self.screen_width, self.screen_height, self.buffer)
         self.starfield = Starfield(self.sector, max_stars=50)
+        self.nebula = Nebula(self.sector, 0.01, 0.01, 0.1)
         self.player_ship = Ship(self.sector)
 
         self.set_minimap(20)
@@ -69,6 +71,8 @@ class Game:
         self.sector.scroll_particles( self.player_ship.velocity_angle, self.player_ship.velocity )
 
         self.sector.update_visibility(self.player_ship.sector_position_x, self.player_ship.sector_position_y)
+
+        self.nebula.draw()
 
         for planet in self.sector.planets:
             planet.draw()
@@ -220,6 +224,7 @@ class Game:
             libtcod.sys_check_for_event(libtcod.KEY_PRESSED|libtcod.KEY_RELEASED|libtcod.EVENT_MOUSE, self.key, self.mouse)
 
             self.starfield.draw()
+            self.nebula.draw()
 
             planet.render_detail()
             self.buffer.blit(self.console)
@@ -277,7 +282,8 @@ libtcod.console_set_keyboard_repeat(1, 10)
 # libtcod.console_set_custom_font('fonts/8x8.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)
 # libtcod.console_set_custom_font('fonts/12x12.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)
 # libtcod.console_set_custom_font('fonts/terminal8x8_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
-libtcod.console_set_custom_font('fonts/terminal12x12_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+# libtcod.console_set_custom_font('fonts/terminal12x12_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+libtcod.console_set_custom_font('fonts/12x12_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 # libtcod.console_set_custom_font('fonts/terminal16x16_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 
 # game = Game(90, 53)
