@@ -1,7 +1,10 @@
+from random import randrange
+
 import libtcodpy as libtcod
 
 class Nebula:
-    def __init__(self, sector, r_factor=0.1, g_factor=0.1, b_factor=0.1, seed=95837203, size=512):
+    def __init__(self, sector, r_factor=0.4, g_factor=0.4, b_factor=0.4, seed=95837203, size=512):
+        self.seed = randrange(1,10000) if seed is None else seed
         self.sector = sector
 
         self.parallax_speed = 0.1
@@ -18,17 +21,37 @@ class Nebula:
 
         self.size = size
 
-        self.r_rand = libtcod.random_new_from_seed(seed)
-        self.g_rand = libtcod.random_new_from_seed(seed+1)
-        self.b_rand = libtcod.random_new_from_seed(seed+2)
-        self.l_rand = libtcod.random_new_from_seed(seed*2)
+        self.r_rand = libtcod.random_new_from_seed(self.seed)
+        self.g_rand = libtcod.random_new_from_seed(self.seed+1)
+        self.b_rand = libtcod.random_new_from_seed(self.seed+2)
+        self.c_rand = libtcod.random_new_from_seed(self.seed*2)
 
         self.r_noise = libtcod.noise_new(2, libtcod.NOISE_DEFAULT_HURST, libtcod.NOISE_DEFAULT_LACUNARITY, self.r_rand)
         self.g_noise = libtcod.noise_new(2, libtcod.NOISE_DEFAULT_HURST, libtcod.NOISE_DEFAULT_LACUNARITY, self.g_rand)
         self.b_noise = libtcod.noise_new(2, libtcod.NOISE_DEFAULT_HURST, libtcod.NOISE_DEFAULT_LACUNARITY, self.b_rand)
-        self.l_noise = libtcod.noise_new(2, libtcod.NOISE_DEFAULT_HURST, libtcod.NOISE_DEFAULT_LACUNARITY, self.l_rand)
+        self.c_noise = libtcod.noise_new(2, libtcod.NOISE_DEFAULT_HURST, libtcod.NOISE_DEFAULT_LACUNARITY, self.c_rand)
 
         self.build_sector_nebula()
+
+    # cover 0..255
+    # sharpness 0.0..1.0
+    def exponent_filter(self, value, cover=32, sharpness=0.995):
+        c = value - (255 - cover)
+        if c < 0:
+            c = 0
+        new_value = 255 - ((sharpness**c) * 255)
+        return int(new_value)
+
+    def blend_multiply(self, a, b):
+        return ((a * b) >> 8)
+
+    def get_color_value(self, value, factor=0.5):
+        c = int((value + 1.0) * factor * 255)
+        if c < 0:
+            c = 0
+        elif c > 255:
+            c = 255
+        return c
 
     def build_sector_nebula(self):
         self.grid = []
@@ -37,27 +60,13 @@ class Nebula:
             for y in range(0, self.size):
                 f = [self.noise_zoom * x / (2*self.sector.screen_width),
                      self.noise_zoom * y / (2*self.sector.screen_height)]
-                value = 0.0
-                value = libtcod.noise_get_fbm(self.r_noise, f, self.noise_octaves, libtcod.NOISE_SIMPLEX)
-                r = int((value + 0.5) * self.r_factor * 255)
-                if r < 0:
-                    r = 0
-                value = libtcod.noise_get_fbm(self.g_noise, f, self.noise_octaves, libtcod.NOISE_SIMPLEX)
-                g = int((value + 0.5) * self.g_factor * 255)
-                if g < 0:
-                    g = 0
-                value = libtcod.noise_get_fbm(self.b_noise, f, self.noise_octaves, libtcod.NOISE_SIMPLEX)
-                b = int((value + 0.5) * self.b_factor * 255)
-                if b < 0:
-                    b = 0
-                value = libtcod.noise_get_fbm(self.l_noise, f, self.noise_octaves, libtcod.NOISE_SIMPLEX)
-                l = int((value + 0.5) * self.b_factor * 255)
-                if l < 0:
-                    l = 0
-                if l > 255:
-                    l = 255
-
-                column.append([r+l, g+l, b+l])
+                r = self.get_color_value(libtcod.noise_get_fbm(self.r_noise, f, self.noise_octaves, libtcod.NOISE_SIMPLEX), self.r_factor)
+                g = self.get_color_value(libtcod.noise_get_fbm(self.g_noise, f, self.noise_octaves, libtcod.NOISE_SIMPLEX), self.g_factor)
+                b = self.get_color_value(libtcod.noise_get_fbm(self.b_noise, f, self.noise_octaves, libtcod.NOISE_SIMPLEX), self.b_factor)
+                c = self.exponent_filter( (libtcod.noise_get_fbm(self.c_noise, f, self.noise_octaves, libtcod.NOISE_SIMPLEX) + 1.0) * 255 )
+                # column.append([c, c, c])
+                # column.append([r, g, b])
+                column.append([self.blend_multiply(r,c), self.blend_multiply(g,c), self.blend_multiply(b,c)])
             self.grid.append(column)
 
     def draw(self):
