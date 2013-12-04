@@ -42,7 +42,7 @@ class Game:
         libtcod.console_print_ex(self.console, 0, self.screen_height/2, libtcod.BKGND_SET, libtcod.LEFT, "Building Nebula".center(self.screen_width))
         libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
         libtcod.console_flush()
-        self.nebula = Nebula(self.sector, 0.01, 0.01, 0.2)
+        self.nebula = Nebula(self.sector, 0.15, 0.1, 0.3)
         self.player_ship = Ship(self.sector)
 
         self.set_minimap(20)
