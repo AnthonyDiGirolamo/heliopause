@@ -448,6 +448,11 @@ class ConsoleBuffer:
         self.back_g[i] = g
         self.back_b[i] = b
 
+    def get_back(self, x, y):
+        # get the background color of one cell.
+        i = self.width * y + x
+        return [self.back_r[i], self.back_g[i], self.back_b[i]]
+
     def set(self, x, y, back_r, back_g, back_b, fore_r, fore_g, fore_b, char):
         # set the background color, foreground color and character of one cell.
         i = self.width * y + x

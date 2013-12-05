@@ -29,7 +29,7 @@ class Ship:
 
         self.deltav = 0.05
         self.turn_rate = math.radians(10.0)
-        self.speed_limit = 5.0
+        self.speed_limit = 4.0
 
         self.twopi = 2 * math.pi
         self.max_heading = self.twopi - self.turn_rate
@@ -229,12 +229,19 @@ class Ship:
 
         self.update_location()
 
+        threshold = 120*3
+
         for y, line in enumerate(ship):
             for x, cell in enumerate(line):
                 if cell != None:
                     b = cell[0]
                     f = cell[1]
                     c = cell[2]
+                    if b[0] + b[1] + b[2] <= threshold:
+                        b = self.sector.buffer.get_back(self.x + x, self.y + y)
+                    if f[0] + f[1] + f[2] <= threshold:
+                        f = self.sector.buffer.get_back(self.x + x, self.y + y)
+
                     self.sector.buffer.set(self.x + x, self.y + y, b[0], b[1], b[2], f[0], f[1], f[2], c)
                     # self.sector.buffer.set_fore(self.x + x, self.y + y, f[0], f[1], f[2], c)
 
