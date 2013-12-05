@@ -36,7 +36,7 @@ class Sector:
     def add_planet(self, **keyword_args):
         self.planets.append(Planet(sector=self, **keyword_args))
         self.planet_distances = [None for p in self.planets]
-        return [self.planets[-1].icon, self.planets[-1].icon_color]
+        return [self.planets[-1].icon, self.planets[-1].icon_color, len(self.planets)]
 
     def update_visibility(self, player_sector_position_x, player_sector_position_y):
         self.visible_space_left   = player_sector_position_x - self.screen_width/2
@@ -72,11 +72,11 @@ class Sector:
     def selected_planet_distance(self):
         return self.planet_distances[self.selected_planet]
 
-    def update_all_planet_distances(self, shipx, shipy):
-        self.planet_distances = [ math.sqrt((shipx - planet.sector_position_x)**2.0 + (shipy - planet.sector_position_y)**2.0) for planet in self.planets]
+    def update_all_planet_distances(self, ship):
+        self.planet_distances = [ math.sqrt((ship.sector_position_x - planet.sector_position_x)**2.0 + (ship.sector_position_y - planet.sector_position_y)**2.0) for planet in self.planets]
 
-    def closest_planet(self, shipx, shipy):
-        self.update_all_planet_distances(shipx, shipy)
+    def closest_planet(self, ship):
+        self.update_all_planet_distances(ship)
         nearest_planet_index = 0
         smallest_distance = None
         for index, distance in enumerate(self.planet_distances):
@@ -88,7 +88,7 @@ class Sector:
     def land_at_closest_planet(self, ship):
         landed = False
         message = None
-        index, distance = self.closest_planet(ship.sector_position_x, ship.sector_position_y)
+        index, distance = self.closest_planet(ship)
         planet = self.planets[index]
         if distance < 1.25*(planet.width/2.0):
             for p in self.planets:

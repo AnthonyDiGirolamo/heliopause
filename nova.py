@@ -4,7 +4,7 @@
 import libtcodpy as libtcod
 import math
 import collections
-from random import randrange
+from random import randrange, random
 
 from particle import Particle
 from ship import Ship
@@ -22,22 +22,6 @@ class Game:
 
         self.buffer = libtcod.ConsoleBuffer(self.screen_width, self.screen_height)
         self.console = libtcod.console_new(self.screen_width, self.screen_height)
-
-        # Loading Screen
-        libtcod.console_set_default_background(self.console, libtcod.black)
-        libtcod.console_clear(self.console)
-
-        self.mouse = libtcod.Mouse()
-        self.key = libtcod.Key()
-
-        self.loading_message("Generating Planets")
-        self.sector = Sector(self.screen_width, self.screen_height, self.buffer)
-        self.add_planets()
-
-        self.loading_message("Building Nebulae", clear=False)
-        self.starfield = Starfield(self.sector, max_stars=50)
-        self.nebula = Nebula(self.sector)
-        self.player_ship = Ship(self.sector)
 
         self.set_minimap(20)
 
@@ -61,6 +45,23 @@ class Game:
         libtcod.console_set_default_foreground(self.landing_console, libtcod.white)
         libtcod.console_set_default_background(self.landing_console, libtcod.black)
 
+        # Loading Screen
+        libtcod.console_set_default_background(self.console, libtcod.black)
+        libtcod.console_clear(self.console)
+
+        self.mouse = libtcod.Mouse()
+        self.key = libtcod.Key()
+
+        self.loading_message("Scanning Planets")
+        self.sector = Sector(self.screen_width, self.screen_height, self.buffer)
+        self.add_planets()
+
+        self.loading_message("Reading Background Radiation", clear=False)
+        self.starfield = Starfield(self.sector, max_stars=50)
+        self.nebula = Nebula(self.sector)
+        self.player_ship = Ship(self.sector)
+
+
     def set_minimap(self, size):
         self.minimap_width  = size+3
         self.minimap_height = size+3
@@ -80,49 +81,52 @@ class Game:
         libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
         libtcod.console_flush()
 
-    def print_planet_loading_icon(self, icon, color, offset=0):
+    def print_planet_loading_icon(self, icon, color, offset=0, count=0):
         center_height = self.screen_height/2
         center_width = self.screen_width/2
         # quarter_width = self.screen_width/4
         # libtcod.console_set_color_control(libtcod.COLCTRL_1, color, libtcod.black)
         # libtcod.console_print(self.console, quarter_width*2+2, center_height+4, ("%c"+chr(icon)+"%c")%(libtcod.COLCTRL_1,libtcod.COLCTRL_STOP))
-        libtcod.console_put_char_ex(self.console, center_width-7+offset, center_height+4, icon, color, libtcod.black)
+        libtcod.console_put_char_ex(self.console, center_width-((count+2)/2)+offset, center_height+4, icon, color, libtcod.black)
         libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
         libtcod.console_flush()
 
     def add_planets(self):
-        icon, color = self.sector.add_planet(planet_class='star',      position_x=0, position_y=0,       diameter=50, name='Eridani')
-        self.print_planet_loading_icon(icon, color, len(self.sector.planets))
-        icon, color = self.sector.add_planet(planet_class='terran',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Gaea')
-        self.print_planet_loading_icon(icon, color, len(self.sector.planets))
-        icon, color = self.sector.add_planet(planet_class='ocean',     position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Posideon')
-        self.print_planet_loading_icon(icon, color, len(self.sector.planets))
-        icon, color = self.sector.add_planet(planet_class='jungle',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Sky\'s Edge')
-        self.print_planet_loading_icon(icon, color, len(self.sector.planets))
-        icon, color = self.sector.add_planet(planet_class='lava',      position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Hades')
-        self.print_planet_loading_icon(icon, color, len(self.sector.planets))
-        icon, color = self.sector.add_planet(planet_class='tundra',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Tiga')
-        self.print_planet_loading_icon(icon, color, len(self.sector.planets))
-        icon, color = self.sector.add_planet(planet_class='arid',      position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Resurjum')
-        self.print_planet_loading_icon(icon, color, len(self.sector.planets))
-        icon, color = self.sector.add_planet(planet_class='desert',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Arakis')
-        self.print_planet_loading_icon(icon, color, len(self.sector.planets))
-        icon, color = self.sector.add_planet(planet_class='artic',     position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Hoth')
-        self.print_planet_loading_icon(icon, color, len(self.sector.planets))
-        icon, color = self.sector.add_planet(planet_class='barren',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Cerberus')
-        self.print_planet_loading_icon(icon, color, len(self.sector.planets))
-        icon, color = self.sector.add_planet(planet_class='gas giant', position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Jool')
-        self.print_planet_loading_icon(icon, color, len(self.sector.planets))
+        total_planets = 10
+        icon, color, planet_count = self.sector.add_planet(planet_class='star',      position_x=0, position_y=0,       diameter=50, name='Eridani')
+        self.print_planet_loading_icon(icon, color, planet_count, total_planets)
+        icon, color, planet_count = self.sector.add_planet(planet_class='terran',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Gaea')
+        self.print_planet_loading_icon(icon, color, planet_count, total_planets)
+        icon, color, planet_count = self.sector.add_planet(planet_class='ocean',     position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Posideon')
+        self.print_planet_loading_icon(icon, color, planet_count, total_planets)
+        icon, color, planet_count = self.sector.add_planet(planet_class='jungle',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Sky\'s Edge')
+        self.print_planet_loading_icon(icon, color, planet_count, total_planets)
+        icon, color, planet_count = self.sector.add_planet(planet_class='lava',      position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Hades')
+        self.print_planet_loading_icon(icon, color, planet_count, total_planets)
+        icon, color, planet_count = self.sector.add_planet(planet_class='tundra',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Tiga')
+        self.print_planet_loading_icon(icon, color, planet_count, total_planets)
+        icon, color, planet_count = self.sector.add_planet(planet_class='arid',      position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Resurjum')
+        self.print_planet_loading_icon(icon, color, planet_count, total_planets)
+        icon, color, planet_count = self.sector.add_planet(planet_class='desert',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Arakis')
+        self.print_planet_loading_icon(icon, color, planet_count, total_planets)
+        icon, color, planet_count = self.sector.add_planet(planet_class='artic',     position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Hoth')
+        self.print_planet_loading_icon(icon, color, planet_count, total_planets)
+        icon, color, planet_count = self.sector.add_planet(planet_class='barren',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Cerberus')
+        self.print_planet_loading_icon(icon, color, planet_count, total_planets)
+        icon, color, planet_count = self.sector.add_planet(planet_class='gas giant', position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Jool')
+        self.print_planet_loading_icon(icon, color, planet_count, total_planets)
 
     def new_sector(self):
-        if self.sector.distance_from_center(self.player_ship) > 500:
+        index, distance = self.sector.closest_planet(self.player_ship)
+        # if self.sector.distance_from_center(self.player_ship) > 500:
+        if distance > 500:
             fade_speed = 10
             # Fade out
             for fade in range(255,0,-1*fade_speed):
                 libtcod.console_set_fade(fade,libtcod.black)
                 libtcod.console_flush()
 
-            self.loading_message("Generating Planets")
+            self.loading_message("Scanning Planets")
             self.sector.clear_selected_planet()
             self.sector = Sector(self.screen_width, self.screen_height, self.buffer)
             self.add_planets()
@@ -130,9 +134,13 @@ class Game:
             self.player_ship.sector = self.sector
             self.player_ship.about_face()
 
-            self.loading_message("Building Nebulae")
+            self.loading_message("Reading Background Radiation")
             self.starfield = Starfield(self.sector, max_stars=50)
-            self.nebula = Nebula(self.sector, seed=randrange(1,100000))
+            self.nebula = Nebula(self.sector, r_factor=random(), g_factor=random(), b_factor=random(), seed=randrange(1,100000))
+            self.add_message("nebula colors: r:{0} g:{1} b:{2}".format(
+                round(self.nebula.r_factor,2),
+                round(self.nebula.g_factor,2),
+                round(self.nebula.b_factor,2)))
 
             # Fade in
             libtcod.console_set_fade(0,libtcod.black)
@@ -142,7 +150,7 @@ class Game:
                 libtcod.console_flush()
 
         else:
-            self.add_message("You are not far enough from the sector center to jump")
+            self.add_message("You are not far enough from the nearest planet to jump")
 
     def render_all(self):
         if self.player_ship.velocity > 0.0:
@@ -323,13 +331,19 @@ class Game:
             libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
 
             libtcod.console_print_frame(self.landing_console, 0, 0, self.landing_screen_width, self.landing_screen_height, clear=True, flag=libtcod.BKGND_SET, fmt=0)
-            title = "[ Landed at Planet ... ]"
+            title = "[ Landed at {0} ]".format(planet.name)
             libtcod.console_print_ex(self.landing_console,
                     (self.landing_screen_width/2) - (len(title)/2),
                     0, libtcod.BKGND_SET, libtcod.LEFT, title)
             libtcod.console_print_ex(self.landing_console,
                     2, 2, libtcod.BKGND_SET, libtcod.LEFT,
-                    "Class: {0}".format(planet.planet_class))
+                    "Class: {0}".format(planet.planet_class.title()))
+            libtcod.console_print_ex(self.landing_console,
+                    2, 3, libtcod.BKGND_SET, libtcod.LEFT,
+                    "Diameter: {0}".format(planet.width))
+            libtcod.console_print_ex(self.landing_console,
+                    2, 4, libtcod.BKGND_SET, libtcod.LEFT,
+                    "Seed: {0}".format(planet.seed))
             libtcod.console_blit(self.landing_console, 0, 0, self.landing_screen_width, self.landing_screen_height, 0, self.screen_width/2, 2, 1.0, 0.25)
 
             libtcod.console_flush()
@@ -337,7 +351,7 @@ class Game:
 
             player_action = self.handle_keys()
             if player_action == 1:
-                self.add_message("Taking off from Planet X")
+                self.add_message("Taking off from {0}".format(planet.name))
                 done = True
 
     def main_loop(self):
@@ -383,8 +397,8 @@ libtcod.console_set_keyboard_repeat(1, 10)
 # libtcod.console_set_custom_font('fonts/10x10_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 libtcod.console_set_custom_font('fonts/12x12_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 
-game = Game(90, 53)
-# game = Game()
+# game = Game(90, 56)
+game = Game()
 # game = Game(180, 120)
 game.main_loop()
 
