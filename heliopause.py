@@ -21,7 +21,7 @@ class Game:
         self.screen_width = screen_width
         self.screen_height = screen_height
 
-        libtcod.console_init_root(self.screen_width, self.screen_height, 'Nova', False)
+        libtcod.console_init_root(self.screen_width, self.screen_height, 'Heliopause', False)
 
         self.buffer = libtcod.ConsoleBuffer(self.screen_width, self.screen_height)
         self.console = libtcod.console_new(self.screen_width, self.screen_height)
