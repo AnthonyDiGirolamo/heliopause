@@ -152,11 +152,17 @@ class Nebula:
                     b = self.get_color_value(libtcod.noise_get_fbm(self.b_noise, f, self.noise_octaves, libtcod.NOISE_SIMPLEX), self.b_factor)
                     c = self.exponent_filter( (libtcod.noise_get_fbm(self.c_noise, f, self.noise_octaves, libtcod.NOISE_SIMPLEX) + 1.0) * 255 )
                     # ops+=4
+                    self.grid[(left+x)%self.size][(top+y)%self.size] = self.blend_colors(
+                        self.blend_multiply(r,c), self.blend_multiply(g,c), self.blend_multiply(b,c),
+                        self.sector.background[0], self.sector.background[1], self.sector.background[2], 0.5)
 
-                    self.grid[(left+x)%self.size][(top+y)%self.size] = [self.blend_multiply(r,c), self.blend_multiply(g,c), self.blend_multiply(b,c)]
                 r, g, b = self.grid[(left+x)%self.size][(top+y)%self.size]
                 self.sector.buffer.set_back(x, self.sector.mirror_y_coordinate(y), r, g, b)
         # if ops > 0:
         #     print(ops)
 
+    def blend_colors(self, r1, g1, b1, r2, g2, b2, alpha):
+        return [ int(alpha * r1 + (1-alpha) * r2),
+                 int(alpha * g1 + (1-alpha) * g2),
+                 int(alpha * b1 + (1-alpha) * b2) ]
 

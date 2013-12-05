@@ -65,7 +65,7 @@ class Planet:
 
         if self.planet_class == 'terran':
             self.icon_color = libtcod.Color(50,  72,  88)
-            self.height_colormap = collections.deque( libtcod.color_gen_map(
+            self.height_colormap = libtcod.color_gen_map(
                 [
                   libtcod.Color(39,  62,  90),
                   libtcod.Color(50,  72,  88),
@@ -77,7 +77,7 @@ class Planet:
                   libtcod.Color(220, 197, 173)
                 ],
                 [ 0, 15, 70, 80, 90, 200, 233, 255]
-            ))
+            )
             self.noise_octaves = 6.0
             self.noise_zoom = 1.0
 
@@ -101,7 +101,7 @@ class Planet:
 
         elif self.planet_class == 'jungle':
             self.icon_color = libtcod.Color(100, 173, 22)
-            self.height_colormap = collections.deque( libtcod.color_gen_map(
+            self.height_colormap = libtcod.color_gen_map(
                 [
                   libtcod.Color(29,  53,  112),
                   libtcod.Color(69,  137, 200),
@@ -113,13 +113,13 @@ class Planet:
                   libtcod.Color(100, 173, 22),
                 ],
                 [0, 60, 80, 110, 150, 205, 235, 255]
-            ))
+            )
             self.noise_octaves = 6.0
             self.noise_zoom = 3.0
 
         elif self.planet_class == 'lava':
             self.icon_color = libtcod.Color(255, 52,  0)
-            self.height_colormap = collections.deque( libtcod.color_gen_map(
+            self.height_colormap = libtcod.color_gen_map(
                 [
                   libtcod.Color(255, 151, 19),
                   libtcod.Color(255, 52,  0),
@@ -131,13 +131,13 @@ class Planet:
                   libtcod.Color(94,  65,  35),
                 ],
                 [0, 60, 80, 110, 150, 205, 235, 255]
-            ))
+            )
             self.noise_octaves = 6.0
             self.noise_zoom = 6.0
 
         elif self.planet_class == 'tundra':
             self.icon_color = libtcod.Color(167, 157, 109)
-            self.height_colormap = collections.deque( libtcod.color_gen_map(
+            self.height_colormap = libtcod.color_gen_map(
                 [
                   libtcod.Color(121, 183, 170),
                   libtcod.Color(167, 206, 174),
@@ -149,13 +149,13 @@ class Planet:
                   libtcod.Color(255, 255, 200),
                 ],
                 [0, 60, 75, 105, 140, 200, 235, 255]
-            ))
+            )
             self.noise_octaves = 6.0
             self.noise_zoom = 2.0
 
         elif self.planet_class == 'arid':
             self.icon_color = libtcod.Color(235, 131, 44)
-            self.height_colormap = collections.deque( libtcod.color_gen_map(
+            self.height_colormap = libtcod.color_gen_map(
                 [
                   libtcod.Color(121, 183, 170),
                   libtcod.Color(167, 206, 174),
@@ -167,13 +167,13 @@ class Planet:
                   libtcod.Color(41,  30,  20),
                 ],
                 [0, 60, 75, 90, 140, 180, 225, 255]
-            ))
+            )
             self.noise_octaves = 6.0
             self.noise_zoom = 3.0
 
         elif self.planet_class == 'desert':
             self.icon_color = libtcod.Color(255, 178, 58)
-            self.height_colormap = collections.deque( libtcod.color_gen_map(
+            self.height_colormap = libtcod.color_gen_map(
                 [
                   libtcod.Color(255, 178, 58),
                   libtcod.Color(229, 163, 78),
@@ -185,13 +185,13 @@ class Planet:
                   libtcod.Color(68,  47,  49),
                 ],
                 [0, 30, 40, 80, 140, 200, 244, 255]
-            ))
+            )
             self.noise_octaves = 6.0
             self.noise_zoom = 3.0
 
         elif self.planet_class == 'artic':
             self.icon_color = libtcod.Color(255, 255, 240)
-            self.height_colormap = collections.deque( libtcod.color_gen_map(
+            self.height_colormap = libtcod.color_gen_map(
                 [
                   libtcod.Color(255, 255, 240),
                   libtcod.Color(221, 245, 193),
@@ -203,13 +203,13 @@ class Planet:
                   libtcod.Color(255, 255, 255),
                 ],
                 [0, 60, 100, 120, 140, 170, 175, 255]
-            ))
+            )
             self.noise_octaves = 6.0
             self.noise_zoom = 1.0
 
         elif self.planet_class == 'barren':
             self.icon_color = libtcod.Color(151, 152, 113)
-            self.height_colormap = collections.deque( libtcod.color_gen_map(
+            self.height_colormap = libtcod.color_gen_map(
                 [
                   libtcod.Color(39,  41,  44 ),
                   libtcod.Color(88,  93,  67 ),
@@ -221,13 +221,13 @@ class Planet:
                   libtcod.Color(247, 236, 177),
                 ],
                 [0, 30, 60, 85, 100, 120, 180, 255]
-            ))
+            )
             self.noise_octaves = 6.0
             self.noise_zoom = 2.5
 
         if self.planet_class == 'gas giant':
             self.icon_color = libtcod.Color(112, 199, 242)
-            self.height_colormap = collections.deque( libtcod.color_gen_map(
+            self.height_colormap = libtcod.color_gen_map(
                 [
                   libtcod.Color(62,  99,  120),
                   libtcod.Color(86,  137, 173),
@@ -239,7 +239,7 @@ class Planet:
                   libtcod.Color(255, 255, 255)
                 ],
                 [ 0, 40, 80, 100, 120, 190, 210, 255]
-            ))
+            )
             self.noise_octaves = 4.0
             self.noise_zoom = 3.0
 
@@ -539,7 +539,7 @@ class Planet:
             diameter = self.width
 
         if self.planet_class == 'star':
-            light = self.normalize((10,10,-50))
+            light = self.normalize((0,0,-1.0))
             return self.draw_sphere(diameter/2, 0.5, 0.1, light)
         else:
             d = 0.05 * math.sqrt(self.sector_position_x**2 + self.sector_position_y**2)
@@ -549,9 +549,9 @@ class Planet:
             return self.draw_sphere(diameter/2, 0.5, 0.1, light)
 
     def blend_colors(self, r1, g1, b1, r2, g2, b2, alpha):
-        return ( int(alpha * r1 + (1-alpha) * r2),
+        return [ int(alpha * r1 + (1-alpha) * r2),
                  int(alpha * g1 + (1-alpha) * g2),
-                 int(alpha * b1 + (1-alpha) * b2) )
+                 int(alpha * b1 + (1-alpha) * b2) ]
 
     def build_sprite(self, diameter, **kwargs):
         sprite = []

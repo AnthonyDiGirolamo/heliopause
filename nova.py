@@ -52,20 +52,20 @@ class Game:
         self.targeting_buffer  = libtcod.ConsoleBuffer(self.targeting_width, self.targeting_height)
         self.targeting_console = libtcod.console_new(self.targeting_width, self.targeting_height)
         libtcod.console_set_default_foreground(self.targeting_console, libtcod.white)
-        libtcod.console_set_default_background(self.targeting_console, self.sector.background)
+        libtcod.console_set_default_background(self.targeting_console, libtcod.black)
 
         self.message_height = 4
         self.message_width = self.screen_width
         self.messages = collections.deque([])
         self.message_console = libtcod.console_new(self.message_width, self.message_height)
         libtcod.console_set_default_foreground(self.message_console, libtcod.white)
-        libtcod.console_set_default_background(self.message_console, self.sector.background)
+        libtcod.console_set_default_background(self.message_console, libtcod.black)
 
         self.landing_screen_width = self.screen_width / 2 - 2
         self.landing_screen_height = self.screen_height - 4
         self.landing_console = libtcod.console_new(self.landing_screen_width, self.landing_screen_height)
         libtcod.console_set_default_foreground(self.landing_console, libtcod.white)
-        libtcod.console_set_default_background(self.landing_console, self.sector.background)
+        libtcod.console_set_default_background(self.landing_console, libtcod.black)
 
     def set_minimap(self, size):
         self.minimap_width  = size+3
@@ -73,7 +73,7 @@ class Game:
         self.minimap_buffer  = libtcod.ConsoleBuffer(self.minimap_width, self.minimap_height)
         self.minimap_console = libtcod.console_new(self.minimap_width, self.minimap_height)
         libtcod.console_set_default_foreground(self.minimap_console, libtcod.white)
-        libtcod.console_set_default_background(self.minimap_console, self.sector.background)
+        libtcod.console_set_default_background(self.minimap_console, libtcod.black)
 
 
     def render_all(self):
@@ -175,6 +175,7 @@ class Game:
             ).center(self.minimap_width-2, chr(196))
         )
         libtcod.console_blit(self.minimap_console, 0, 0, self.minimap_width, self.minimap_height, 0, self.screen_width-self.minimap_width, 0, 1.0, 0.25)
+
 
         # for i in range(2):
         #     self.sector.add_particle(
