@@ -11,7 +11,7 @@ Compiling libtcod on osx
     cd libtcod_osx
     make -f makefiles/makefile-osx
 
-Copy the resulting libtcod.dylib to the nova directory and run python nova.py
+Copy the resulting libtcod.dylib to the heliopause directory and run `python heliopause.py`
 
 Screenshots
 -----------
