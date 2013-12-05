@@ -25,20 +25,6 @@ class Sector:
 
         self.planets = []
 
-        self.add_planet(planet_class='star',      position_x=0, position_y=0,       diameter=50, name='Eridani')
-        self.add_planet(planet_class='terran',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Gaea')
-        self.add_planet(planet_class='ocean',     position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Posideon')
-        self.add_planet(planet_class='jungle',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Sky\'s Edge')
-        self.add_planet(planet_class='lava',      position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Hades')
-        self.add_planet(planet_class='tundra',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Tiga')
-        self.add_planet(planet_class='arid',      position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Resurjum')
-        self.add_planet(planet_class='desert',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Arakis')
-        self.add_planet(planet_class='artic',     position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Hoth')
-        self.add_planet(planet_class='barren',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Cerberus')
-        self.add_planet(planet_class='gas giant', position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Jool')
-
-        self.planet_distances = [None for p in self.planets]
-
         self.particles = []
 
         self.selected_planet = None
@@ -49,6 +35,8 @@ class Sector:
 
     def add_planet(self, **keyword_args):
         self.planets.append(Planet(sector=self, **keyword_args))
+        self.planet_distances = [None for p in self.planets]
+        return [self.planets[-1].icon, self.planets[-1].icon_color]
 
     def update_visibility(self, player_sector_position_x, player_sector_position_y):
         self.visible_space_left   = player_sector_position_x - self.screen_width/2

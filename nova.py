@@ -31,12 +31,11 @@ class Game:
         self.key = libtcod.Key()
 
         self.loading_message("Generating Planets")
-
         self.sector = Sector(self.screen_width, self.screen_height, self.buffer)
+        self.add_planets()
+
+        self.loading_message("Building Nebulae", clear=False)
         self.starfield = Starfield(self.sector, max_stars=50)
-
-        self.loading_message("Building Nebulae")
-
         self.nebula = Nebula(self.sector)
         self.player_ship = Ship(self.sector)
 
@@ -70,15 +69,50 @@ class Game:
         libtcod.console_set_default_foreground(self.minimap_console, libtcod.white)
         libtcod.console_set_default_background(self.minimap_console, libtcod.black)
 
-    def loading_message(self, message):
-        libtcod.console_clear(self.console)
+    def loading_message(self, message, clear=True):
+        if clear:
+            libtcod.console_clear(self.console)
         libtcod.console_set_fade(255,libtcod.black)
         center_height = self.screen_height/2
-        quarter_width = self.screen_width/4
+        third_width = self.screen_width/2
         libtcod.console_print_ex(self.console, 0, center_height, libtcod.BKGND_SET, libtcod.LEFT, message.center(self.screen_width))
-        libtcod.console_print_frame(self.console, int(quarter_width*1.5), center_height-2, quarter_width, 5, clear=False, flag=libtcod.BKGND_SET, fmt=0)
+        libtcod.console_print_frame(self.console, int(third_width*0.5), center_height-2, third_width, 5, clear=False, flag=libtcod.BKGND_SET, fmt=0)
         libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
         libtcod.console_flush()
+
+    def print_planet_loading_icon(self, icon, color, offset=0):
+        center_height = self.screen_height/2
+        center_width = self.screen_width/2
+        # quarter_width = self.screen_width/4
+        # libtcod.console_set_color_control(libtcod.COLCTRL_1, color, libtcod.black)
+        # libtcod.console_print(self.console, quarter_width*2+2, center_height+4, ("%c"+chr(icon)+"%c")%(libtcod.COLCTRL_1,libtcod.COLCTRL_STOP))
+        libtcod.console_put_char_ex(self.console, center_width-7+offset, center_height+4, icon, color, libtcod.black)
+        libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
+        libtcod.console_flush()
+
+    def add_planets(self):
+        icon, color = self.sector.add_planet(planet_class='star',      position_x=0, position_y=0,       diameter=50, name='Eridani')
+        self.print_planet_loading_icon(icon, color, len(self.sector.planets))
+        icon, color = self.sector.add_planet(planet_class='terran',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Gaea')
+        self.print_planet_loading_icon(icon, color, len(self.sector.planets))
+        icon, color = self.sector.add_planet(planet_class='ocean',     position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Posideon')
+        self.print_planet_loading_icon(icon, color, len(self.sector.planets))
+        icon, color = self.sector.add_planet(planet_class='jungle',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Sky\'s Edge')
+        self.print_planet_loading_icon(icon, color, len(self.sector.planets))
+        icon, color = self.sector.add_planet(planet_class='lava',      position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Hades')
+        self.print_planet_loading_icon(icon, color, len(self.sector.planets))
+        icon, color = self.sector.add_planet(planet_class='tundra',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Tiga')
+        self.print_planet_loading_icon(icon, color, len(self.sector.planets))
+        icon, color = self.sector.add_planet(planet_class='arid',      position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Resurjum')
+        self.print_planet_loading_icon(icon, color, len(self.sector.planets))
+        icon, color = self.sector.add_planet(planet_class='desert',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Arakis')
+        self.print_planet_loading_icon(icon, color, len(self.sector.planets))
+        icon, color = self.sector.add_planet(planet_class='artic',     position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Hoth')
+        self.print_planet_loading_icon(icon, color, len(self.sector.planets))
+        icon, color = self.sector.add_planet(planet_class='barren',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Cerberus')
+        self.print_planet_loading_icon(icon, color, len(self.sector.planets))
+        icon, color = self.sector.add_planet(planet_class='gas giant', position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name='Jool')
+        self.print_planet_loading_icon(icon, color, len(self.sector.planets))
 
     def new_sector(self):
         if self.sector.distance_from_center(self.player_ship) > 500:
@@ -91,6 +125,8 @@ class Game:
             self.loading_message("Generating Planets")
             self.sector.clear_selected_planet()
             self.sector = Sector(self.screen_width, self.screen_height, self.buffer)
+            self.add_planets()
+
             self.player_ship.sector = self.sector
             self.player_ship.about_face()
 
@@ -342,8 +378,8 @@ libtcod.console_set_keyboard_repeat(1, 10)
 libtcod.console_set_custom_font('fonts/12x12_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 # libtcod.console_set_custom_font('fonts/terminal16x16_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 
-# game = Game(90, 53)
-game = Game()
+game = Game(90, 53)
+# game = Game()
 # game = Game(180, 120)
 game.main_loop()
 
