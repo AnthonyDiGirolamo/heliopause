@@ -71,36 +71,36 @@ class Game:
         libtcod.console_set_default_background(self.minimap_console, libtcod.black)
 
     def loading_message(self, message):
-        # libtcod.console_print_frame(self.console, 0, 0, self.screen_width, self.screen_height, clear=True, flag=libtcod.BKGND_SET, fmt=0)
         libtcod.console_clear(self.console)
         libtcod.console_set_fade(255,libtcod.black)
-        libtcod.console_print_ex(self.console, 0, self.screen_height/2, libtcod.BKGND_SET, libtcod.LEFT, message.center(self.screen_width))
+        center_height = self.screen_height/2
+        quarter_width = self.screen_width/4
+        libtcod.console_print_ex(self.console, 0, center_height, libtcod.BKGND_SET, libtcod.LEFT, message.center(self.screen_width))
+        libtcod.console_print_frame(self.console, int(quarter_width*1.5), center_height-2, quarter_width, 5, clear=False, flag=libtcod.BKGND_SET, fmt=0)
         libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
         libtcod.console_flush()
 
     def new_sector(self):
         if self.sector.distance_from_center(self.player_ship) > 500:
             fade_speed = 10
+            # Fade out
             for fade in range(255,0,-1*fade_speed):
                 libtcod.console_set_fade(fade,libtcod.black)
                 libtcod.console_flush()
 
             self.loading_message("Generating Planets")
-
             self.sector.clear_selected_planet()
-
             self.sector = Sector(self.screen_width, self.screen_height, self.buffer)
             self.player_ship.sector = self.sector
+            self.player_ship.about_face()
 
             self.loading_message("Building Nebulae")
             self.starfield = Starfield(self.sector, max_stars=50)
             self.nebula = Nebula(self.sector, seed=randrange(1,100000))
 
-            self.player_ship.about_face()
-
+            # Fade in
             libtcod.console_set_fade(0,libtcod.black)
             self.render_all()
-
             for fade in range(0,255,fade_speed):
                 libtcod.console_set_fade(fade,libtcod.black)
                 libtcod.console_flush()
