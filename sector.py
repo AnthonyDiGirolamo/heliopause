@@ -56,6 +56,12 @@ class Sector:
         self.visible_space_right  = self.visible_space_left + self.screen_width
         self.visible_space_bottom = self.visible_space_top - self.screen_height
 
+    def clear_selected_planet(self):
+        self.selected_planet = None
+
+    def distance_from_center(self, ship):
+        return math.sqrt(ship.sector_position_x**2 + ship.sector_position_y**2)
+
     def update_selected_planet_distance(self, ship):
         planet = self.planets[self.selected_planet]
         self.planet_distances[self.selected_planet] = math.sqrt((ship.sector_position_x - planet.sector_position_x)**2.0 + (ship.sector_position_y - planet.sector_position_y)**2.0)

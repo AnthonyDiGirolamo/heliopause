@@ -200,6 +200,16 @@ class Ship:
                 else:
                     self.turn_left()
 
+    def about_face(self):
+        if self.velocity > 0.0:
+            self.velocity_angle, self.velocity_angle_opposite = self.velocity_angle_opposite, self.velocity_angle
+            self.velocity_component_x *= -1.0
+            self.velocity_component_y *= -1.0
+            if self.heading < math.pi:
+                self.heading += math.pi
+            else:
+                self.heading -= math.pi
+
     # \--,
     #  \  \--,
     #   \     \----,

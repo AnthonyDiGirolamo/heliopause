@@ -36,12 +36,14 @@ class Game:
         libtcod.console_print_ex(self.console, 0, self.screen_height/2, libtcod.BKGND_SET, libtcod.LEFT, "Generating Planets".center(self.screen_width))
         libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
         libtcod.console_flush()
+
         self.sector = Sector(self.screen_width, self.screen_height, self.buffer)
         self.starfield = Starfield(self.sector, max_stars=50)
 
         libtcod.console_print_ex(self.console, 0, self.screen_height/2, libtcod.BKGND_SET, libtcod.LEFT, "Building Nebula".center(self.screen_width))
         libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
         libtcod.console_flush()
+
         self.nebula = Nebula(self.sector)
         self.player_ship = Ship(self.sector)
 
@@ -75,6 +77,18 @@ class Game:
         libtcod.console_set_default_foreground(self.minimap_console, libtcod.white)
         libtcod.console_set_default_background(self.minimap_console, libtcod.black)
 
+    def new_sector(self):
+        if self.sector.distance_from_center(self.player_ship) > 500:
+            self.sector.clear_selected_planet()
+
+            self.sector = Sector(self.screen_width, self.screen_height, self.buffer)
+            self.starfield.sector = self.sector
+            self.nebula.sector = self.sector
+            self.player_ship.sector = self.sector
+
+            self.player_ship.about_face()
+        else:
+            self.add_message("You are not far enough from the sector center to jump")
 
     def render_all(self):
         if self.player_ship.velocity > 0.0:
@@ -227,6 +241,9 @@ class Game:
 
             elif key_character == 'p':
                 self.sector.cycle_planet_target(self.player_ship)
+
+            elif key_character == 'r':
+                self.new_sector()
 
     def add_message(self, message):
         if len(self.messages) == self.message_height:
