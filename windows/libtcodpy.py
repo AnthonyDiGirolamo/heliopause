@@ -447,6 +447,11 @@ class ConsoleBuffer:
         self.back_g[i] = g
         self.back_b[i] = b
 
+    def get_back(self, x, y):
+        # get the background color of one cell.
+        i = self.width * y + x
+        return [self.back_r[i], self.back_g[i], self.back_b[i]]
+
     def set(self, x, y, back_r, back_g, back_b, fore_r, fore_g, fore_b, char):
         # set the background color, foreground color and character of one cell.
         i = self.width * y + x
@@ -1426,7 +1431,7 @@ def random_new_from_seed(seed, algo=RNG_CMWC):
     return _lib.TCOD_random_new_from_seed(algo,c_uint(seed))
 
 def random_set_distribution(rnd, dist) :
-	_lib.TCOD_random_set_distribution(rnd, dist)
+    _lib.TCOD_random_set_distribution(rnd, dist)
 
 def random_get_int(rnd, mi, ma):
     return _lib.TCOD_random_get_int(rnd, mi, ma)
