@@ -542,7 +542,10 @@ class Planet:
             light = self.normalize((10,10,-50))
             return self.draw_sphere(diameter/2, 0.5, 0.1, light)
         else:
-            light = self.normalize((20,20,-50))
+            d = 0.05 * math.sqrt(self.sector_position_x**2 + self.sector_position_y**2)
+            x = d * self.sector_position_x
+            y = -1.0 * d * self.sector_position_y
+            light = self.normalize((x,y,-1.0 * 750.0 * d))
             return self.draw_sphere(diameter/2, 0.5, 0.1, light)
 
     def blend_colors(self, r1, g1, b1, r2, g2, b2, alpha):
