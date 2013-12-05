@@ -74,7 +74,7 @@ class Game:
         self.planet_name_index += 1
         if self.planet_name_index > len(self.planet_names):
             self.planet_name_index = 0
-        return self.planet_names[self.planet_name_index]
+        return self.planet_names[self.planet_name_index].strip()
 
     def set_minimap(self, size):
         self.minimap_width  = size+3
