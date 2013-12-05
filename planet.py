@@ -64,7 +64,7 @@ class Planet:
         self.icon_color = libtcod.Color(255, 255, 255)
 
         if self.planet_class == 'terran':
-            self.icon_color = libtcod.Color(50,  72,  88)
+            self.icon_color = libtcod.Color(50,  72, 200)
             self.height_colormap = libtcod.color_gen_map(
                 [
                   libtcod.Color(39,  62,  90),
