@@ -3,6 +3,8 @@
 
 import libtcodpy as libtcod
 import math
+import collections
+from random import randrange
 
 from particle import Particle
 from ship import Ship
@@ -10,7 +12,6 @@ from starfield import Starfield
 from nebula import Nebula
 from sector import Sector
 from planet import Planet
-import collections
 
 class Game:
     def __init__(self, screen_width=120, screen_height=70):
@@ -25,24 +26,16 @@ class Game:
         # Loading Screen
         libtcod.console_set_default_background(self.console, libtcod.black)
         libtcod.console_clear(self.console)
-        # libtcod.console_print_frame(self.console, 0, 0, self.screen_width, self.screen_height, clear=True, flag=libtcod.BKGND_SET, fmt=0)
-        libtcod.console_print_ex(self.console, 0, self.screen_height/2, libtcod.BKGND_SET, libtcod.LEFT, "Loading...".center(self.screen_width))
-        libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
-        libtcod.console_flush()
 
         self.mouse = libtcod.Mouse()
         self.key = libtcod.Key()
 
-        libtcod.console_print_ex(self.console, 0, self.screen_height/2, libtcod.BKGND_SET, libtcod.LEFT, "Generating Planets".center(self.screen_width))
-        libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
-        libtcod.console_flush()
+        self.loading_message("Generating Planets")
 
         self.sector = Sector(self.screen_width, self.screen_height, self.buffer)
         self.starfield = Starfield(self.sector, max_stars=50)
 
-        libtcod.console_print_ex(self.console, 0, self.screen_height/2, libtcod.BKGND_SET, libtcod.LEFT, "Building Nebula".center(self.screen_width))
-        libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
-        libtcod.console_flush()
+        self.loading_message("Building Nebulae")
 
         self.nebula = Nebula(self.sector)
         self.player_ship = Ship(self.sector)
@@ -77,16 +70,41 @@ class Game:
         libtcod.console_set_default_foreground(self.minimap_console, libtcod.white)
         libtcod.console_set_default_background(self.minimap_console, libtcod.black)
 
+    def loading_message(self, message):
+        # libtcod.console_print_frame(self.console, 0, 0, self.screen_width, self.screen_height, clear=True, flag=libtcod.BKGND_SET, fmt=0)
+        libtcod.console_clear(self.console)
+        libtcod.console_set_fade(255,libtcod.black)
+        libtcod.console_print_ex(self.console, 0, self.screen_height/2, libtcod.BKGND_SET, libtcod.LEFT, message.center(self.screen_width))
+        libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
+        libtcod.console_flush()
+
     def new_sector(self):
         if self.sector.distance_from_center(self.player_ship) > 500:
+            fade_speed = 10
+            for fade in range(255,0,-1*fade_speed):
+                libtcod.console_set_fade(fade,libtcod.black)
+                libtcod.console_flush()
+
+            self.loading_message("Generating Planets")
+
             self.sector.clear_selected_planet()
 
             self.sector = Sector(self.screen_width, self.screen_height, self.buffer)
-            self.starfield.sector = self.sector
-            self.nebula.sector = self.sector
             self.player_ship.sector = self.sector
 
+            self.loading_message("Building Nebulae")
+            self.starfield = Starfield(self.sector, max_stars=50)
+            self.nebula = Nebula(self.sector, seed=randrange(1,100000))
+
             self.player_ship.about_face()
+
+            libtcod.console_set_fade(0,libtcod.black)
+            self.render_all()
+
+            for fade in range(0,255,fade_speed):
+                libtcod.console_set_fade(fade,libtcod.black)
+                libtcod.console_flush()
+
         else:
             self.add_message("You are not far enough from the sector center to jump")
 
@@ -244,6 +262,10 @@ class Game:
 
             elif key_character == 'r':
                 self.new_sector()
+
+            elif key_character == 'S':
+                libtcod.sys_save_screenshot()
+                self.add_message("Saved screenshot")
 
     def add_message(self, message):
         if len(self.messages) == self.message_height:
