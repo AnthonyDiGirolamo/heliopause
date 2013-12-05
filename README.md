@@ -1,5 +1,5 @@
-nova-stories
-============
+heliopause
+==========
 
 A space exporation game written in python using libtcod
 
