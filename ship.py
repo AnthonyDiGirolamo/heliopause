@@ -29,7 +29,7 @@ class Ship:
 
         self.deltav = 0.05
         self.turn_rate = math.radians(10.0)
-        self.speed_limit = 3.0
+        self.speed_limit = 5.0
 
         self.twopi = 2 * math.pi
         self.max_heading = self.twopi - self.turn_rate

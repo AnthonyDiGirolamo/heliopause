@@ -124,23 +124,23 @@ class Nebula:
             self.grid.append(column)
 
     def draw(self):
+        # ops = 0
         left   = int((self.size/2) + (self.sector.visible_space_left * self.parallax_speed))
         top    = int((self.size/2) + (self.sector.visible_space_top * self.parallax_speed))
         right  = left + self.sector.screen_width
-        bottom = top - self.sector.screen_height
+        bottom = top + self.sector.screen_height
 
         if self.last_left != left or self.last_top != top:
-            for y in range(0, self.sector.screen_height):
-                self.grid[(left)%self.size][(top+y)%self.size] = None
-                self.grid[(right)%self.size][(top+y)%self.size] = None
-            for x in range(0, self.sector.screen_width):
-                self.grid[(left+x)%self.size][(top)%self.size] = None
-                self.grid[(left+x)%self.size][(bottom)%self.size] = None
+            # print(repr([ left, top ]))
+            for y in range(0, self.sector.screen_height+2):
+                self.grid[(left-1)%self.size][(top-1+y)%self.size] = None
+                self.grid[(right)%self.size][(top-1+y)%self.size] = None
+            for x in range(0, self.sector.screen_width+2):
+                self.grid[(left-1+x)%self.size][(bottom)%self.size] = None
+                self.grid[(left-1+x)%self.size][(top-1)%self.size] = None
 
         self.last_left = left
-        self.last_right = right
         self.last_top = top
-        self.last_bottom = bottom
 
         for y in range(0, self.sector.screen_height):
             for x in range(0, self.sector.screen_width):
@@ -151,8 +151,12 @@ class Nebula:
                     g = self.get_color_value(libtcod.noise_get_fbm(self.g_noise, f, self.noise_octaves, libtcod.NOISE_SIMPLEX), self.g_factor)
                     b = self.get_color_value(libtcod.noise_get_fbm(self.b_noise, f, self.noise_octaves, libtcod.NOISE_SIMPLEX), self.b_factor)
                     c = self.exponent_filter( (libtcod.noise_get_fbm(self.c_noise, f, self.noise_octaves, libtcod.NOISE_SIMPLEX) + 1.0) * 255 )
+                    # ops+=4
+
                     self.grid[(left+x)%self.size][(top+y)%self.size] = [self.blend_multiply(r,c), self.blend_multiply(g,c), self.blend_multiply(b,c)]
                 r, g, b = self.grid[(left+x)%self.size][(top+y)%self.size]
                 self.sector.buffer.set_back(x, self.sector.mirror_y_coordinate(y), r, g, b)
+        # if ops > 0:
+        #     print(ops)
 
 
