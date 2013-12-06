@@ -19,13 +19,13 @@ laser_colormap = libtcod.color_gen_map(
 laser_character_map = [4 for i in range(0, laser_index+1)]
 
 class Ship:
-    def __init__(self, sector):
+    def __init__(self, sector, posx=0.0, posy=0.0):
         self.sector = sector
         self.x = (self.sector.screen_width / 2) - 4
         self.y = (self.sector.screen_height / 2) - 4
 
-        self.sector_position_x = 0.0
-        self.sector_position_y = 0.0
+        self.sector_position_x = posx
+        self.sector_position_y = posy
 
         self.deltav = 0.05
         self.turn_rate = math.radians(10.0)
@@ -72,7 +72,8 @@ class Ship:
             return ord('>')
 
     def load_ship_sprites(self):
-        console = libtcod.console_new(16, 16)
+        sprite_size = 16
+        console = libtcod.console_new(sprite_size, sprite_size)
         self.ship = []
         color_masks = [[0, 0, 255], [68,68,196], [66,66,193]]
         for angle in range(0, 360, 10):
@@ -81,9 +82,9 @@ class Ship:
             # libtcod.image_blit_rect(ship, console, 0, 0, -1, -1, libtcod.BKGND_SET)
             libtcod.image_blit_2x(ship, console, 0, 0)
             frame = []
-            for y in range(0, 16):
+            for y in range(0, sprite_size):
                 row = []
-                for x in range(0, 16):
+                for x in range(0, sprite_size):
                     b = libtcod.console_get_char_background(console,x,y)
                     f = libtcod.console_get_char_foreground(console,x,y)
                     c = libtcod.console_get_char(console,x,y)
@@ -230,6 +231,7 @@ class Ship:
         self.update_location()
 
         threshold = 120*3
+        # threshold = 0
 
         for y, line in enumerate(ship):
             for x, cell in enumerate(line):

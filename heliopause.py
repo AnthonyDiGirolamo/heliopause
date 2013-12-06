@@ -68,7 +68,9 @@ class Game:
         self.loading_message("Reading Background Radiation", clear=False)
         self.starfield = Starfield(self.sector, max_stars=50)
         self.nebula = Nebula(self.sector)
-        self.player_ship = Ship(self.sector)
+        starting_planet = self.sector.planets[randrange(len(self.sector.planets))]
+        self.player_ship = Ship(self.sector, starting_planet.sector_position_x, starting_planet.sector_position_y)
+        self.add_message("Taking off from {0}".format(starting_planet.name))
 
     def next_name(self):
         self.planet_name_index += 1
