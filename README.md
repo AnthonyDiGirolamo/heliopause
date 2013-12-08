@@ -18,6 +18,10 @@ Screenshots
 
 [![screenshot005.png](https://raw.github.com/AnthonyDiGirolamo/heliopause/master/screenshots/screenshot005.png)](https://raw.github.com/AnthonyDiGirolamo/heliopause/master/screenshots/screenshot005.png)
 
+[![screenshot006.png](https://raw.github.com/AnthonyDiGirolamo/heliopause/master/screenshots/screenshot006.png)](https://raw.github.com/AnthonyDiGirolamo/heliopause/master/screenshots/screenshot006.png)
+
+[![screenshot007.png](https://raw.github.com/AnthonyDiGirolamo/heliopause/master/screenshots/screenshot007.png)](https://raw.github.com/AnthonyDiGirolamo/heliopause/master/screenshots/screenshot007.png)
+
 Compiling libtcod on osx
 ------------------------
 
