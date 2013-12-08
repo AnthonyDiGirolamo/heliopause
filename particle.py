@@ -63,7 +63,7 @@ class ThrustExhaust(Particle):
 
 class BlueBullet(Particle):
     def __init__(self, **kwargs):
-        self.index = 60
+        self.index = 20
         self.colormap = libtcod.color_gen_map(
             [ libtcod.Color(0, 144, 255),  libtcod.Color(0, 222, 255) ],
             [ 0,                           self.index ] )

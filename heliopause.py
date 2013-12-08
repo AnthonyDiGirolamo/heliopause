@@ -382,7 +382,7 @@ class Game:
 # libtcod setup
 
 libtcod.sys_set_fps(30)
-libtcod.sys_set_renderer(libtcod.RENDERER_GLSL)
+# libtcod.sys_set_renderer(libtcod.RENDERER_GLSL)
 # libtcod.sys_set_renderer(libtcod.RENDERER_OPENGL)
 # libtcod.sys_set_renderer(libtcod.RENDERER_SDL)
 libtcod.console_set_keyboard_repeat(1, 10)
