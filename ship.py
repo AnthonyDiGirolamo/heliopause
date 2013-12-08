@@ -1,22 +1,7 @@
 import libtcodpy as libtcod
 import math
 
-from particle import Particle
-
-# sector_background = libtcod.Color(32,32,64)
-sector_background = libtcod.Color(0,0,0)
-
-thrust_exhaust_index = 10
-thrust_exhaust_colormap = libtcod.color_gen_map(
-    [ sector_background, libtcod.Color(255, 144, 0),  libtcod.Color(255, 222, 0) ],
-    [ 0,                 thrust_exhaust_index/2,      thrust_exhaust_index] )
-thrust_exhaust_character_map = [176, 176, 176, 177, 177, 178, 178, 219, 219, 219]
-
-laser_index = 20
-laser_colormap = libtcod.color_gen_map(
-    [ libtcod.Color(0, 144, 255),  libtcod.Color(0, 222, 255) ],
-    [ 0,                           laser_index] )
-laser_character_map = [4 for i in range(0, laser_index+1)]
+from particle import Particle, ThrustExhaust, BlueBullet
 
 class Ship:
     def __init__(self, sector, posx=0.0, posy=0.0):
@@ -183,14 +168,14 @@ class Ship:
             self.velocity = self.speed_limit
 
         self.sector.add_particle(
-            Particle( self.x+3+x_component*-2, self.y+4+y_component*-2,
-                "thrust_exhaust",
-                thrust_exhaust_index,
-                thrust_exhaust_colormap,
-                thrust_exhaust_character_map,
-                1.0,
-                self.heading - math.pi if self.heading > math.pi else self.heading + math.pi,
-                newx, newy)
+            ThrustExhaust(
+                sector               = self.sector,
+                x                    = self.x+3+x_component*-2,
+                y                    = self.y+4+y_component*-2,
+                velocity             = 1.0,
+                angle                = self.heading - math.pi if self.heading > math.pi else self.heading + math.pi,
+                velocity_component_x = newx,
+                velocity_component_y = newy)
         )
 
     def reverse_direction(self):
@@ -251,19 +236,14 @@ class Ship:
         x_component = math.cos(self.heading)
         y_component = math.sin(self.heading)
         self.sector.add_particle(
-            Particle(
-                # self.x,
-                self.x+3+x_component*3,
-                self.y+4+y_component*3,
-                # self.y-y_component*10,
-                "laser",
-                laser_index,
-                laser_colormap,
-                laser_character_map,
-                3.0,
-                self.heading,
-                self.velocity_component_x,
-                self.velocity_component_y
+            BlueBullet(
+                sector               = self.sector,
+                x                    = self.x+3+x_component*3,
+                y                    = self.y+4+y_component*3,
+                velocity             = 3.0,
+                angle                = self.heading,
+                velocity_component_x = self.velocity_component_x,
+                velocity_component_y = self.velocity_component_y
             )
         )
 

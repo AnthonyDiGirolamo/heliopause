@@ -68,7 +68,7 @@ class Game:
         self.loading_message("Reading Background Radiation", clear=False)
         self.starfield = Starfield(self.sector, max_stars=50)
         self.nebula = Nebula(self.sector)
-        starting_planet = self.sector.planets[randrange(len(self.sector.planets))]
+        starting_planet = self.sector.planets[randrange(1, len(self.sector.planets))]
         self.player_ship = Ship(self.sector, starting_planet.sector_position_x, starting_planet.sector_position_y)
         self.add_message("Taking off from {0}".format(starting_planet.name))
 
@@ -184,23 +184,8 @@ class Game:
         for planet in self.sector.planets:
             planet.draw()
 
-        for p in self.sector.particles:
-            if p.valid:
-                color = p.colormap[p.index]
-                character = p.charactermap[p.index]
-                x = int(round(p.x))
-                y = int(round(p.y))
-                if x < 2 or x > self.screen_width-2 or y < 2 or y > self.screen_height-3:
-                    p.valid = False
-                    continue
-
-                if p.particle_type == "thrust_exhaust":
-                    self.buffer.set_fore(x,   self.sector.mirror_y_coordinate(y),   color[0], color[1], color[2], character)
-                    self.buffer.set_fore(x,   self.sector.mirror_y_coordinate(y-1), color[0], color[1], color[2], character)
-                    self.buffer.set_fore(x+1, self.sector.mirror_y_coordinate(y),   color[0], color[1], color[2], character)
-                    self.buffer.set_fore(x+1, self.sector.mirror_y_coordinate(y-1), color[0], color[1], color[2], character)
-                else:
-                    self.buffer.set_fore(x,   self.sector.mirror_y_coordinate(y),   color[0], color[1], color[2], character)
+        for particle in self.sector.particles:
+            particle.draw()
 
         self.player_ship.draw()
 
@@ -414,8 +399,8 @@ libtcod.console_set_keyboard_repeat(1, 10)
 # libtcod.console_set_custom_font('fonts/10x10_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 libtcod.console_set_custom_font('fonts/12x12_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 
-game = Game(90, 56)
-# game = Game()
+# game = Game(90, 56)
+game = Game()
 # game = Game(180, 120)
 game.main_loop()
 
