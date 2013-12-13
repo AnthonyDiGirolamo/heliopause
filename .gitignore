@@ -1,2 +1,6 @@
 .DS_Store
 *.pyc
+windows/*.py*
+windows/fonts
+windows/images
+windows/planet_names
