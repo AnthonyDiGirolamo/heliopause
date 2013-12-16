@@ -14,7 +14,7 @@ from nebula import Nebula
 from starfield import Starfield
 
 class Galaxy:
-    def __init__(self, width, height, seed=52, size=20):
+    def __init__(self, width, height, seed=52, size=10):
         self.screen_width = width
         self.screen_height = height
         self.seed = seed
@@ -37,6 +37,7 @@ class Galaxy:
         # pp( [sector.neighbors for sector in self.sectors] )
 
         self.current_sector = 0
+        self.targeted_sector_index = 0
         self.selected_blink = 0
 
     def next_name(self):
@@ -48,18 +49,31 @@ class Galaxy:
     def new_sector(self):
         self.sectors.append( SectorMap( self, random.randrange(0,1000000) ) )
 
+    def cycle_sector_target(self):
+        self.targeted_sector_index += 1
+        if self.targeted_sector_index >= len(self.sectors[self.current_sector].neighbors):
+            self.targeted_sector_index = 0
+
     def link_sectors(self):
         for index, sector in enumerate(self.sectors):
-            while len(sector.neighbors) == 0:
-                for i in range(random.randrange(5)):
-                    link = random.randrange(self.sector_count)
-                    if index != link and link not in sector.neighbors:
-                        sector.neighbors.append( link )
+            if index == self.sector_count-1:
+                sector.neighbors.append( 0 )
+            else:
+                sector.neighbors.append( index+1 )
+
+        # for index, sector in enumerate(self.sectors):
+        #     while len(sector.neighbors) == 0:
+        #         for i in range(random.randrange(5)):
+        #             link = random.randrange(self.sector_count)
+        #             if index != link and link not in sector.neighbors and index not in self.sectors[link].neighbors:
+        #                 sector.neighbors.append( link )
+
+        pp([sector.neighbors for sector in self.sectors])
 
     def force_directed(self):
         repulsion_constant = 100
-        attraction_constant = 0.2
-        spring_length = 8
+        attraction_constant = 0.05
+        spring_length = 4
 
         displacements = [[0, 0] for sector in self.sectors]
 
@@ -109,6 +123,21 @@ class Galaxy:
         for index, sector in enumerate(self.sectors):
             sector.galaxy_position_x += int(round(displacements[index][0]))
             sector.galaxy_position_y += int(round(displacements[index][1]))
+
+        # Recenter Sector Map
+        min_x = min( [sector.galaxy_position_x for sector in self.sectors] )
+        min_y = min( [sector.galaxy_position_y for sector in self.sectors] )
+        max_x = max( [sector.galaxy_position_x for sector in self.sectors] )
+        max_y = max( [sector.galaxy_position_y for sector in self.sectors] )
+
+        width = max_x - min_x
+        height = max_y - min_y
+        disp_x = ((self.screen_width/2) - (width/2)) - min_x
+        disp_y = ((self.screen_height/2) - (height/2)) - min_y
+
+        for index, sector in enumerate(self.sectors):
+            sector.galaxy_position_x += disp_x
+            sector.galaxy_position_y += disp_y
             if sector.galaxy_position_x < 2:
                 sector.galaxy_position_x = 2
             if sector.galaxy_position_y < 2:
@@ -125,6 +154,11 @@ class Galaxy:
             buffer.set(sector.galaxy_position_x, sector.galaxy_position_y, 0, 0, 0, color[0], color[1], color[2], ord('*'))
 
             for neighbor in sector.neighbors:
+                if index == self.current_sector and neighbor == sector.neighbors[self.targeted_sector_index]:
+                    color = libtcod.Color(64, 200, 64)
+                else:
+                    color = libtcod.Color(64, 64, 64)
+
                 libtcod.line_init(
                     sector.galaxy_position_x,
                     sector.galaxy_position_y,
@@ -133,7 +167,7 @@ class Galaxy:
                 )
                 x,y=libtcod.line_step()
                 while x is not None:
-                    buffer.set_back(x, y, 64, 64, 64)
+                    buffer.set_back(x, y, color[0], color[1], color[2])
                     x,y=libtcod.line_step()
 
             if self.current_sector is not None and index == self.current_sector:
