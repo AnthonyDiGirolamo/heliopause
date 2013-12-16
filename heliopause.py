@@ -27,6 +27,8 @@ class Game:
         self.buffer = libtcod.ConsoleBuffer(self.screen_width, self.screen_height)
         self.console = libtcod.console_new(self.screen_width, self.screen_height)
 
+        self.galaxy_map_console = libtcod.console_new(self.screen_width, self.screen_height)
+
         self.set_minimap(20)
 
         self.targeting_width = 20
@@ -61,7 +63,6 @@ class Game:
 
         starting_planet = self.sector.planets[randrange(1, len(self.sector.planets))]
         self.player_ship = Ship(self.sector, starting_planet.sector_position_x, starting_planet.sector_position_y)
-        self.add_message("Galaxy Seed: {0}".format(self.galaxy.seed))
         self.add_message("Taking off from {0}".format(starting_planet.name))
         self.add_message("Nebula Colors: r:{0} g:{1} b:{2}".format(
             round(self.nebula.r_factor,2),
@@ -230,12 +231,15 @@ class Game:
             return 1  #exit game
         elif self.key.pressed:
             key_character = chr(self.key.c)
-            if key_character == 'l':
+            if key_character == 'l' and self.current_screen != 'landed':
                 landed, message, planet_index = self.sector.land_at_closest_planet(self.player_ship)
                 if message:
                     self.add_message(message)
                 if landed:
                     self.landed_loop(planet_index)
+
+            elif key_character == 'b' and self.current_screen != 'galaxy':
+                self.galaxy_map_loop()
 
             elif key_character == 'm':
                 if self.minimap_width == 63:
@@ -260,7 +264,35 @@ class Game:
             self.messages.popleft()
         self.messages.append(message)
 
+    def galaxy_map_loop(self):
+        self.current_screen = 'galaxy'
+        done = False
+        while not done:
+            libtcod.sys_check_for_event(libtcod.KEY_PRESSED|libtcod.KEY_RELEASED|libtcod.EVENT_MOUSE, self.key, self.mouse)
+
+            self.starfield.draw()
+            self.nebula.draw()
+            self.galaxy.draw(self.buffer)
+            self.buffer.blit(self.console)
+            libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
+
+            libtcod.console_print_frame(self.galaxy_map_console, 0, 0, self.screen_width, self.screen_height,
+                    clear=False, flag=libtcod.BKGND_SET, fmt=0)
+            title = "[ Galaxy Map - Seed: {0} ]".format(self.galaxy.seed)
+            libtcod.console_print_ex(self.galaxy_map_console,
+                    (self.screen_width/2) - (len(title)/2),
+                    0, libtcod.BKGND_SET, libtcod.LEFT, title)
+            libtcod.console_blit(self.galaxy_map_console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0, 1.0, 0.25)
+            libtcod.console_flush()
+
+            self.buffer.clear(self.sector.background[0], self.sector.background[1], self.sector.background[2])
+
+            player_action = self.handle_keys()
+            if player_action == 1:
+                done = True
+
     def landed_loop(self, planet_index):
+        self.current_screen = 'landed'
         done = False
         planet = self.sector.planets[planet_index]
         while not done:
@@ -300,6 +332,7 @@ class Game:
 
     def main_loop(self):
         while not libtcod.console_is_window_closed():
+            self.current_screen = 'flight'
             libtcod.sys_check_for_event(libtcod.KEY_PRESSED|libtcod.KEY_RELEASED|libtcod.EVENT_MOUSE, self.key, self.mouse)
 
             self.render_all()

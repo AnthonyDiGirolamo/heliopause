@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import random
+import time
 import pprint
 pp = pprint.PrettyPrinter(indent=4, width=200).pprint
 
@@ -31,6 +32,7 @@ class Galaxy:
             self.new_sector()
 
         self.current_sector = 0
+        self.selected_blink = 0
 
     def next_name(self):
         self.planet_name_index += 1
@@ -41,40 +43,28 @@ class Galaxy:
     def new_sector(self):
         self.sectors.append( SectorMap( self, random.randrange(0,1000000) ) )
 
-    def draw(self, buffer, width, height):
-        pass
-        # zoom = 1.0
-        # distance = 1000.0
-        # zoom = float(int(distance + max([ abs((ship.sector_position_x)), abs(ship.sector_position_y) ])) / int(distance))
-
-        # buffer.clear(self.background[0], self.background[1], self.background[2])
-
-        # size = int((width-3) / 2.0)
-        # size_reduction = (zoom*distance)/size
-
-        # for index, p in enumerate(self.planets):
-        #     x = size + 1 + int(p.sector_position_x / (size_reduction))
-        #     y = size + 1 - int(p.sector_position_y / (size_reduction))
-        #     if 0 < x < width-1 and 0 < y < height-1:
-        #         buffer.set(x, y, 0, 0, 0, p.icon_color[0], p.icon_color[1], p.icon_color[2], p.icon)
-        #         if self.selected_planet is not None and index == self.selected_planet:
-        #             t = time.clock()
-        #             if t > self.selected_blink + 0.5:
-        #                 if t > self.selected_blink + 1.0:
-        #                     self.selected_blink = t
-        #                 buffer.set(x+1, y, 0, 0, 0, 255, 255, 255, ord('>'))
-        #                 buffer.set(x-1, y, 0, 0, 0, 255, 255, 255, ord('<'))
-
-        # x = size + 1 + int(ship.sector_position_x / (size_reduction))
-        # y = size + 1 - int(ship.sector_position_y / (size_reduction))
-        # if 0 < x < width-1 and 0 < y < height-1:
-        #     buffer.set_fore(x, y, 255, 255, 255, ship.icon())
+    def draw(self, buffer):
+        for index, sector in enumerate(self.sectors):
+            # color = [int(sector.nebula_background[0] * 255), int(sector.nebula_background[1] * 255), int(sector.nebula_background[2] * 255)]
+            color = libtcod.Color(255, 255, 255)
+            buffer.set(sector.galaxy_position_x, sector.galaxy_position_y, 0, 0, 0, color[0], color[1], color[2], ord('*'))
+            if self.current_sector is not None and index == self.current_sector:
+                t = time.clock()
+                if t > self.selected_blink + 0.5:
+                    if t > self.selected_blink + 1.0:
+                        self.selected_blink = t
+                    buffer.set(sector.galaxy_position_x+1, sector.galaxy_position_y, 0, 0, 0, 255, 255, 255, ord('>'))
+                    buffer.set(sector.galaxy_position_x-1, sector.galaxy_position_y, 0, 0, 0, 255, 255, 255, ord('<'))
 
 class SectorMap:
     def __init__(self, galaxy, seed):
         self.galaxy = galaxy
         self.screen_width = self.galaxy.screen_width
         self.screen_height = self.galaxy.screen_height
+
+        self.galaxy_position_x = int(random.random() * (self.screen_width-4)) + 2
+        self.galaxy_position_y = int(random.random() * (self.screen_height-4)) + 2
+
         self.seed = seed
         random.seed(seed)
 
@@ -89,6 +79,8 @@ class SectorMap:
         self.new_star()
         for p in range(0, self.planet_count):
             self.new_planet()
+
+        # pp(self)
 
     def new_star(self):
         self.planets.append( {
@@ -111,7 +103,7 @@ class SectorMap:
         } )
 
     def __repr__(self):
-        return repr({ "seed": self.seed, "planet_count": self.planet_count, "nebula_background": self.nebula_background, "planets": self.planets })
+        return repr({ "posx": self.galaxy_position_x, "posy": self.galaxy_position_y, "seed": self.seed, "planet_count": self.planet_count, "nebula_background": self.nebula_background, "planets": self.planets })
 
     def print_planet_loading_icon(self, console, icon, color, offset=0, count=0):
         center_height = self.screen_height/2
