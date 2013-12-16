@@ -47,7 +47,7 @@ class Galaxy:
         return self.planet_names[self.planet_name_index].strip()
 
     def new_sector(self):
-        self.sectors.append( SectorMap( self, random.randrange(0,1000000) ) )
+        self.sectors.append( SectorMap( self, random.randrange(0,1000000), self.next_name() ) )
 
     def cycle_sector_target(self):
         self.targeted_sector_index += 1
@@ -164,7 +164,7 @@ class Galaxy:
     def draw(self, buffer):
         # Draw Connecting Lines
         for index1, index2 in self.one_way_links:
-            if index1 == self.current_sector and index2 == self.sectors[self.current_sector].neighbors[self.targeted_sector_index]:
+            if index1 == self.current_sector and index2 == self.sectors[self.current_sector].neighbors[self.targeted_sector_index] or index2 == self.current_sector and index1 == self.sectors[self.current_sector].neighbors[self.targeted_sector_index]:
                 color = libtcod.Color(64, 200, 64)
             else:
                 color = libtcod.Color(64, 64, 64)
@@ -195,11 +195,12 @@ class Galaxy:
                     buffer.set_fore(sector.galaxy_position_x-1, sector.galaxy_position_y, 255, 255, 255, ord('<'))
 
 class SectorMap:
-    def __init__(self, galaxy, seed):
+    def __init__(self, galaxy, seed, name):
         self.galaxy = galaxy
         self.screen_width = self.galaxy.screen_width
         self.screen_height = self.galaxy.screen_height
 
+        self.name = name
         self.galaxy_position_x = int(random.random() * (self.screen_width/2)) + self.screen_width/4
         self.galaxy_position_y = int(random.random() * (self.screen_height/2)) + self.screen_height/4
 

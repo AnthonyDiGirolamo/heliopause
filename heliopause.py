@@ -90,12 +90,14 @@ class Game:
 
             self.sector.clear_selected_planet()
 
-            self.galaxy.current_sector += 1
+            self.galaxy.current_sector = self.galaxy.sectors[self.galaxy.current_sector].neighbors[self.galaxy.targeted_sector_index]
+            self.galaxy.targeted_sector_index = 0
             self.sector, self.starfield, self.nebula = self.galaxy.sectors[self.galaxy.current_sector].load_sector(self.console, self.buffer)
 
             self.player_ship.sector = self.sector
             self.player_ship.about_face()
 
+            self.add_message("Arriving in {0}".format(self.galaxy.sectors[self.galaxy.current_sector].name))
             self.add_message("Nebula Colors: r:{0} g:{1} b:{2}".format(
                 round(self.nebula.r_factor,2),
                 round(self.nebula.g_factor,2),
@@ -282,7 +284,11 @@ class Game:
 
             libtcod.console_print_frame(self.galaxy_map_console, 0, 0, self.screen_width, self.screen_height,
                     clear=False, flag=libtcod.BKGND_SET, fmt=0)
-            title = "[ Galaxy Map - Seed: {0} ]".format(self.galaxy.seed)
+            title = "[ Galaxy Map - Seed: {0} - Current Sector: {1} - Target Sector: {2} ]".format(
+                self.galaxy.seed,
+                self.galaxy.sectors[self.galaxy.current_sector].name,
+                self.galaxy.sectors[ self.galaxy.sectors[self.galaxy.current_sector].neighbors[self.galaxy.targeted_sector_index] ].name
+            )
             libtcod.console_print_ex(self.galaxy_map_console,
                     (self.screen_width/2) - (len(title)/2),
                     0, libtcod.BKGND_SET, libtcod.LEFT, title)
