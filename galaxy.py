@@ -14,7 +14,7 @@ from nebula import Nebula
 from starfield import Starfield
 
 class Galaxy:
-    def __init__(self, width, height, seed=52, size=10):
+    def __init__(self, width, height, seed=52, size=20):
         self.screen_width = width
         self.screen_height = height
         self.seed = seed
@@ -57,6 +57,10 @@ class Galaxy:
                         sector.neighbors.append( link )
 
     def force_directed(self):
+        repulsion_constant = 100
+        attraction_constant = 0.2
+        spring_length = 8
+
         displacements = [[0, 0] for sector in self.sectors]
 
         for index1, sector1 in enumerate(self.sectors):
@@ -65,7 +69,7 @@ class Galaxy:
                     continue
 
                 proximity = max( math.sqrt((sector2.galaxy_position_x - sector1.galaxy_position_x)**2 + (sector2.galaxy_position_y - sector1.galaxy_position_y)**2), 1.0)
-                repulsion_force = -(2000.0 / proximity**2)
+                repulsion_force = -(repulsion_constant / proximity**2)
 
                 x_displacement = sector2.galaxy_position_x - sector1.galaxy_position_x
                 y_displacement = sector2.galaxy_position_y - sector1.galaxy_position_y
@@ -86,7 +90,7 @@ class Galaxy:
                 sector2 = self.sectors[neighbor_index]
 
                 proximity = max( math.sqrt((sector2.galaxy_position_x - sector1.galaxy_position_x)**2 + (sector2.galaxy_position_y - sector1.galaxy_position_y)**2), 1.0)
-                attraction_force = 0.2 * max(proximity - 10, 0)
+                attraction_force = attraction_constant * max(proximity - spring_length, 0)
 
                 x_displacement = sector2.galaxy_position_x - sector1.galaxy_position_x
                 y_displacement = sector2.galaxy_position_y - sector1.galaxy_position_y
@@ -129,7 +133,7 @@ class Galaxy:
                 )
                 x,y=libtcod.line_step()
                 while x is not None:
-                    buffer.set_back(x, y, 128, 128, 128)
+                    buffer.set_back(x, y, 64, 64, 64)
                     x,y=libtcod.line_step()
 
             if self.current_sector is not None and index == self.current_sector:
@@ -137,8 +141,8 @@ class Galaxy:
                 if t > self.selected_blink + 0.5:
                     if t > self.selected_blink + 1.0:
                         self.selected_blink = t
-                    buffer.set(sector.galaxy_position_x+1, sector.galaxy_position_y, 0, 0, 0, 255, 255, 255, ord('>'))
-                    buffer.set(sector.galaxy_position_x-1, sector.galaxy_position_y, 0, 0, 0, 255, 255, 255, ord('<'))
+                    buffer.set_fore(sector.galaxy_position_x+1, sector.galaxy_position_y, 255, 255, 255, ord('>'))
+                    buffer.set_fore(sector.galaxy_position_x-1, sector.galaxy_position_y, 255, 255, 255, ord('<'))
 
 class SectorMap:
     def __init__(self, galaxy, seed):
@@ -146,8 +150,8 @@ class SectorMap:
         self.screen_width = self.galaxy.screen_width
         self.screen_height = self.galaxy.screen_height
 
-        self.galaxy_position_x = int(random.random() * (self.screen_width-4)) + 2
-        self.galaxy_position_y = int(random.random() * (self.screen_height-4)) + 2
+        self.galaxy_position_x = int(random.random() * (self.screen_width/2)) + self.screen_width/4
+        self.galaxy_position_y = int(random.random() * (self.screen_height/2)) + self.screen_height/4
 
         self.seed = seed
         random.seed(seed)
