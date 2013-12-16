@@ -14,7 +14,7 @@ from nebula import Nebula
 from starfield import Starfield
 
 class Galaxy:
-    def __init__(self, width, height, seed=52, size=10):
+    def __init__(self, width, height, seed=52, size=12):
         self.screen_width = width
         self.screen_height = height
         self.seed = seed
@@ -68,7 +68,20 @@ class Galaxy:
         #             if index != link and link not in sector.neighbors and index not in self.sectors[link].neighbors:
         #                 sector.neighbors.append( link )
 
-        pp([sector.neighbors for sector in self.sectors])
+        # Add links in the other direction
+        for index, sector in enumerate(self.sectors):
+            for neighbor in sector.neighbors:
+                if index not in self.sectors[neighbor].neighbors:
+                    self.sectors[neighbor].neighbors.append(index)
+
+        self.one_way_links = []
+        for index, sector in enumerate(self.sectors):
+            for neighbor in sector.neighbors:
+                if [index, neighbor] not in self.one_way_links and [neighbor, index] not in self.one_way_links:
+                    self.one_way_links.append([index, neighbor])
+
+        # pp([sector.neighbors for sector in self.sectors])
+        # pp(self.one_way_links)
 
     def force_directed(self):
         repulsion_constant = 100
@@ -99,27 +112,28 @@ class Galaxy:
                 displacements[index1][0] += math.cos(angle) * repulsion_force
                 displacements[index1][1] += math.sin(angle) * repulsion_force
 
-        for index1, sector1 in enumerate(self.sectors):
-            for neighbor_index in sector1.neighbors:
-                sector2 = self.sectors[neighbor_index]
+        for index1, index2 in self.one_way_links:
+            sector1 = self.sectors[index1]
+            sector2 = self.sectors[index2]
 
-                proximity = max( math.sqrt((sector2.galaxy_position_x - sector1.galaxy_position_x)**2 + (sector2.galaxy_position_y - sector1.galaxy_position_y)**2), 1.0)
-                attraction_force = attraction_constant * max(proximity - spring_length, 0)
+            proximity = max( math.sqrt((sector2.galaxy_position_x - sector1.galaxy_position_x)**2 + (sector2.galaxy_position_y - sector1.galaxy_position_y)**2), 1.0)
+            attraction_force = attraction_constant * max(proximity - spring_length, 0)
 
-                x_displacement = sector2.galaxy_position_x - sector1.galaxy_position_x
-                y_displacement = sector2.galaxy_position_y - sector1.galaxy_position_y
-                try:
-                    angle = math.atan(y_displacement / x_displacement)
-                except:
-                    angle = 0.0
-                if x_displacement > 0.0 and y_displacement < 0.0:
-                    angle += math.pi * 2
-                elif x_displacement < 0.0:
-                    angle += math.pi
+            x_displacement = sector2.galaxy_position_x - sector1.galaxy_position_x
+            y_displacement = sector2.galaxy_position_y - sector1.galaxy_position_y
+            try:
+                angle = math.atan(y_displacement / x_displacement)
+            except:
+                angle = 0.0
+            if x_displacement > 0.0 and y_displacement < 0.0:
+                angle += math.pi * 2
+            elif x_displacement < 0.0:
+                angle += math.pi
 
-                displacements[index1][0] += math.cos(angle) * attraction_force
-                displacements[index1][1] += math.sin(angle) * attraction_force
+            displacements[index1][0] += math.cos(angle) * attraction_force
+            displacements[index1][1] += math.sin(angle) * attraction_force
 
+        # Move sector positions
         for index, sector in enumerate(self.sectors):
             sector.galaxy_position_x += int(round(displacements[index][0]))
             sector.galaxy_position_y += int(round(displacements[index][1]))
@@ -148,27 +162,29 @@ class Galaxy:
                 sector.galaxy_position_y = self.screen_height - 3
 
     def draw(self, buffer):
+        # Draw Connecting Lines
+        for index1, index2 in self.one_way_links:
+            if index1 == self.current_sector and index2 == self.sectors[self.current_sector].neighbors[self.targeted_sector_index]:
+                color = libtcod.Color(64, 200, 64)
+            else:
+                color = libtcod.Color(64, 64, 64)
+
+            libtcod.line_init(
+                self.sectors[index1].galaxy_position_x,
+                self.sectors[index1].galaxy_position_y,
+                self.sectors[index2].galaxy_position_x,
+                self.sectors[index2].galaxy_position_y,
+            )
+            x,y=libtcod.line_step()
+            while x is not None:
+                buffer.set_back(x, y, color[0], color[1], color[2])
+                x,y=libtcod.line_step()
+
+        # Draw Sectors Nodes
         for index, sector in enumerate(self.sectors):
             # color = [int(sector.nebula_background[0] * 255), int(sector.nebula_background[1] * 255), int(sector.nebula_background[2] * 255)]
             color = libtcod.Color(255, 255, 255)
             buffer.set(sector.galaxy_position_x, sector.galaxy_position_y, 0, 0, 0, color[0], color[1], color[2], ord('*'))
-
-            for neighbor in sector.neighbors:
-                if index == self.current_sector and neighbor == sector.neighbors[self.targeted_sector_index]:
-                    color = libtcod.Color(64, 200, 64)
-                else:
-                    color = libtcod.Color(64, 64, 64)
-
-                libtcod.line_init(
-                    sector.galaxy_position_x,
-                    sector.galaxy_position_y,
-                    self.sectors[neighbor].galaxy_position_x,
-                    self.sectors[neighbor].galaxy_position_y,
-                )
-                x,y=libtcod.line_step()
-                while x is not None:
-                    buffer.set_back(x, y, color[0], color[1], color[2])
-                    x,y=libtcod.line_step()
 
             if self.current_sector is not None and index == self.current_sector:
                 t = time.clock()
