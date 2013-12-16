@@ -9,9 +9,9 @@ from planet import Planet
 
 
 class Sector:
-    def __init__(self, screen_width, screen_height, buffer):
+    def __init__(self, screen_width, screen_height, buffer, background=libtcod.Color(0,0,0)):
         self.twopi = 2 * math.pi
-        self.background = libtcod.Color(0,0,0)
+        self.background = background
         # self.background = libtcod.Color(32,32,64)
 
         self.buffer = buffer

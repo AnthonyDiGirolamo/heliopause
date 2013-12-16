@@ -15,6 +15,7 @@ from starfield import Starfield
 from nebula import Nebula
 from sector import Sector
 from planet import Planet
+from galaxy import Galaxy
 
 class Game:
     def __init__(self, screen_width=120, screen_height=70):
@@ -55,28 +56,18 @@ class Game:
         self.mouse = libtcod.Mouse()
         self.key = libtcod.Key()
 
-        self.planet_names = []
-        with open("planet_names", "r") as planet_names_file:
-            self.planet_names = planet_names_file.readlines()
-        shuffle(self.planet_names)
-        self.planet_name_index = -1
+        self.galaxy = Galaxy(self.screen_width, self.screen_height)
+        self.sector, self.starfield, self.nebula = self.galaxy.sectors[self.galaxy.current_sector].load_sector(self.console, self.buffer)
 
-        self.loading_message("Scanning Planets")
-        self.sector = Sector(self.screen_width, self.screen_height, self.buffer)
-        self.add_planets()
-
-        self.loading_message("Reading Background Radiation", clear=False)
-        self.starfield = Starfield(self.sector, max_stars=50)
-        self.nebula = Nebula(self.sector)
         starting_planet = self.sector.planets[randrange(1, len(self.sector.planets))]
         self.player_ship = Ship(self.sector, starting_planet.sector_position_x, starting_planet.sector_position_y)
+        self.add_message("Galaxy Seed: {0}".format(self.galaxy.seed))
         self.add_message("Taking off from {0}".format(starting_planet.name))
+        self.add_message("Nebula Colors: r:{0} g:{1} b:{2}".format(
+            round(self.nebula.r_factor,2),
+            round(self.nebula.g_factor,2),
+            round(self.nebula.b_factor,2)))
 
-    def next_name(self):
-        self.planet_name_index += 1
-        if self.planet_name_index > len(self.planet_names):
-            self.planet_name_index = 0
-        return self.planet_names[self.planet_name_index].strip()
 
     def set_minimap(self, size):
         self.minimap_width  = size+3
@@ -85,52 +76,6 @@ class Game:
         self.minimap_console = libtcod.console_new(self.minimap_width, self.minimap_height)
         libtcod.console_set_default_foreground(self.minimap_console, libtcod.white)
         libtcod.console_set_default_background(self.minimap_console, libtcod.black)
-
-    def loading_message(self, message, clear=True):
-        if clear:
-            libtcod.console_clear(self.console)
-        libtcod.console_set_fade(255,libtcod.black)
-        center_height = self.screen_height/2
-        third_width = self.screen_width/2
-        libtcod.console_print_ex(self.console, 0, center_height, libtcod.BKGND_SET, libtcod.LEFT, message.center(self.screen_width))
-        libtcod.console_print_frame(self.console, int(third_width*0.5), center_height-2, third_width, 5, clear=False, flag=libtcod.BKGND_SET, fmt=0)
-        libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
-        libtcod.console_flush()
-
-    def print_planet_loading_icon(self, icon, color, offset=0, count=0):
-        center_height = self.screen_height/2
-        center_width = self.screen_width/2
-        # quarter_width = self.screen_width/4
-        # libtcod.console_set_color_control(libtcod.COLCTRL_1, color, libtcod.black)
-        # libtcod.console_print(self.console, quarter_width*2+2, center_height+4, ("%c"+chr(icon)+"%c")%(libtcod.COLCTRL_1,libtcod.COLCTRL_STOP))
-        libtcod.console_put_char_ex(self.console, center_width-((count+2)/2)+offset, center_height+4, icon, color, libtcod.black)
-        libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
-        libtcod.console_flush()
-
-    def add_planets(self):
-        total_planets = 10
-        icon, color, planet_count = self.sector.add_planet(planet_class='star',      position_x=0, position_y=0,       diameter=50, name=self.next_name())
-        self.print_planet_loading_icon(icon, color, planet_count, total_planets)
-        icon, color, planet_count = self.sector.add_planet(planet_class='terran',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name=self.next_name())
-        self.print_planet_loading_icon(icon, color, planet_count, total_planets)
-        icon, color, planet_count = self.sector.add_planet(planet_class='ocean',     position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name=self.next_name())
-        self.print_planet_loading_icon(icon, color, planet_count, total_planets)
-        icon, color, planet_count = self.sector.add_planet(planet_class='jungle',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name=self.next_name())
-        self.print_planet_loading_icon(icon, color, planet_count, total_planets)
-        icon, color, planet_count = self.sector.add_planet(planet_class='lava',      position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name=self.next_name())
-        self.print_planet_loading_icon(icon, color, planet_count, total_planets)
-        icon, color, planet_count = self.sector.add_planet(planet_class='tundra',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name=self.next_name())
-        self.print_planet_loading_icon(icon, color, planet_count, total_planets)
-        icon, color, planet_count = self.sector.add_planet(planet_class='arid',      position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name=self.next_name())
-        self.print_planet_loading_icon(icon, color, planet_count, total_planets)
-        icon, color, planet_count = self.sector.add_planet(planet_class='desert',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name=self.next_name())
-        self.print_planet_loading_icon(icon, color, planet_count, total_planets)
-        icon, color, planet_count = self.sector.add_planet(planet_class='artic',     position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name=self.next_name())
-        self.print_planet_loading_icon(icon, color, planet_count, total_planets)
-        icon, color, planet_count = self.sector.add_planet(planet_class='barren',    position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name=self.next_name())
-        self.print_planet_loading_icon(icon, color, planet_count, total_planets)
-        icon, color, planet_count = self.sector.add_planet(planet_class='gas giant', position_x=randrange(-1000,1001), position_y=randrange(-1000,1001), diameter=randrange(12, self.screen_height), seed=randrange(1,100000), name=self.next_name())
-        self.print_planet_loading_icon(icon, color, planet_count, total_planets)
 
     def new_sector(self):
         index, distance = self.sector.closest_planet(self.player_ship)
@@ -142,18 +87,15 @@ class Game:
                 libtcod.console_set_fade(fade,libtcod.black)
                 libtcod.console_flush()
 
-            self.loading_message("Scanning Planets")
             self.sector.clear_selected_planet()
-            self.sector = Sector(self.screen_width, self.screen_height, self.buffer)
-            self.add_planets()
+
+            self.galaxy.current_sector += 1
+            self.sector, self.starfield, self.nebula = self.galaxy.sectors[self.galaxy.current_sector].load_sector(self.console, self.buffer)
 
             self.player_ship.sector = self.sector
             self.player_ship.about_face()
 
-            self.loading_message("Reading Background Radiation")
-            self.starfield = Starfield(self.sector, max_stars=50)
-            self.nebula = Nebula(self.sector, r_factor=random(), g_factor=random(), b_factor=random(), seed=randrange(1,100000))
-            self.add_message("nebula colors: r:{0} g:{1} b:{2}".format(
+            self.add_message("Nebula Colors: r:{0} g:{1} b:{2}".format(
                 round(self.nebula.r_factor,2),
                 round(self.nebula.g_factor,2),
                 round(self.nebula.b_factor,2)))

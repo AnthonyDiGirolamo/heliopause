@@ -9,6 +9,8 @@ import time
 import libtcodpy as libtcod
 
 class Planet:
+    classes = [ 'arid', 'artic', 'barren', 'desert', 'gas giant', 'jungle', 'lava', 'ocean', 'tundra', 'terran' ]
+
     def __init__(self, sector, planet_class='terran', position_x=-30, position_y=30, diameter=60, seed=3849058430, name="X"):
         self.name = name
         self.planet_class = planet_class
@@ -42,18 +44,6 @@ class Planet:
         self.last_atmosphere_rotation = 0.0
 
         self.selected = False
-
-        # Classes:
-        #     arid
-        #     artic
-        #     barren
-        #     desert
-        #     gas giants
-        #     junlge
-        #     lava
-        #     ocean
-        #     terran
-        #     tundra
 
         self.noise_dx = 0.0
         self.noise_dy = 0.0
