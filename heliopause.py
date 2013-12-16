@@ -231,14 +231,14 @@ class Game:
             return 1  #exit game
         elif self.key.pressed:
             key_character = chr(self.key.c)
-            if key_character == 'l' and self.current_screen != 'landed':
+            if key_character == 'l' and self.current_screen == 'flight':
                 landed, message, planet_index = self.sector.land_at_closest_planet(self.player_ship)
                 if message:
                     self.add_message(message)
                 if landed:
                     self.landed_loop(planet_index)
 
-            elif key_character == 'b' and self.current_screen != 'galaxy':
+            elif key_character == 'b' and self.current_screen == 'flight':
                 self.galaxy_map_loop()
             elif key_character == 'f' and self.current_screen == 'galaxy':
                 self.galaxy.force_directed()
