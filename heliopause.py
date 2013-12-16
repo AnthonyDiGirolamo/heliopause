@@ -240,6 +240,8 @@ class Game:
 
             elif key_character == 'b' and self.current_screen != 'galaxy':
                 self.galaxy_map_loop()
+            elif key_character == 'f' and self.current_screen == 'galaxy':
+                self.galaxy.force_directed()
 
             elif key_character == 'm':
                 if self.minimap_width == 63:

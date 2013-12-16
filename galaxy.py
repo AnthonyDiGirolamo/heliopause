@@ -3,6 +3,7 @@
 
 import random
 import time
+import math
 import pprint
 pp = pprint.PrettyPrinter(indent=4, width=200).pprint
 
@@ -13,7 +14,7 @@ from nebula import Nebula
 from starfield import Starfield
 
 class Galaxy:
-    def __init__(self, width, height, seed=52, size=25):
+    def __init__(self, width, height, seed=52, size=10):
         self.screen_width = width
         self.screen_height = height
         self.seed = seed
@@ -54,6 +55,64 @@ class Galaxy:
                     link = random.randrange(self.sector_count)
                     if index != link and link not in sector.neighbors:
                         sector.neighbors.append( link )
+
+    def force_directed(self):
+        displacements = [[0, 0] for sector in self.sectors]
+
+        for index1, sector1 in enumerate(self.sectors):
+            for index2, sector2 in enumerate(self.sectors):
+                if index1 == index2:
+                    continue
+
+                proximity = max( math.sqrt((sector2.galaxy_position_x - sector1.galaxy_position_x)**2 + (sector2.galaxy_position_y - sector1.galaxy_position_y)**2), 1.0)
+                repulsion_force = -(2000.0 / proximity**2)
+
+                x_displacement = sector2.galaxy_position_x - sector1.galaxy_position_x
+                y_displacement = sector2.galaxy_position_y - sector1.galaxy_position_y
+                try:
+                    angle = math.atan(y_displacement / x_displacement)
+                except:
+                    angle = 0.0
+                if x_displacement > 0.0 and y_displacement < 0.0:
+                    angle += math.pi * 2
+                elif x_displacement < 0.0:
+                    angle += math.pi
+
+                displacements[index1][0] += math.cos(angle) * repulsion_force
+                displacements[index1][1] += math.sin(angle) * repulsion_force
+
+        for index1, sector1 in enumerate(self.sectors):
+            for neighbor_index in sector1.neighbors:
+                sector2 = self.sectors[neighbor_index]
+
+                proximity = max( math.sqrt((sector2.galaxy_position_x - sector1.galaxy_position_x)**2 + (sector2.galaxy_position_y - sector1.galaxy_position_y)**2), 1.0)
+                attraction_force = 0.2 * max(proximity - 10, 0)
+
+                x_displacement = sector2.galaxy_position_x - sector1.galaxy_position_x
+                y_displacement = sector2.galaxy_position_y - sector1.galaxy_position_y
+                try:
+                    angle = math.atan(y_displacement / x_displacement)
+                except:
+                    angle = 0.0
+                if x_displacement > 0.0 and y_displacement < 0.0:
+                    angle += math.pi * 2
+                elif x_displacement < 0.0:
+                    angle += math.pi
+
+                displacements[index1][0] += math.cos(angle) * attraction_force
+                displacements[index1][1] += math.sin(angle) * attraction_force
+
+        for index, sector in enumerate(self.sectors):
+            sector.galaxy_position_x += int(round(displacements[index][0]))
+            sector.galaxy_position_y += int(round(displacements[index][1]))
+            if sector.galaxy_position_x < 2:
+                sector.galaxy_position_x = 2
+            if sector.galaxy_position_y < 2:
+                sector.galaxy_position_y = 2
+            if sector.galaxy_position_x > self.screen_width - 3:
+                sector.galaxy_position_x = self.screen_width - 3
+            if sector.galaxy_position_y > self.screen_height - 3:
+                sector.galaxy_position_y = self.screen_height - 3
 
     def draw(self, buffer):
         for index, sector in enumerate(self.sectors):
