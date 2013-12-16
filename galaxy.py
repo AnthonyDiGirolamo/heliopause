@@ -27,9 +27,13 @@ class Galaxy:
         self.planet_name_index = -1
 
         # Build Sectors
+        self.sector_count = size
         self.sectors = []
-        for i in range(0, size):
+        for i in range(0, self.sector_count):
             self.new_sector()
+
+        self.link_sectors()
+        # pp( [sector.neighbors for sector in self.sectors] )
 
         self.current_sector = 0
         self.selected_blink = 0
@@ -43,11 +47,32 @@ class Galaxy:
     def new_sector(self):
         self.sectors.append( SectorMap( self, random.randrange(0,1000000) ) )
 
+    def link_sectors(self):
+        for index, sector in enumerate(self.sectors):
+            while len(sector.neighbors) == 0:
+                for i in range(random.randrange(5)):
+                    link = random.randrange(self.sector_count)
+                    if index != link and link not in sector.neighbors:
+                        sector.neighbors.append( link )
+
     def draw(self, buffer):
         for index, sector in enumerate(self.sectors):
             # color = [int(sector.nebula_background[0] * 255), int(sector.nebula_background[1] * 255), int(sector.nebula_background[2] * 255)]
             color = libtcod.Color(255, 255, 255)
             buffer.set(sector.galaxy_position_x, sector.galaxy_position_y, 0, 0, 0, color[0], color[1], color[2], ord('*'))
+
+            for neighbor in sector.neighbors:
+                libtcod.line_init(
+                    sector.galaxy_position_x,
+                    sector.galaxy_position_y,
+                    self.sectors[neighbor].galaxy_position_x,
+                    self.sectors[neighbor].galaxy_position_y,
+                )
+                x,y=libtcod.line_step()
+                while x is not None:
+                    buffer.set_back(x, y, 128, 128, 128)
+                    x,y=libtcod.line_step()
+
             if self.current_sector is not None and index == self.current_sector:
                 t = time.clock()
                 if t > self.selected_blink + 0.5:
@@ -70,11 +95,11 @@ class SectorMap:
 
         # self.sector_background = libtcod.Color( random.randrange(0,256), random.randrange(0,256), random.randrange(0,256) )
         self.nebula_background = [ random.random(), random.random(), random.random() ]
-        self.nebula_seed = seed * 3
+        self.nebula_seed       = seed * 3
         self.planet_count      = random.randrange(1, 17)
 
-        self.planets           = []
-        self.sector_neighbors  = []
+        self.planets   = []
+        self.neighbors = []
 
         self.new_star()
         for p in range(0, self.planet_count):
