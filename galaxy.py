@@ -14,7 +14,7 @@ from nebula import Nebula
 from starfield import Starfield
 
 class Galaxy:
-    def __init__(self, width, height, seed=52, size=12):
+    def __init__(self, width, height, seed=1024, size=12):
         self.screen_width = width
         self.screen_height = height
         self.seed = seed
@@ -55,18 +55,20 @@ class Galaxy:
             self.targeted_sector_index = 0
 
     def link_sectors(self):
-        for index, sector in enumerate(self.sectors):
-            if index == self.sector_count-1:
-                sector.neighbors.append( 0 )
-            else:
-                sector.neighbors.append( index+1 )
-
+        # Circle
         # for index, sector in enumerate(self.sectors):
-        #     while len(sector.neighbors) == 0:
-        #         for i in range(random.randrange(5)):
-        #             link = random.randrange(self.sector_count)
-        #             if index != link and link not in sector.neighbors and index not in self.sectors[link].neighbors:
-        #                 sector.neighbors.append( link )
+        #     if index == self.sector_count-1:
+        #         sector.neighbors.append( 0 )
+        #     else:
+        #         sector.neighbors.append( index+1 )
+
+        # Randomly
+        for index, sector in enumerate(self.sectors):
+            while len(sector.neighbors) == 0:
+                for i in range(random.randrange(5)):
+                    link = random.randrange(self.sector_count)
+                    if index != link and link not in sector.neighbors and index not in self.sectors[link].neighbors:
+                        sector.neighbors.append( link )
 
         # Add links in the other direction
         for index, sector in enumerate(self.sectors):
