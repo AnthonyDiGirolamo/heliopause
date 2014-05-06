@@ -14,11 +14,12 @@ from nebula import Nebula
 from starfield import Starfield
 
 class Galaxy:
-    def __init__(self, width, height, seed=1024, size=12):
+    def __init__(self, width, height, seed=678321):
         self.screen_width = width
         self.screen_height = height
         self.seed = seed
         random.seed(seed)
+        self.rnd = libtcod.random_new_from_seed(self.seed)
 
         # Load Random Names
         self.planet_names = []
@@ -27,8 +28,21 @@ class Galaxy:
         random.shuffle(self.planet_names)
         self.planet_name_index = -1
 
-        # Build Sectors
-        self.sector_count = size
+        # Build Galaxy Map
+        self.bsp_depth = 5
+        self.bsp = libtcod.bsp_new_with_size(0, 0, self.screen_width, self.screen_height)
+        libtcod.bsp_split_recursive(self.bsp, self.rnd, self.bsp_depth, 8, 8, 1.0, 1.0)
+
+        # Count number of sectors
+        count = [ 0 ]
+        def count_bsp_leaf_nodes(node, userData):
+            if node.level == self.bsp_depth:
+                count[0] += 1
+            return True
+        libtcod.bsp_traverse_inverted_level_order(self.bsp, count_bsp_leaf_nodes, userData=None)
+        self.sector_count = count[0]
+        # self.sector_count = 2**self.bsp_depth # only if we have a fully populated tree (not guaranteed)
+
         self.sectors = []
         for i in range(0, self.sector_count):
             self.new_sector()
@@ -55,6 +69,40 @@ class Galaxy:
             self.targeted_sector_index = 0
 
     def link_sectors(self):
+        self.bsp_nodes = {"index": 0}
+        def get_bsp_links(node, userData):
+            self.bsp_nodes["index"] += 1
+
+            if node.level not in self.bsp_nodes:
+                self.bsp_nodes[node.level] = []
+            self.bsp_nodes[node.level].append( {"index": self.bsp_nodes["index"]-1, "x": node.x, "y": node.y, "w": node.w, "h": node.h, "node": node } )
+
+            return True
+
+        libtcod.bsp_traverse_inverted_level_order(self.bsp, get_bsp_links, userData=None)
+        pp(self.bsp_nodes)
+
+        # Set Sector Galaxy Positions
+        for index, sector in enumerate(self.sectors):
+            node = self.bsp_nodes[self.bsp_depth][index]
+            startx = int(node["x"] + (node["w"]/2.0))
+            starty = int(node["y"] + (node["h"]/2.0))
+            sector.galaxy_position_x = startx
+            sector.galaxy_position_y = starty
+
+        # Link nodes in the bsp tree
+        for i in range(self.bsp_depth):
+            for index in range(0, self.sector_count, 2**(i+1)):
+                node1_index = index
+                if i == 0:
+                    # we are linking the lowest level nodes
+                    node2_index = node1_index + 2**i
+                else:
+                    # find the two closest nodes in each subtree
+                    node2_index = node1_index + 2**i
+                if node2_index < self.sector_count:
+                    self.sectors[node1_index].neighbors.append( node2_index )
+
         # Circle
         # for index, sector in enumerate(self.sectors):
         #     if index == self.sector_count-1:
@@ -63,12 +111,12 @@ class Galaxy:
         #         sector.neighbors.append( index+1 )
 
         # Randomly
-        for index, sector in enumerate(self.sectors):
-            while len(sector.neighbors) == 0:
-                for i in range(random.randrange(5)):
-                    link = random.randrange(self.sector_count)
-                    if index != link and link not in sector.neighbors and index not in self.sectors[link].neighbors:
-                        sector.neighbors.append( link )
+        # for index, sector in enumerate(self.sectors):
+        #     while len(sector.neighbors) == 0:
+        #         for i in range(random.randrange(5)):
+        #             link = random.randrange(self.sector_count)
+        #             if index != link and link not in sector.neighbors and index not in self.sectors[link].neighbors:
+        #                 sector.neighbors.append( link )
 
         # Add links in the other direction
         for index, sector in enumerate(self.sectors):
@@ -163,13 +211,29 @@ class Galaxy:
             if sector.galaxy_position_y > self.screen_height - 3:
                 sector.galaxy_position_y = self.screen_height - 3
 
+
     def draw(self, buffer):
+
+        color = libtcod.Color(255, 255, 255)
+        def draw_node(node, userData):
+            if node.level == self.bsp_depth:
+                # print("node pos %dx%d size %dx%d level %d" % (node.x,node.y,node.w,node.h,node.level))
+                startx = int(node.x + (node.w/2.0))
+                starty = int(node.y + (node.h/2.0))
+                # for x in range(node.x, node.x + node.w - 1):
+                #     for y in range(node.y, node.y + node.h - 1):
+                for x in range(startx - 1, startx + 2):
+                    for y in range(starty - 1, starty + 2):
+                        buffer.set(x, y, color[0], color[1], color[2], 0, 0, 0, ord(' '))
+            return True
+        libtcod.bsp_traverse_inverted_level_order(self.bsp, draw_node, userData=None)
+
         # Draw Connecting Lines
         for index1, index2 in self.one_way_links:
             if index1 == self.current_sector and index2 == self.sectors[self.current_sector].neighbors[self.targeted_sector_index] or index2 == self.current_sector and index1 == self.sectors[self.current_sector].neighbors[self.targeted_sector_index]:
                 color = libtcod.Color(64, 200, 64)
             else:
-                color = libtcod.Color(64, 64, 64)
+                color = libtcod.Color(255, 255, 255)
 
             libtcod.line_init(
                 self.sectors[index1].galaxy_position_x,
@@ -179,15 +243,15 @@ class Galaxy:
             )
             x,y=libtcod.line_step()
             while x is not None:
-                buffer.set_back(x, y, color[0], color[1], color[2])
+                # buffer.set_back(x, y, color[0], color[1], color[2])
+                buffer.set(x, y, color[0], color[1], color[2], 0, 0, 0, ord('.'))
                 x,y=libtcod.line_step()
 
         # Draw Sectors Nodes
         for index, sector in enumerate(self.sectors):
             # color = [int(sector.nebula_background[0] * 255), int(sector.nebula_background[1] * 255), int(sector.nebula_background[2] * 255)]
-            color = libtcod.Color(255, 255, 255)
+            color = libtcod.Color(16, 16, 255)
             buffer.set(sector.galaxy_position_x, sector.galaxy_position_y, 0, 0, 0, color[0], color[1], color[2], ord('*'))
-
             if self.current_sector is not None and index == self.current_sector:
                 t = time.clock()
                 if t > self.selected_blink + 0.5:
@@ -197,7 +261,7 @@ class Galaxy:
                     buffer.set_fore(sector.galaxy_position_x-1, sector.galaxy_position_y, 255, 255, 255, ord('<'))
 
 class SectorMap:
-    def __init__(self, galaxy, seed, name):
+    def __init__(self, galaxy, seed, name, posx=None, posy=None):
         self.galaxy = galaxy
         self.screen_width = self.galaxy.screen_width
         self.screen_height = self.galaxy.screen_height
