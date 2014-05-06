@@ -38,6 +38,13 @@ class Game:
         libtcod.console_set_default_foreground(self.targeting_console, libtcod.white)
         libtcod.console_set_default_background(self.targeting_console, libtcod.black)
 
+        self.ship_info_width = 20
+        self.ship_info_height = 10
+        self.ship_info_buffer  = libtcod.ConsoleBuffer(self.ship_info_width, self.ship_info_height)
+        self.ship_info_console = libtcod.console_new(self.ship_info_width, self.ship_info_height)
+        libtcod.console_set_default_foreground(self.ship_info_console, libtcod.white)
+        libtcod.console_set_default_background(self.ship_info_console, libtcod.black)
+
         self.message_height = 4
         self.message_width = self.screen_width
         self.messages = collections.deque([])
@@ -166,20 +173,23 @@ class Game:
                     # round(math.degrees(self.sector.selected_planet_angle))
                 )
             )
-
-            # libtcod.console_print_ex(self.targeting_console, 1, 17, libtcod.BKGND_SET, libtcod.LEFT,
-            #         ( "  Heading: {0}\n"
-            #           " Velocity: {1}\n"
-            #           " VelAngle: {2}\n"
-            #           "Particles: {3}\n"
-            #         ).format(
-            #             round(math.degrees(self.player_ship.heading),2),
-            #             round(self.player_ship.velocity,2),
-            #             round(math.degrees(self.player_ship.velocity_angle),2),
-            #             len(self.sector.particles),
-            #     ).ljust(self.targeting_width-2)
-            # )
             libtcod.console_blit(self.targeting_console, 0, 0, self.targeting_width, self.targeting_height, 0, 0, 0, 1.0, 0.25)
+
+        # Ship Info
+        libtcod.console_print_frame(self.ship_info_console, 0, 0, self.ship_info_width, self.ship_info_height, clear=True, flag=libtcod.BKGND_SET, fmt=0)
+        libtcod.console_print_ex(self.ship_info_console, 1, 1, libtcod.BKGND_SET, libtcod.LEFT,
+                ( "  Heading: {0}\n"
+                  " Velocity: {1}\n"
+                  " VelAngle: {2}\n"
+                  "Particles: {3}\n"
+                ).format(
+                    round(math.degrees(self.player_ship.heading),2),
+                    round(self.player_ship.velocity,2),
+                    round(math.degrees(self.player_ship.velocity_angle),2),
+                    len(self.sector.particles),
+            ).ljust(self.ship_info_width-2)
+        )
+        libtcod.console_blit(self.ship_info_console, 0, 0, self.ship_info_width, self.ship_info_height, 0, 0, self.screen_height-self.ship_info_height-self.message_height, 1.0, 0.25)
 
         # Bottom Messages
         if len(self.messages) > 0:

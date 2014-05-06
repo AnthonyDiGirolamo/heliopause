@@ -166,7 +166,8 @@ class Galaxy:
             )
             x,y=libtcod.line_step()
             while x is not None:
-                buffer.set_fore(x, y, color[0], color[1], color[2], 11)
+                if self.sectors[index1].discovered() or self.sectors[index2].discovered():
+                    buffer.set_fore(x, y, color[0], color[1], color[2], 4)
                 x,y=libtcod.line_step()
 
         # Draw Sectors Nodes
@@ -178,17 +179,23 @@ class Galaxy:
                                (x-1, y+1, ord(' ')), (x, y+1, ord(' ')), (x+1, y+1, ord(' ')) ]:
                 buffer.set_fore(x, y, 0, 0, 0, icon )
 
-            if self.current_sector is not None and index == self.current_sector:
+            if index == self.sectors[self.current_sector].neighbors[self.targeted_sector_index]:
+                x, y  = sector.galaxy_position_x, sector.galaxy_position_y
+                for x, y, icon in [(x-1, y-1, ord(' ')), (x, y-1, ord('-')), (x+1, y-1, ord(' ')),
+                                   (x-1, y,   ord('|')),                     (x+1, y,   ord('|')),
+                                   (x-1, y+1, ord(' ')), (x, y+1, ord('-')), (x+1, y+1, ord(' ')) ]:
+                    buffer.set_fore(x, y, 255, 128, 128, icon)
+
+            if index == self.current_sector:
                 t = time.clock()
                 if t > self.selected_blink + 0.5:
                     if t > self.selected_blink + 1.0:
                         self.selected_blink = t
-                    x = sector.galaxy_position_x
-                    y = sector.galaxy_position_y
+                    x, y  = sector.galaxy_position_x, sector.galaxy_position_y
                     for x, y, icon in [(x-1, y-1, 213), (x, y-1, 205), (x+1, y-1, 184),
                                        (x-1, y,   179),                (x+1, y,   179),
                                        (x-1, y+1, 212), (x, y+1, 205), (x+1, y+1, 190) ]:
-                        buffer.set_fore(x, y, 128, 128, 255, icon)
+                        buffer.set_fore(x, y, 128, 255, 128, icon)
 
 class SectorMap:
     def __init__(self, galaxy, seed, name, posx=None, posy=None):
@@ -219,6 +226,9 @@ class SectorMap:
             self.new_planet()
 
         # pp(self)
+
+    def discovered(self):
+        return self.star_icon != ord('?')
 
     def new_star(self):
         self.planets.append( {
