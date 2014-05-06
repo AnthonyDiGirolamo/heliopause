@@ -80,7 +80,7 @@ class Galaxy:
             return True
 
         libtcod.bsp_traverse_inverted_level_order(self.bsp, get_bsp_nodes, userData=None)
-        pp(self.bsp_nodes)
+        # pp(self.bsp_nodes)
 
         # Set Sector Galaxy Positions
         for index, sector in enumerate(self.sectors):
@@ -109,12 +109,12 @@ class Galaxy:
                     tree1_stop_index = index + (2**(i+1))/2
                     tree2_start_index = tree1_stop_index
                     tree2_stop_index = tree2_start_index + (2**(i+1))/2
-                    pp([tree1_start_index, tree1_stop_index, tree2_start_index, tree2_stop_index])
+                    # pp([tree1_start_index, tree1_stop_index, tree2_start_index, tree2_stop_index])
 
                     for n1 in range(tree1_start_index, tree1_stop_index):
                         for n2 in range(tree2_start_index, tree2_stop_index):
                             if n1 != n2 and n1 < self.sector_count and n2 < self.sector_count:
-                                pp((n1, n2))
+                                # pp((n1, n2))
                                 node1 = self.bsp_nodes[self.bsp_depth][n1]
                                 node2 = self.bsp_nodes[self.bsp_depth][n2]
                                 d = math.sqrt((node2["x"] - node1["x"])**2 + (node2["y"] - node1["y"])**2)
@@ -129,7 +129,7 @@ class Galaxy:
                     # print("done min ---")
 
                 if node2_index < self.sector_count:
-                    print("linked {} -> {}".format(node1_index, node2_index))
+                    # print("linked {} -> {}".format(node1_index, node2_index))
                     if node2_index not in self.sectors[node1_index].neighbors:
                         self.sectors[node1_index].neighbors.append( node2_index )
 
