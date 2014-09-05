@@ -27,11 +27,13 @@ class Nebula:
         self.g_rand = libtcod.random_new_from_seed(self.seed+1)
         self.b_rand = libtcod.random_new_from_seed(self.seed+2)
         self.c_rand = libtcod.random_new_from_seed(self.seed*2)
+        self.s_rand = libtcod.random_new_from_seed(self.seed*3)
 
         self.r_noise = libtcod.noise_new(2, libtcod.NOISE_DEFAULT_HURST, libtcod.NOISE_DEFAULT_LACUNARITY, self.r_rand)
         self.g_noise = libtcod.noise_new(2, libtcod.NOISE_DEFAULT_HURST, libtcod.NOISE_DEFAULT_LACUNARITY, self.g_rand)
         self.b_noise = libtcod.noise_new(2, libtcod.NOISE_DEFAULT_HURST, libtcod.NOISE_DEFAULT_LACUNARITY, self.b_rand)
         self.c_noise = libtcod.noise_new(2, libtcod.NOISE_DEFAULT_HURST, libtcod.NOISE_DEFAULT_LACUNARITY, self.c_rand)
+        self.s_noise = libtcod.noise_new(2, libtcod.NOISE_DEFAULT_HURST, libtcod.NOISE_DEFAULT_LACUNARITY, self.s_rand)
 
         self.grid = [[None for i in range(self.size)] for i in range(self.size)]
         self.last_top = None
@@ -86,14 +88,26 @@ class Nebula:
                     b = self.get_color_value(libtcod.noise_get_fbm(self.b_noise, f, self.noise_octaves, libtcod.NOISE_SIMPLEX), self.b_factor)
                     c = self.exponent_filter( (libtcod.noise_get_fbm(self.c_noise, f, self.noise_octaves, libtcod.NOISE_SIMPLEX) + 1.0) * 255 )
                     # ops+=4
-                    self.grid[(left+x)%self.size][(top+y)%self.size] = self.blend_colors(
-                        self.blend_multiply(r,c), self.blend_multiply(g,c), self.blend_multiply(b,c),
-                        self.sector.background[0], self.sector.background[1], self.sector.background[2], 0.5)
+                    self.grid[(left+x)%self.size][(top+y)%self.size] = [
+                        self.blend_colors( self.blend_multiply(r,c), self.blend_multiply(g,c), self.blend_multiply(b,c),
+                        self.sector.background[0], self.sector.background[1], self.sector.background[2], 0.5), None ]
 
-                r, g, b = self.grid[(left+x)%self.size][(top+y)%self.size]
+                    f[0] *= 1000.0
+                    f[1] *= 1000.0
+                    star_value = libtcod.noise_get_fbm(self.s_noise, f, self.noise_octaves, libtcod.NOISE_SIMPLEX)
+                    if 0.1 < star_value < 0.11:
+                        r, g, b = self.grid[(left+x)%self.size][(top+y)%self.size][0]
+                        rm = r * random.choice([1, 2, 3, 4, 5]) if r * 5 < 255 else 255
+                        gm = g * random.choice([1, 2, 3, 4, 5]) if g * 5 < 255 else 255
+                        bm = b * random.choice([1, 2, 3, 4, 5]) if b * 5 < 255 else 255
+                        self.grid[(left+x)%self.size][(top+y)%self.size][1] = [rm, gm, bm]
+
+                r, g, b = self.grid[(left+x)%self.size][(top+y)%self.size][0]
                 self.sector.buffer.set_back(x, self.sector.mirror_y_coordinate(y), r, g, b)
-        # if ops > 0:
-        #     print(ops)
+                if self.grid[(left+x)%self.size][(top+y)%self.size][1]:
+                    rm, gm, bm = self.grid[(left+x)%self.size][(top+y)%self.size][1]
+                    self.sector.buffer.set_fore(x, self.sector.mirror_y_coordinate(y), rm, gm, bm, ord('.'))
+        # end draw
 
     def blend_colors(self, r1, g1, b1, r2, g2, b2, alpha):
         return [ int(alpha * r1 + (1-alpha) * r2),
