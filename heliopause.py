@@ -182,11 +182,15 @@ class Game:
                   " Velocity: {1}\n"
                   " VelAngle: {2}\n"
                   "Particles: {3}\n"
+                  "Nebula Position:\n"
+                  "l:{4} r:{5}\n"
+                  "t:{6} b:{7}\n"
                 ).format(
                     round(math.degrees(self.player_ship.heading),2),
                     round(self.player_ship.velocity,2),
                     round(math.degrees(self.player_ship.velocity_angle),2),
                     len(self.sector.particles),
+                    self.nebula.left, self.nebula.right, self.nebula.top, self.nebula.bottom
             ).ljust(self.ship_info_width-2)
         )
         libtcod.console_blit(self.ship_info_console, 0, 0, self.ship_info_width, self.ship_info_height, 0, 0, self.screen_height-self.ship_info_height-self.message_height, 1.0, 0.25)

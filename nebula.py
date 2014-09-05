@@ -59,10 +59,10 @@ class Nebula:
 
     def draw(self):
         # ops = 0
-        left   = int((self.size/2) + (self.sector.visible_space_left * self.parallax_speed))
-        top    = int((self.size/2) + (self.sector.visible_space_top * self.parallax_speed))
-        right  = left + self.sector.screen_width
-        bottom = top + self.sector.screen_height
+        self.left   = left   = int((self.size/2) + (self.sector.visible_space_left * self.parallax_speed))
+        self.top    = top    = int((self.size/2) + (self.sector.visible_space_top * self.parallax_speed))
+        self.right  = right  = left + self.sector.screen_width
+        self.bottom = bottom = top + self.sector.screen_height
 
         if self.last_left != left or self.last_top != top:
             # print(repr([ left, top ]))
@@ -79,8 +79,8 @@ class Nebula:
         for y in range(0, self.sector.screen_height):
             for x in range(0, self.sector.screen_width):
                 if self.grid[(left+x)%self.size][(top+y)%self.size] == None:
-                    f = [self.noise_zoom * (left+x) / (2*self.sector.screen_width),
-                         self.noise_zoom * (top+y)  / (2*self.sector.screen_height)]
+                    f = [9999 + self.noise_zoom * (left+x) / (2*self.sector.screen_width),
+                         9999 + self.noise_zoom * (top+y)  / (2*self.sector.screen_height)]
                     r = self.get_color_value(libtcod.noise_get_fbm(self.r_noise, f, self.noise_octaves, libtcod.NOISE_SIMPLEX), self.r_factor)
                     g = self.get_color_value(libtcod.noise_get_fbm(self.g_noise, f, self.noise_octaves, libtcod.NOISE_SIMPLEX), self.g_factor)
                     b = self.get_color_value(libtcod.noise_get_fbm(self.b_noise, f, self.noise_octaves, libtcod.NOISE_SIMPLEX), self.b_factor)
@@ -99,4 +99,3 @@ class Nebula:
         return [ int(alpha * r1 + (1-alpha) * r2),
                  int(alpha * g1 + (1-alpha) * g2),
                  int(alpha * b1 + (1-alpha) * b2) ]
-

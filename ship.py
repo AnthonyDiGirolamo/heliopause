@@ -174,7 +174,7 @@ class Ship:
             ThrustExhaust(
                 sector               = self.sector,
                 x                    = self.x+3+x_component*-2,
-                y                    = self.y+4+y_component*-2,
+                y                    = self.y+5+y_component*-2,
                 velocity             = 1.0,
                 angle                = self.heading - math.pi if self.heading > math.pi else self.heading + math.pi,
                 velocity_component_x = newx,
