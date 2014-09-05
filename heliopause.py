@@ -9,7 +9,7 @@ from random import randrange, random, shuffle
 import pprint
 pp = pprint.PrettyPrinter(indent=4, width=200).pprint
 
-from particle import Particle
+from particle import Particle, ThrustExhaust
 from ship import Ship
 from starfield import Starfield
 from nebula import Nebula
@@ -209,18 +209,6 @@ class Game:
         )
         libtcod.console_blit(self.minimap_console, 0, 0, self.minimap_width, self.minimap_height, 0, self.screen_width-self.minimap_width, 0, 1.0, 0.25)
 
-
-        # for i in range(2):
-        #     self.sector.add_particle(
-        #         Particle(
-        #             randrange(0, self.screen_width), randrange(0, self.screen_height),
-        #             "thrust_exhaust",
-        #             thrust_exhaust_index,
-        #             thrust_exhaust_colormap,
-        #             thrust_exhaust_character_map,
-        #         )
-        #     )
-
         libtcod.console_flush()
         self.buffer.clear(self.sector.background[0], self.sector.background[1], self.sector.background[2])
 
@@ -256,12 +244,12 @@ class Game:
                 self.galaxy.cycle_sector_target()
 
             elif key_character == 'm':
-                if self.minimap_width == 63:
+                if self.minimap_width == self.screen_height:
                     self.set_minimap(20)
                 elif self.minimap_width == 23:
-                    self.set_minimap(40)
+                    self.set_minimap(20 + (self.screen_height-20)/2)
                 else:
-                    self.set_minimap(60)
+                    self.set_minimap(self.screen_height-3)
 
             elif key_character == 'p':
                 self.sector.cycle_planet_target(self.player_ship)
@@ -389,11 +377,10 @@ libtcod.console_set_keyboard_repeat(1, 10)
 # libtcod.console_set_custom_font('fonts/terminal16x16_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 
 # libtcod.console_set_custom_font('fonts/8x8_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
-# libtcod.console_set_custom_font('fonts/10x10_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
-libtcod.console_set_custom_font('fonts/12x12_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+libtcod.console_set_custom_font('fonts/10x10_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+# libtcod.console_set_custom_font('fonts/12x12_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 
-# game = Game(90, 56)
-game = Game()
+game = Game(90, 51)
+# game = Game()
 # game = Game(180, 120)
 game.main_loop()
-

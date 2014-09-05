@@ -74,4 +74,3 @@ class BlueBullet(Particle):
         color = self.colormap[self.index]
         character = self.charactermap[self.index]
         self.sector.buffer.set_fore(x, self.sector.mirror_y_coordinate(y),   color[0], color[1], color[2], character)
-

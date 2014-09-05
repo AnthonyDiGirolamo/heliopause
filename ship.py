@@ -1,5 +1,7 @@
 import libtcodpy as libtcod
 import math
+import pprint
+pp = pprint.PrettyPrinter(indent=4, width=200).pprint
 
 from particle import Particle, ThrustExhaust, BlueBullet
 
@@ -14,7 +16,7 @@ class Ship:
 
         self.deltav = 0.05
         self.turn_rate = math.radians(10.0)
-        self.speed_limit = 4.0
+        self.speed_limit = 6.0
 
         self.twopi = 2 * math.pi
         self.max_heading = self.twopi - self.turn_rate
@@ -84,6 +86,7 @@ class Ship:
                         row.append( [b, f, c] )
                 frame.append(row)
             self.ship.append(frame)
+
         libtcod.console_delete(console)
 
     def load_pointer_sprites(self):
@@ -263,4 +266,3 @@ class Ship:
                     f = cell[1]
                     c = cell[2]
                     self.sector.buffer.set(startx + x, starty + y, b[0], b[1], b[2], f[0], f[1], f[2], c)
-

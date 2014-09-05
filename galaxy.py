@@ -14,7 +14,7 @@ from nebula import Nebula
 from starfield import Starfield
 
 class Galaxy:
-    def __init__(self, width, height, seed=1358901):
+    def __init__(self, width, height, seed=78615891):
         self.screen_width = width
         self.screen_height = height
         self.seed = seed
@@ -29,7 +29,7 @@ class Galaxy:
         self.planet_name_index = -1
 
         # Build Galaxy Map
-        self.bsp_depth = 6
+        self.bsp_depth = 7
         self.bsp = libtcod.bsp_new_with_size(0, 0, self.screen_width, self.screen_height)
         libtcod.bsp_split_recursive(self.bsp, self.rnd, self.bsp_depth, 8, 8, 1.0, 1.0)
 
@@ -166,8 +166,8 @@ class Galaxy:
             )
             x,y=libtcod.line_step()
             while x is not None:
-                if self.sectors[index1].discovered() or self.sectors[index2].discovered():
-                    buffer.set_fore(x, y, color[0], color[1], color[2], 4)
+                # if self.sectors[index1].discovered() or self.sectors[index2].discovered():
+                buffer.set_fore(x, y, color[0], color[1], color[2], 4)
                 x,y=libtcod.line_step()
 
         # Draw Sectors Nodes
