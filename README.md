@@ -34,3 +34,8 @@ Compiling libtcod on osx
 
 Copy the resulting libtcod.dylib to the heliopause directory and run `python heliopause.py`
 
+Fonts
+-----
+
+Fonts created by [Mark Johnson](https://twitter.com/UltimaRegum) for [Ultima Ratio Regum](http://www.ultimaratioregum.co.uk/game/info/)
+
