@@ -14,7 +14,7 @@ from nebula import Nebula
 from starfield import Starfield
 
 class Galaxy:
-    def __init__(self, width, height, seed=78615891):
+    def __init__(self, width, height, seed=4681):
         self.screen_width = width
         self.screen_height = height
         self.seed = seed

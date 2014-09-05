@@ -71,10 +71,10 @@ class Game:
         starting_planet = self.sector.planets[randrange(1, len(self.sector.planets))]
         self.player_ship = Ship(self.sector, starting_planet.sector_position_x, starting_planet.sector_position_y)
         self.add_message("Taking off from {0}".format(starting_planet.name))
-        self.add_message("Nebula Colors: r:{0} g:{1} b:{2}".format(
-            round(self.nebula.r_factor,2),
-            round(self.nebula.g_factor,2),
-            round(self.nebula.b_factor,2)))
+        # self.add_message("Nebula Colors: r:{0} g:{1} b:{2}".format(
+        #     round(self.nebula.r_factor,2),
+        #     round(self.nebula.g_factor,2),
+        #     round(self.nebula.b_factor,2)))
 
 
     def set_minimap(self, size):
@@ -104,11 +104,12 @@ class Game:
             self.player_ship.sector = self.sector
             self.player_ship.about_face()
 
+            self.clear_messages()
             self.add_message("Arriving in {0}".format(self.galaxy.sectors[self.galaxy.current_sector].name))
-            self.add_message("Nebula Colors: r:{0} g:{1} b:{2}".format(
-                round(self.nebula.r_factor,2),
-                round(self.nebula.g_factor,2),
-                round(self.nebula.b_factor,2)))
+            # self.add_message("Nebula Colors: r:{0} g:{1} b:{2}".format(
+            #     round(self.nebula.r_factor,2),
+            #     round(self.nebula.g_factor,2),
+            #     round(self.nebula.b_factor,2)))
 
             # Fade in
             libtcod.console_set_fade(0,libtcod.black)
@@ -265,6 +266,9 @@ class Game:
                 libtcod.sys_save_screenshot()
                 self.add_message("Saved screenshot")
 
+    def clear_messages(self):
+        self.messages.clear()
+
     def add_message(self, message):
         if len(self.messages) == self.message_height:
             self.messages.popleft()
@@ -381,10 +385,11 @@ libtcod.console_set_keyboard_repeat(1, 10)
 # libtcod.console_set_custom_font('fonts/terminal16x16_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 
 # libtcod.console_set_custom_font('fonts/8x8_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
-libtcod.console_set_custom_font('fonts/10x10_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
-# libtcod.console_set_custom_font('fonts/12x12_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+# libtcod.console_set_custom_font('fonts/10x10_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+libtcod.console_set_custom_font('fonts/12x12_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 
-game = Game(90, 51)
-# game = Game()
+# game = Game(85, 48)
+# game = Game(128, 72)
+game = Game(106, 60)
 # game = Game(180, 120)
 game.main_loop()
