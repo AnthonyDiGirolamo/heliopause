@@ -1,5 +1,9 @@
 #!/bin/bash
 # Ship Sprite
+# Arrow Shape
+# polygon 2,1 15,7 2,13, 5,7" \
+# Tiefighter Shape
+# polygon 3,1 15,5 7,7 15,9 3,13, 1,7" \
 for angle in `seq 0 10 350`
 do
   convert \
