@@ -1,7 +1,9 @@
 heliopause
 ==========
 
-A space exporation game written in python using libtcod
+A text mode space exporation game in the spirit of [Escape Velocityi](http://en.wikipedia.org/wiki/Escape_Velocity_%28video_game%29) written in Python using [libtcod](http://doryen.eptalys.net/libtcod/).
+
+[Video demo here](https://www.youtube.com/watch?v=XIpc9fwR4BU)
 
 Screenshots
 -----------
