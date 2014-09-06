@@ -6,6 +6,7 @@ import pprint
 pp = pprint.PrettyPrinter(indent=4, width=200).pprint
 
 from planet import Planet
+from asteroid import Asteroid
 
 
 class Sector:
@@ -24,6 +25,7 @@ class Sector:
         self.visible_space_bottom = 0
 
         self.planets = []
+        self.asteroids = []
 
         self.particles = []
 
@@ -37,6 +39,10 @@ class Sector:
         self.planets.append(Planet(sector=self, **keyword_args))
         self.planet_distances = [None for p in self.planets]
         return [self.planets[-1].icon, self.planets[-1].icon_color, len(self.planets)]
+
+    def add_asteroid(self, **keyword_args):
+        self.asteroids.append(Asteroid(sector=self, **keyword_args))
+        return [self.asteroids[-1].icon, self.asteroids[-1].icon_color, len(self.asteroids)]
 
     def update_visibility(self, player_sector_position_x, player_sector_position_y):
         self.visible_space_left   = player_sector_position_x - self.screen_width/2
@@ -135,7 +141,7 @@ class Sector:
         size = int((width-3) / 2.0)
         size_reduction = (zoom*distance)/size
 
-        for index, p in enumerate(self.planets):
+        for index, p in enumerate(self.planets + self.asteroids):
             x = size + 1 + int(p.sector_position_x / (size_reduction))
             y = size + 1 - int(p.sector_position_y / (size_reduction))
             if 0 < x < width-1 and 0 < y < height-1:

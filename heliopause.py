@@ -137,6 +137,9 @@ class Game:
         for planet in self.sector.planets:
             planet.draw()
 
+        for asteroid in self.sector.asteroids:
+            asteroid.draw()
+
         for particle in self.sector.particles:
             particle.draw()
 

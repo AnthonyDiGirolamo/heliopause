@@ -243,7 +243,9 @@ class Ship:
                 sector               = self.sector,
                 x                    = self.x+3+x_component*3,
                 y                    = self.y+4+y_component*3,
-                velocity             = 3.0,
+                sector_position_x    = self.sector_position_x+3+x_component*3,
+                sector_position_y    = self.sector_position_y+4+y_component*3,
+                velocity             = 1.0,
                 angle                = self.heading,
                 velocity_component_x = self.velocity_component_x,
                 velocity_component_y = self.velocity_component_y

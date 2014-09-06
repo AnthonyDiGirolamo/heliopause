@@ -12,6 +12,7 @@ from planet import Planet
 from sector import Sector
 from nebula import Nebula
 from starfield import Starfield
+from asteroid import Asteroid
 
 class Galaxy:
     def __init__(self, width, height, seed=4681):
@@ -214,7 +215,9 @@ class SectorMap:
         self.nebula_background = [ random.random(), random.random(), random.random() ]
         self.nebula_seed       = seed * 3
         self.planet_count      = random.randrange(1, 17)
+        self.asteriod_count    = random.randrange(0, 25)
 
+        self.asteroids = []
         self.planets   = []
         self.neighbors = []
 
@@ -222,10 +225,12 @@ class SectorMap:
         self.star_color = libtcod.Color(255, 255, 255)
 
         self.new_star()
+
         for p in range(0, self.planet_count):
             self.new_planet()
 
-        # pp(self)
+        for a in range(self.asteriod_count):
+            self.new_asteroid()
 
     def discovered(self):
         return self.star_icon != ord('?')
@@ -240,12 +245,22 @@ class SectorMap:
             "name"         : self.galaxy.next_name(),
         } )
 
+    def new_asteroid(self):
+        self.asteroids.append( {
+            "planet_class" : "asteroid",
+            "position_x"   : random.randrange(-1000,1001),
+            "position_y"   : random.randrange(-1000,1001),
+            "diameter"     : random.randrange(5, 8),
+            "seed"         : random.randrange(1,1000000),
+            "name"         : "Asteroid",
+        } )
+
     def new_planet(self):
         self.planets.append( {
             "planet_class" : Planet.classes[ random.randrange(0, len(Planet.classes)) ],
             "position_x"   : random.randrange(-1000,1001),
             "position_y"   : random.randrange(-1000,1001),
-            "diameter"     : random.randrange(12, self.galaxy.screen_height),
+            "diameter"     : random.randrange(18, self.galaxy.screen_height),
             "seed"         : random.randrange(1,1000000),
             "name"         : self.galaxy.next_name(),
         } )
@@ -253,10 +268,10 @@ class SectorMap:
     def __repr__(self):
         return repr({ "posx": self.galaxy_position_x, "posy": self.galaxy_position_y, "seed": self.seed, "planet_count": self.planet_count, "nebula_background": self.nebula_background, "planets": self.planets })
 
-    def print_planet_loading_icon(self, console, icon, color, offset=0, count=0):
+    def print_planet_loading_icon(self, console, icon, color, offset=0, count=0, line=0):
         center_height = self.screen_height/2
         center_width = self.screen_width/2
-        libtcod.console_put_char_ex(console, center_width-((count+2)/2)+offset, center_height+4, icon, color, libtcod.black)
+        libtcod.console_put_char_ex(console, center_width-((count+2)/2)+offset, center_height+4+line, icon, color, libtcod.black)
         libtcod.console_blit(console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
         libtcod.console_flush()
 
@@ -289,6 +304,18 @@ class SectorMap:
                 self.star_icon = icon
                 self.star_color = color
             self.print_planet_loading_icon(console, icon, color, offset=index, count=len(self.planets))
+
+        self.loading_message("Mapping Asteroids", console)
+        for index, asteroid in enumerate(self.asteroids):
+            icon, color, asteroid_count = sector.add_asteroid(
+                planet_class=asteroid['planet_class'],
+                position_x=asteroid['position_x'],
+                position_y=asteroid['position_y'],
+                diameter=asteroid['diameter'],
+                seed=asteroid['seed'],
+                name=asteroid['name'],
+            )
+            self.print_planet_loading_icon(console, icon, color, offset=index, count=len(self.asteroids), line=1)
 
         self.loading_message("Reading Background Radiation", console)
         starfield = Starfield(sector, max_stars=50)

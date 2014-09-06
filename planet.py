@@ -8,7 +8,7 @@ import time
 
 import libtcodpy as libtcod
 
-class Planet:
+class Planet(object):
     classes = [ 'arid', 'artic', 'barren', 'desert', 'gas giant', 'jungle', 'lava', 'ocean', 'tundra', 'terran' ]
 
     def __init__(self, sector, planet_class='terran', position_x=-30, position_y=30, diameter=60, seed=3849058430, name="X"):
@@ -197,7 +197,7 @@ class Planet:
             self.noise_octaves = 6.0
             self.noise_zoom = 1.0
 
-        elif self.planet_class == 'barren':
+        elif self.planet_class == 'barren' or self.planet_class == 'asteroid':
             self.icon_color = libtcod.Color(151, 152, 113)
             self.height_colormap = libtcod.color_gen_map(
                 [
@@ -524,11 +524,11 @@ class Planet:
         # pp(self.circle_mask)
         return circle_mask
 
-    def build_circle_mask(self, diameter=None):
+    def build_circle_mask(self, diameter=None, asteroid=False):
         if diameter is None:
             diameter = self.width
 
-        if self.planet_class == 'star':
+        if self.planet_class == 'star' or self.planet_class == 'asteroid':
             light = self.normalize((0,0,-1.0))
             return self.draw_sphere(diameter/2, 0.5, 0.1, light)
         else:

@@ -2,12 +2,12 @@ import math
 import libtcodpy as libtcod
 
 class Particle(object):
-    def __init__(self, sector, x, y, velocity=0.0, angle=0.0, velocity_component_x=0.0, velocity_component_y=0.0):
+    def __init__(self, sector, x, y, sector_position_x=0.0, sector_position_y=0.0, velocity=0.0, angle=0.0, velocity_component_x=0.0, velocity_component_y=0.0):
         self.sector = sector
         self.x = x
         self.y = y
-        self.sector_position_x = 0.0
-        self.sector_position_y = 0.0
+        self.sector_position_x = sector_position_x
+        self.sector_position_y = sector_position_y
         self.velocity = velocity
         self.angle = angle
         self.valid = True
@@ -16,8 +16,12 @@ class Particle(object):
 
     def update_position(self):
         if self.velocity > 0.0:
-            self.x += math.cos(self.angle) * self.velocity
-            self.y += math.sin(self.angle) * self.velocity
+            dx = math.cos(self.angle) * self.velocity
+            dy = math.sin(self.angle) * self.velocity
+            self.sector_position_x += dx
+            self.sector_position_y += dy
+            self.x += dx
+            self.y += dy
 
         self.x += self.velocity_component_x
         self.y += self.velocity_component_y
@@ -45,7 +49,9 @@ class Particle(object):
 
 class ThrustExhaust(Particle):
     def __init__(self, **kwargs):
-        self.index = 10
+        self.bullet = False
+        self.particle_type = 'thrust'
+        self.index = 9
         self.colormap = libtcod.color_gen_map(
             [ kwargs.get('sector').background, libtcod.Color(255, 144, 0),  libtcod.Color(255, 222, 0) ],
             [ 0,                               self.index/2,                self.index] )
@@ -63,6 +69,8 @@ class ThrustExhaust(Particle):
 
 class BlueBullet(Particle):
     def __init__(self, **kwargs):
+        self.bullet = True
+        self.particle_type = 'bullet'
         self.index = 20
         self.colormap = libtcod.color_gen_map(
             [ libtcod.Color(0, 144, 255),  libtcod.Color(0, 222, 255) ],
