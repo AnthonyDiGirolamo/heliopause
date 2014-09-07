@@ -111,11 +111,11 @@ class ExplosionFireBall(Particle):
     def __init__(self, **kwargs):
         self.bullet = False
         self.particle_type = 'explosion_fire_ball'
-        self.index = 7
+        self.index = 12
         self.colormap = libtcod.color_gen_map(
-            [ kwargs.get('sector').background, libtcod.Color(255, 128, 128),  libtcod.Color(255, 222, 222) ],
-            [ 0,                               self.index/2,                self.index] )
-        self.charactermap = [176, 176, 177, 177, 178, 178, 219, 219, 219]
+            [ kwargs.get('sector').background, libtcod.Color(255, 0, 0),  libtcod.Color(255, 255, 255) ],
+            [ 0,                               self.index/3,                self.index] )
+        self.charactermap = [176, 176, 176, 177, 177, 177, 178, 178, 178, 219, 219, 219, 219]
         super(ExplosionFireBall, self).__init__(**kwargs)
 
     def draw_sprite(self, x, y):

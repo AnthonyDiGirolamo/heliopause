@@ -19,37 +19,6 @@ class Asteroid(Planet):
         self.sector_position_x = math.cos(math.radians(self.angle)) * self.distance_to_star
         self.sector_position_y = math.sin(math.radians(self.angle)) * self.distance_to_star
 
-    def check_for_collision(self):
-        for p in self.sector.particles:
-            if p.bullet:
-                # pp("x: {} < {} < {}".format(self.sector_position_x, p.sector_position_x, self.sector_position_x+self.width))
-                # pp("y: {} < {} < {}".format(self.sector_position_y, p.sector_position_y, self.sector_position_y+self.width))
-                if self.sector_position_x < p.sector_position_x < self.sector_position_x+self.width and \
-                   self.sector_position_y < p.sector_position_y < self.sector_position_y+self.width:
-                    self.hp -= p.damage
-                    if self.hp < 0:
-                        for a in range(0, random.randrange(5, 15)):
-                            self.sector.add_particle(
-                                ExplosionFireBall(
-                                    sector               = self.sector,
-                                    x                    = p.x,
-                                    y                    = p.y,
-                                    sector_position_x    = p.sector_position_x,
-                                    sector_position_y    = p.sector_position_y,
-                                    angle                = random.randrange(0, 359),
-                                    velocity             = random.random() * random.randrange(0,3)))
-                        #TODO delete this asteroid
-                    else:
-                        self.sector.add_particle(
-                            Fire(
-                                sector               = self.sector,
-                                x                    = p.x,
-                                y                    = p.y,
-                                sector_position_x    = p.sector_position_x,
-                                sector_position_y    = p.sector_position_y))
-                    # delete the bullet that hit
-                    self.sector.particles.remove(p)
-
     def update_position(self):
         if self.velocity > 0.0:
             self.angle += self.velocity
@@ -59,7 +28,6 @@ class Asteroid(Planet):
             self.sector_position_y = math.sin(math.radians(self.angle)) * self.distance_to_star
 
     def draw(self):
-        self.check_for_collision()
         self.update_position()
 
         feature_left         = self.sector_position_x - (self.width / 2)

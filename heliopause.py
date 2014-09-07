@@ -9,7 +9,7 @@ from random import randrange, random, shuffle
 import pprint
 pp = pprint.PrettyPrinter(indent=4, width=200).pprint
 
-from particle import Particle, ThrustExhaust
+from particle import Particle, ThrustExhaust, Fire, ExplosionFireBall
 from ship import Ship
 from starfield import Starfield
 from nebula import Nebula
@@ -121,6 +121,36 @@ class Game:
         else:
             self.add_message("You are not far enough from the nearest planet to jump")
 
+    def check_for_collisions(self):
+        for asteroid in self.sector.asteroids:
+            for p in self.sector.particles:
+                if p.bullet:
+                    if asteroid.sector_position_x < p.sector_position_x < asteroid.sector_position_x+asteroid.width and \
+                       asteroid.sector_position_y < p.sector_position_y < asteroid.sector_position_y+asteroid.width:
+                        asteroid.hp -= p.damage
+                        if asteroid.hp < 0:
+                            for a in range(0, 30):
+                                self.sector.add_particle(
+                                    ExplosionFireBall(
+                                        sector               = self.sector,
+                                        x                    = p.x,
+                                        y                    = p.y,
+                                        sector_position_x    = p.sector_position_x,
+                                        sector_position_y    = p.sector_position_y,
+                                        angle                = randrange(0, 359),
+                                        velocity             = random() * randrange(1,3)))
+                            self.sector.asteroids.remove(asteroid)
+                        else:
+                            self.sector.add_particle(
+                                Fire(
+                                    sector               = self.sector,
+                                    x                    = p.x,
+                                    y                    = p.y,
+                                    sector_position_x    = p.sector_position_x,
+                                    sector_position_y    = p.sector_position_y))
+                        # delete the bullet that hit
+                        self.sector.particles.remove(p)
+
     def render_all(self):
         if self.player_ship.velocity > 0.0:
             self.starfield.scroll( self.player_ship.velocity_angle, self.player_ship.velocity )
@@ -137,6 +167,7 @@ class Game:
         for planet in self.sector.planets:
             planet.draw()
 
+        self.check_for_collisions()
         for asteroid in self.sector.asteroids:
             asteroid.draw()
 
@@ -388,8 +419,8 @@ libtcod.console_set_keyboard_repeat(1, 10)
 # libtcod.console_set_custom_font('fonts/terminal16x16_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 
 # libtcod.console_set_custom_font('fonts/8x8_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
-libtcod.console_set_custom_font('fonts/10x10_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
-# libtcod.console_set_custom_font('fonts/12x12_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+# libtcod.console_set_custom_font('fonts/10x10_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+libtcod.console_set_custom_font('fonts/12x12_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 
 # game = Game(85, 48)
 # game = Game(128, 72)
