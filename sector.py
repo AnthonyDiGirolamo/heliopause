@@ -122,14 +122,15 @@ class Sector:
         deltax = math.cos(heading) * velocity * -1
         deltay = math.sin(heading) * velocity * -1
         # remove particles which have faded
-        self.particles = [p for p in self.particles if p.valid]
+        self.particles = [p for p in self.particles if p.on_screen]
         for particle in self.particles:
-            if particle.valid:
+            if particle.on_screen:
                 particle.x += deltax * 1.0
                 particle.y += deltay * 1.0
                 particle.index -= 1
                 if particle.index < 0:
-                    particle.valid = False
+                    particle.index = 0
+                    particle.on_screen = False
 
     def draw_minimap(self, buffer, width, height, ship):
         zoom = 1.0

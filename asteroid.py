@@ -7,7 +7,7 @@ pp = pprint.PrettyPrinter(indent=4, width=200).pprint
 import libtcodpy as libtcod
 
 from planet import Planet
-from particle import Particle, ThrustExhaust, BlueBullet, ExplosionFireBall
+from particle import Particle, Fire, ThrustExhaust, BlueBullet, ExplosionFireBall
 
 class Asteroid(Planet):
     def __init__(self, **kwargs):
@@ -41,7 +41,7 @@ class Asteroid(Planet):
                         #TODO delete this asteroid
                     else:
                         self.sector.add_particle(
-                            ThrustExhaust(
+                            Fire(
                                 sector               = self.sector,
                                 x                    = p.x,
                                 y                    = p.y,
