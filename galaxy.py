@@ -15,7 +15,7 @@ from starfield import Starfield
 from asteroid import Asteroid
 
 class Galaxy:
-    def __init__(self, width, height, seed=4681):
+    def __init__(self, width, height, seed=8):
         self.screen_width = width
         self.screen_height = height
         self.seed = seed
@@ -305,7 +305,7 @@ class SectorMap:
                 self.star_color = color
             self.print_planet_loading_icon(console, icon, color, offset=index, count=len(self.planets))
 
-        self.loading_message("Mapping Asteroids", console)
+        # self.loading_message("Mapping Asteroids", console)
         for index, asteroid in enumerate(self.asteroids):
             icon, color, asteroid_count = sector.add_asteroid(
                 planet_class=asteroid['planet_class'],

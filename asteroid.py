@@ -7,11 +7,12 @@ pp = pprint.PrettyPrinter(indent=4, width=200).pprint
 import libtcodpy as libtcod
 
 from planet import Planet
-from particle import Particle, ThrustExhaust, BlueBullet
+from particle import Particle, ThrustExhaust, BlueBullet, ExplosionFireBall
 
 class Asteroid(Planet):
     def __init__(self, **kwargs):
         super(Asteroid, self).__init__(**kwargs)
+        self.hp = self.width * 50
         self.velocity = random.random() / 10.0
         self.angle = random.randrange(359)
         self.distance_to_star = math.sqrt(self.sector_position_x**2 + self.sector_position_y**2)
@@ -25,14 +26,29 @@ class Asteroid(Planet):
                 # pp("y: {} < {} < {}".format(self.sector_position_y, p.sector_position_y, self.sector_position_y+self.width))
                 if self.sector_position_x < p.sector_position_x < self.sector_position_x+self.width and \
                    self.sector_position_y < p.sector_position_y < self.sector_position_y+self.width:
-                    # pp("hit")
-                    self.sector.add_particle(
-                        ThrustExhaust(
-                            sector               = self.sector,
-                            x                    = p.x,
-                            y                    = p.y,
-                            sector_position_x    = p.sector_position_x,
-                            sector_position_y    = p.sector_position_y))
+                    self.hp -= p.damage
+                    if self.hp < 0:
+                        for a in range(0, random.randrange(5, 15)):
+                            self.sector.add_particle(
+                                ExplosionFireBall(
+                                    sector               = self.sector,
+                                    x                    = p.x,
+                                    y                    = p.y,
+                                    sector_position_x    = p.sector_position_x,
+                                    sector_position_y    = p.sector_position_y,
+                                    angle                = random.randrange(0, 359),
+                                    velocity             = random.random() * random.randrange(0,3)))
+                        #TODO delete this asteroid
+                    else:
+                        self.sector.add_particle(
+                            ThrustExhaust(
+                                sector               = self.sector,
+                                x                    = p.x,
+                                y                    = p.y,
+                                sector_position_x    = p.sector_position_x,
+                                sector_position_y    = p.sector_position_y))
+                    # delete the bullet that hit
+                    self.sector.particles.remove(p)
 
     def update_position(self):
         if self.velocity > 0.0:
