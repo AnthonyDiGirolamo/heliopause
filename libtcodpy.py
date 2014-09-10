@@ -418,6 +418,19 @@ class ConsoleBuffer:
         self.fore_b = [fore_b] * n
         self.char = [ord(char)] * n
 
+    def __iter__(self):
+        self.index = -1
+        return self
+
+    def next(self):
+        self.index = self.index + 1
+        if self.index == self.width * self.height:
+            raise StopIteration
+        return self.__getitem__(self.index)
+
+    def __getitem__(self, i):
+        return [self.back_r[i], self.back_g[i], self.back_b[i], self.fore_r[i], self.fore_g[i], self.fore_b[i], self.char[i]]
+
     def copy(self):
         # returns a copy of this ConsoleBuffer.
         other = ConsoleBuffer(0, 0)
