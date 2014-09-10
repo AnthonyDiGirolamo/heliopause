@@ -4,12 +4,14 @@ import pprint
 pp = pprint.PrettyPrinter(indent=4, width=200).pprint
 
 from particle import Particle, ThrustExhaust, BlueBullet
+from ship_editor import ShipEditor
 
 class Ship:
     def __init__(self, sector, posx=0.0, posy=0.0):
         self.sector = sector
-        self.x = (self.sector.screen_width / 2) - 4
-        self.y = (self.sector.screen_height / 2) - 4
+        self.x = (self.sector.screen_width / 2) - 8
+        self.y = (self.sector.screen_height / 2) - 8
+        self.center_point = [self.x + 8, self.y + 8]
 
         self.sector_position_x = posx
         self.sector_position_y = posy
@@ -59,36 +61,24 @@ class Ship:
             return ord('>')
 
     def load_ship_sprites(self):
-
-        sprite_size = 16
-        console = libtcod.console_new(sprite_size, sprite_size)
         self.ship = []
-        color_masks = [[0, 0, 255], [68,68,196], [66,66,193]]
+        ship_editor = ShipEditor()
+        ship_editor.generate_random_ship()
         for angle in range(0, 360, 10):
-            ship = libtcod.image_load('images/ship_{0}.png'.format(str(angle).zfill(3)))
-            # libtcod.image_blit(ship, console, 8, 8, libtcod.BKGND_SET, 1.0, 1.0, 0)
-            # libtcod.image_blit_rect(ship, console, 0, 0, -1, -1, libtcod.BKGND_SET)
-            libtcod.image_blit_2x(ship, console, 0, 0)
-            frame = []
-            for y in range(0, sprite_size):
-                row = []
-                for x in range(0, sprite_size):
-                    b = libtcod.console_get_char_background(console,x,y)
-                    f = libtcod.console_get_char_foreground(console,x,y)
-                    c = libtcod.console_get_char(console,x,y)
-                    if c == 32:
-                        f = b
-                        c = 219
-                    if [b[0], b[1], b[2]] in color_masks or [f[0], f[1], f[2]] in color_masks:
-                        row.append( None )
-                    elif [b[0], b[1], b[2]] == [0,0,0] and [f[0], f[1], f[2]] == [0,0,0]:
-                        row.append( None )
-                    else:
-                        row.append( [b, f, c] )
-                frame.append(row)
-            self.ship.append(frame)
+            self.ship.append( ship_editor.load_frame(angle) )
 
-        libtcod.console_delete(console)
+        self.engine_locations = []
+        for y in range(0, ship_editor.sprite_size):
+            if self.ship[0][y][2]:
+                self.engine_locations.append([2, y])
+
+        if not self.engine_locations:
+            for y in range(0, ship_editor.sprite_size):
+                if self.ship[0][y][3]:
+                    self.engine_locations.append([2, y])
+
+        # pp(self.ship[0])
+        # pp(self.engine_locations)
 
     def load_pointer_sprites(self):
         console = libtcod.console_new(32, 32)
@@ -171,16 +161,24 @@ class Ship:
         elif self.velocity > self.speed_limit:
             self.velocity = self.speed_limit
 
-        self.sector.add_particle(
-            ThrustExhaust(
-                sector               = self.sector,
-                x                    = self.x+3+x_component*-2,
-                y                    = self.y+4+y_component*-2,
-                velocity             = 1.0,
-                angle                = self.heading - math.pi if self.heading > math.pi else self.heading + math.pi,
-                velocity_component_x = newx,
-                velocity_component_y = newy)
-        )
+        for thrust_posx, thrust_posy in self.engine_locations:
+            point = [float(self.x + thrust_posx), float(self.y + thrust_posy)]
+            temp_point = point[0]-self.center_point[0] , point[1]-self.center_point[1]
+            temp_point = [ temp_point[0]*math.cos(self.heading)-temp_point[1]*math.sin(self.heading) , temp_point[0]*math.sin(self.heading)+temp_point[1]*math.cos(self.heading) ]
+            temp_point = temp_point[0]+self.center_point[0] , temp_point[1]+self.center_point[1]
+
+            self.sector.add_particle(
+                ThrustExhaust(
+                    sector               = self.sector,
+                    x                    = int(math.floor(temp_point[0])),
+                    y                    = int(math.floor(temp_point[1])),
+                    # x                    = self.x+3+x_component*-2,
+                    # y                    = self.y+4+y_component*-2,
+                    velocity             = 1.0,
+                    angle                = self.heading - math.pi if self.heading > math.pi else self.heading + math.pi,
+                    velocity_component_x = newx,
+                    velocity_component_y = newy)
+            )
 
     def reverse_direction(self):
         if self.velocity > 0.0:
@@ -213,18 +211,19 @@ class Ship:
             else:
                 self.heading -= math.pi
 
-
-    def draw(self):
+    def current_sprite_index(self):
         sprite_index = int(round(math.degrees(self.heading), -1)/10)
         if sprite_index > 35 or sprite_index < 0:
             sprite_index = 0
+        return sprite_index
 
-        ship = self.ship[sprite_index]
+    def draw(self):
+        ship = self.ship[ self.current_sprite_index() ]
 
         self.update_location()
 
-        threshold = 120*3
-        # threshold = 0
+        # threshold = 120*3
+        threshold = 0
 
         for y, line in enumerate(ship):
             for x, cell in enumerate(line):
@@ -232,10 +231,11 @@ class Ship:
                     b = cell[0]
                     f = cell[1]
                     c = cell[2]
-                    if b[0] + b[1] + b[2] <= threshold:
-                        b = self.sector.buffer.get_back(self.x + x, self.y + y)
-                    if f[0] + f[1] + f[2] <= threshold:
-                        f = self.sector.buffer.get_back(self.x + x, self.y + y)
+                    b = self.sector.buffer.get_back(self.x + x, self.y + y)
+                    # if b[0] + b[1] + b[2] <= threshold:
+                    #     b = self.sector.buffer.get_back(self.x + x, self.y + y)
+                    # if f[0] + f[1] + f[2] <= threshold:
+                    #     f = self.sector.buffer.get_back(self.x + x, self.y + y)
 
                     self.sector.buffer.set(self.x + x, self.y + y, b[0], b[1], b[2], f[0], f[1], f[2], c)
                     # self.sector.buffer.set_fore(self.x + x, self.y + y, f[0], f[1], f[2], c)
@@ -246,8 +246,8 @@ class Ship:
         self.sector.add_particle(
             BlueBullet(
                 sector               = self.sector,
-                x                    = self.x+3+x_component*3,
-                y                    = self.y+4+y_component*3,
+                x                    = self.x+8+x_component*3,
+                y                    = self.y+8+y_component*3,
                 sector_position_x    = self.sector_position_x+3+x_component*3,
                 sector_position_y    = self.sector_position_y+4+y_component*3,
                 # velocity             = 1.0,
@@ -273,3 +273,4 @@ class Ship:
                     f = cell[1]
                     c = cell[2]
                     self.sector.buffer.set(startx + x, starty + y, b[0], b[1], b[2], f[0], f[1], f[2], c)
+

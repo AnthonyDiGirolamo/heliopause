@@ -290,7 +290,7 @@ class Game:
                     self.landed_loop(planet_index)
 
             elif key_character == 'G':
-                self.player_ship.generate_random_ship_sprites()
+                self.player_ship.load_ship_sprites()
             elif key_character == 'g':
                 if self.current_screen == 'flight':
                     self.galaxy_map_loop()
@@ -421,28 +421,22 @@ class Game:
             elif self.player_ship.turning_right:
                 self.player_ship.turn_right()
 
-# libtcod setup
+if __name__ == '__main__':
+    # libtcod setup
 
-libtcod.sys_set_fps(30)
-# libtcod.sys_set_renderer(libtcod.RENDERER_GLSL)
-# libtcod.sys_set_renderer(libtcod.RENDERER_OPENGL)
-# libtcod.sys_set_renderer(libtcod.RENDERER_SDL)
-libtcod.console_set_keyboard_repeat(1, 10)
+    libtcod.sys_set_fps(30)
+    # libtcod.sys_set_renderer(libtcod.RENDERER_GLSL)
+    # libtcod.sys_set_renderer(libtcod.RENDERER_OPENGL)
+    # libtcod.sys_set_renderer(libtcod.RENDERER_SDL)
+    libtcod.console_set_keyboard_repeat(1, 10)
 
-# libtcod.console_set_custom_font('fonts/8x8.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)
-# libtcod.console_set_custom_font('fonts/10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)
-# libtcod.console_set_custom_font('fonts/12x12.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=48)
+    libtcod.console_set_custom_font('fonts/8x8_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+    # game = Game(160, 90)
 
-# libtcod.console_set_custom_font('fonts/terminal8x8_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
-# libtcod.console_set_custom_font('fonts/terminal12x12_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
-# libtcod.console_set_custom_font('fonts/terminal16x16_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+    # libtcod.console_set_custom_font('fonts/10x10_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+    # game = Game(128, 72)
 
-# libtcod.console_set_custom_font('fonts/8x8_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
-# libtcod.console_set_custom_font('fonts/10x10_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
-libtcod.console_set_custom_font('fonts/12x12_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+    # libtcod.console_set_custom_font('fonts/12x12_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+    game = Game(106, 60)
 
-# game = Game(85, 48)
-# game = Game(128, 72)
-game = Game(106, 60)
-# game = Game(180, 120)
-game.main_loop()
+    game.main_loop()

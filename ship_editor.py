@@ -8,12 +8,11 @@ from PIL import Image
 import pprint
 pp = pprint.PrettyPrinter(indent=4, width=200).pprint
 
-class Game:
-    def __init__(self, screen_width=120, screen_height=70):
+class ShipEditor:
+    def __init__(self, ship_value=None, screen_width=106, screen_height=60):
+        random.seed()
         self.screen_width = screen_width
         self.screen_height = screen_height
-
-        libtcod.console_init_root(self.screen_width, self.screen_height, 'Heliopause Ship Editor', False)
 
         self.buffer = libtcod.ConsoleBuffer(self.screen_width, self.screen_height)
         self.console = libtcod.console_new(self.screen_width, self.screen_height)
@@ -31,8 +30,6 @@ class Game:
         self.sprite_drawing_top    = 1
         self.sprite_drawing_right  = self.sprite_drawing_left + self.sprite_size
         self.sprite_drawing_bottom = self.sprite_drawing_top + self.sprite_size
-
-        self.generate_random_ship_sprites()
 
         self.rotation_angle = 0
 
@@ -52,21 +49,21 @@ class Game:
             else:
                 pixels[x, y] = (fore_r, fore_g, fore_b, alpha)
 
-        self.ship_original_image.save("rship_test_000.png")
+        # self.ship_original_image.save("rship_test_000.png")
 
-    def rotate(self):
-        if self.rotation_angle in [0, 90, 180, 270]:
-            rotated_image = self.ship_original_image.rotate(self.rotation_angle, resample=Image.NEAREST)
+    def rotate(self, angle=0):
+        if angle in [0, 90, 180, 270]:
+            rotated_image = self.ship_original_image.rotate(angle, resample=Image.NEAREST)
         else:
             larger_image = self.ship_original_image.resize((self.sprite_size*4, self.sprite_size*4), resample=Image.NEAREST)
-            r = larger_image.rotate(self.rotation_angle, resample=Image.BICUBIC)
+            r = larger_image.rotate(angle, resample=Image.BICUBIC)
             rotated_image = r.resize((16, 16), resample=Image.NEAREST)
 
-            # rotated_image = self.ship_original_image.rotate(self.rotation_angle, resample=Image.BICUBIC)
-            # rotated_image = self.ship_original_image.rotate(self.rotation_angle, resample=Image.BILINEAR)
-            # rotated_image = self.ship_original_image.rotate(self.rotation_angle, resample=Image.NEAREST)
+            # rotated_image = self.ship_original_image.rotate(angle, resample=Image.BICUBIC)
+            # rotated_image = self.ship_original_image.rotate(angle, resample=Image.BILINEAR)
+            # rotated_image = self.ship_original_image.rotate(angle, resample=Image.NEAREST)
 
-        rotated_image.save("rship_test_045.png")
+        # rotated_image.save("rship_test_045.png")
 
         rotated_pixels = rotated_image.load()
 
@@ -80,7 +77,7 @@ class Game:
                 self.ship_buffer.set_fore(x, y, rotated_pixels[x,y][0], rotated_pixels[x,y][1], rotated_pixels[x,y][2], 219)
                 self.ship_buffer.set_back(x, y, rotated_pixels[x,y][0], rotated_pixels[x,y][1], rotated_pixels[x,y][2])
 
-    def generate_random_ship_sprites(self, value=None):
+    def generate_random_ship(self, value=None):
         ship_frame = []
         ship_mask = [
             [0, 0, 0, 0, 0, 0],
@@ -103,6 +100,8 @@ class Game:
             self.ship_value = random.getrandbits(32)
         # self.ship_value = 0b10100010101010100011011001000110
         # self.ship_value = 0b11110110101111101000001011010101
+        # self.ship_value = 0b11111101110110011110011111011110
+        # self.ship_value = 0b1000011111101111111111001111110
         print("Ship Value: {0}".format(bin(self.ship_value)))
 
         # Generate Colors
@@ -209,6 +208,25 @@ class Game:
         self.create_ship_image()
         self.rotation_angle = 0
 
+    def load_frame(self, angle=0):
+        self.rotate(angle)
+
+        frame = [[] for i in range(0, self.sprite_size)]
+
+        for i, cell in enumerate(self.ship_buffer):
+            x = i%self.sprite_size
+            y = int(i/self.sprite_size)
+            back_r, back_g, back_b, fore_r, fore_g, fore_b, c = cell
+            alpha = 255
+            if c == 32:
+                if back_r == 64 and back_b == 64 and back_b == 64:
+                    alpha = 0
+                frame[y].append( None )
+            else:
+                frame[y].append( [[back_r, back_b, back_b], [fore_r, fore_g, fore_b], c] )
+
+        return frame
+
     def render_all(self):
         # Draw character select pallete
         for c in range(0, 256):
@@ -252,12 +270,14 @@ class Game:
         elif self.key.pressed:
             key_character = chr(self.key.c)
             if key_character == 'G':
-                self.generate_random_ship_sprites()
+                self.generate_random_ship()
             elif key_character == 'R':
                 self.rotation_angle += 10
                 if self.rotation_angle > 350:
                     self.rotation_angle = 0
-                self.rotate()
+                self.rotate(self.rotation_angle)
+            elif key_character == 'L':
+                self.load_frame(self.rotation_angle)
 
         if self.mouse.lbutton_pressed:
             if self.mouse.cx < 16 and self.mouse.cy < 16:
@@ -269,6 +289,8 @@ class Game:
                 self.ship_buffer.set_fore(xcoord, ycoord, 0, 0, 0, self.selected_character)
 
     def main_loop(self):
+        self.generate_random_ship()
+
         while not libtcod.console_is_window_closed():
             libtcod.sys_check_for_event(libtcod.KEY_PRESSED|libtcod.KEY_RELEASED|libtcod.EVENT_MOUSE, self.key, self.mouse)
 
@@ -276,13 +298,14 @@ class Game:
 
             player_action = self.handle_keys()
             if player_action == 1:
-                pp(self.ship_buffer)
                 break
 
-libtcod.sys_set_fps(30)
-libtcod.console_set_keyboard_repeat(1, 10)
+if __name__ == '__main__':
+    libtcod.sys_set_fps(30)
+    libtcod.console_set_keyboard_repeat(1, 10)
 
-libtcod.console_set_custom_font('fonts/12x12_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+    libtcod.console_set_custom_font('fonts/12x12_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
 
-game = Game(106, 60)
-game.main_loop()
+    game = ShipEditor()
+    libtcod.console_init_root(game.screen_width, game.screen_height, 'Heliopause Ship Editor', False)
+    game.main_loop()
