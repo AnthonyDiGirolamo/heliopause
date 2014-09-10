@@ -48,21 +48,21 @@ done
 mv pointer_00.png pointer_000.png
 
 # Test Image Rotation
-# for angle in `seq -w 0 10 350`
-# do
-#   convert \
-#     -alpha on \
-#     -background transparent \
-#     -rotate -$angle \
-#     -gravity NorthWest \
-#     -crop 16x16+0+0 \
-#     rocket.png rocket_$angle.png
-#     # -transparent-color blue \
-#     # -fuzz 0 -fill blue \
-#     #   -draw 'color 0,0 floodfill' \
-#     #   -draw 'color 0,15 floodfill' \
-#     #   -draw 'color 15,0 floodfill' \
-#     #   -draw 'color 15,15 floodfill' \
-#     # -distort ScaleRotateTranslate -$angle \
-# done
+for angle in `seq -w 0 10 350`
+do
+  convert \
+    -alpha on \
+    -background transparent \
+    -rotate -$angle \
+    -gravity NorthWest \
+    -crop 16x16+0+0 \
+    rship.png rship_$angle.png
+    # -transparent-color blue \
+    # -fuzz 0 -fill blue \
+    #   -draw 'color 0,0 floodfill' \
+    #   -draw 'color 0,15 floodfill' \
+    #   -draw 'color 15,0 floodfill' \
+    #   -draw 'color 15,15 floodfill' \
+    # -distort ScaleRotateTranslate -$angle \
+done
 
