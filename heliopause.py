@@ -28,6 +28,7 @@ class Game:
         self.console = libtcod.console_new(self.screen_width, self.screen_height)
 
         self.galaxy_map_console = libtcod.console_new(self.screen_width, self.screen_height)
+        self.current_screen = 'flight'
 
         self.set_minimap(20)
 
@@ -38,8 +39,8 @@ class Game:
         libtcod.console_set_default_foreground(self.targeting_console, libtcod.white)
         libtcod.console_set_default_background(self.targeting_console, libtcod.black)
 
-        self.ship_info_width = 20
-        self.ship_info_height = 10
+        self.ship_info_width = 18
+        self.ship_info_height = 18
         self.ship_info_buffer  = libtcod.ConsoleBuffer(self.ship_info_width, self.ship_info_height)
         self.ship_info_console = libtcod.console_new(self.ship_info_width, self.ship_info_height)
         libtcod.console_set_default_foreground(self.ship_info_console, libtcod.white)
@@ -102,7 +103,7 @@ class Game:
             self.sector, self.starfield, self.nebula = self.galaxy.sectors[self.galaxy.current_sector].load_sector(self.console, self.buffer)
 
             self.player_ship.sector = self.sector
-            self.player_ship.about_face()
+            self.player_ship.dead_stop()
 
             self.clear_messages()
             self.add_message("Arriving in {0}".format(self.galaxy.sectors[self.galaxy.current_sector].name))
@@ -210,6 +211,14 @@ class Game:
             )
             libtcod.console_blit(self.targeting_console, 0, 0, self.targeting_width, self.targeting_height, 0, 0, 0, 1.0, 0.25)
 
+        try:
+            a = math.degrees(math.acos((self.player_ship.sector_position_x * 1 +
+                self.player_ship.sector_position_y * 0) / math.sqrt(self.player_ship.sector_position_x**2 + self.player_ship.sector_position_y**2)))
+        except:
+            a = 0.0
+        if self.player_ship.sector_position_y < 0:
+            a = (360.0 - a)
+
         # Ship Info
         libtcod.console_print_frame(self.ship_info_console, 0, 0, self.ship_info_width, self.ship_info_height, clear=True, flag=libtcod.BKGND_SET, fmt=0)
         libtcod.console_print_ex(self.ship_info_console, 1, 1, libtcod.BKGND_SET, libtcod.LEFT,
@@ -220,15 +229,18 @@ class Game:
                   "Nebula Position:\n"
                   "l:{4} r:{5}\n"
                   "t:{6} b:{7}\n"
+                  "angle to center:\n"
+                  "{8}\n"
                 ).format(
                     round(math.degrees(self.player_ship.heading),2),
                     round(self.player_ship.velocity,2),
                     round(math.degrees(self.player_ship.velocity_angle),2),
                     len(self.sector.particles),
                     self.nebula.left, self.nebula.right, self.nebula.top, self.nebula.bottom
+                    , a
             ).ljust(self.ship_info_width-2)
         )
-        libtcod.console_blit(self.ship_info_console, 0, 0, self.ship_info_width, self.ship_info_height, 0, 0, self.screen_height-self.ship_info_height-self.message_height, 1.0, 0.25)
+        libtcod.console_blit(self.ship_info_console, 0, 0, self.ship_info_width, self.ship_info_height, 0, self.screen_width-self.ship_info_width, self.screen_height-self.ship_info_height-self.message_height, 1.0, 0.25)
 
         # Bottom Messages
         if len(self.messages) > 0:
@@ -277,8 +289,13 @@ class Game:
                 if landed:
                     self.landed_loop(planet_index)
 
-            elif key_character == 'g' and self.current_screen == 'flight':
-                self.galaxy_map_loop()
+            elif key_character == 'G':
+                self.player_ship.generate_random_ship_sprites()
+            elif key_character == 'g':
+                if self.current_screen == 'flight':
+                    self.galaxy_map_loop()
+                else:
+                    return 1 # exit galaxy loop
             elif key_character == 't' and self.current_screen == 'galaxy':
                 self.galaxy.cycle_sector_target()
 
@@ -294,6 +311,7 @@ class Game:
                 self.sector.cycle_planet_target(self.player_ship)
 
             elif key_character == 'r':
+                self.current_screen = 'flight'
                 self.new_sector()
 
             elif key_character == 'S':
@@ -339,6 +357,8 @@ class Game:
             if player_action == 1:
                 done = True
 
+        self.current_screen = 'flight'
+
     def landed_loop(self, planet_index):
         self.current_screen = 'landed'
         done = False
@@ -380,7 +400,6 @@ class Game:
 
     def main_loop(self):
         while not libtcod.console_is_window_closed():
-            self.current_screen = 'flight'
             libtcod.sys_check_for_event(libtcod.KEY_PRESSED|libtcod.KEY_RELEASED|libtcod.EVENT_MOUSE, self.key, self.mouse)
 
             self.render_all()

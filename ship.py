@@ -59,6 +59,7 @@ class Ship:
             return ord('>')
 
     def load_ship_sprites(self):
+
         sprite_size = 16
         console = libtcod.console_new(sprite_size, sprite_size)
         self.ship = []
@@ -189,6 +190,19 @@ class Ship:
                 else:
                     self.turn_left()
 
+    def dead_stop(self):
+        if self.velocity > 0.0:
+            self.velocity = 0.0
+            self.velocity_component_x = 0.0
+            self.velocity_component_y = 0.0
+
+    def point_towards(self, x, y):
+        pass
+        # math.acos((self.sector_position_x - x)*(self.sector_position_y - y))
+
+    def face_system_center(self):
+        self.point_towards(0, 0)
+
     def about_face(self):
         if self.velocity > 0.0:
             self.velocity_angle, self.velocity_angle_opposite = self.velocity_angle_opposite, self.velocity_angle
@@ -199,15 +213,6 @@ class Ship:
             else:
                 self.heading -= math.pi
 
-    # \--,
-    #  \  \--,
-    #   \     \----,
-    #    \          \---,
-    #     X              ----
-    #    /          /---`
-    #   /     /----`
-    #  /  /--`
-    # /--`
 
     def draw(self):
         sprite_index = int(round(math.degrees(self.heading), -1)/10)

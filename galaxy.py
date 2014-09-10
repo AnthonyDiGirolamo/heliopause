@@ -15,7 +15,7 @@ from starfield import Starfield
 from asteroid import Asteroid
 
 class Galaxy:
-    def __init__(self, width, height, seed=8):
+    def __init__(self, width, height, seed=7654):
         self.screen_width = width
         self.screen_height = height
         self.seed = seed
