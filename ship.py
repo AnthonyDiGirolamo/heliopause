@@ -7,6 +7,8 @@ from particle import Particle, ThrustExhaust, BlueBullet
 from ship_editor import ShipEditor
 
 class Ship:
+    sprite_index_heading = [a for a in range(0, 360, 10)]
+
     def __init__(self, sector, posx=0.0, posy=0.0):
         self.sector = sector
         self.x = (self.sector.screen_width / 2) - 8
@@ -163,8 +165,9 @@ class Ship:
 
         for thrust_posx, thrust_posy in self.engine_locations:
             point = [float(self.x + thrust_posx), float(self.y + thrust_posy)]
+            h = math.radians(Ship.sprite_index_heading[self.current_sprite_index()])
             temp_point = point[0]-self.center_point[0] , point[1]-self.center_point[1]
-            temp_point = [ temp_point[0]*math.cos(self.heading)-temp_point[1]*math.sin(self.heading) , temp_point[0]*math.sin(self.heading)+temp_point[1]*math.cos(self.heading) ]
+            temp_point = [ temp_point[0]*math.cos(h)-temp_point[1]*math.sin(h) , temp_point[0]*math.sin(h)+temp_point[1]*math.cos(h) ]
             temp_point = temp_point[0]+self.center_point[0] , temp_point[1]+self.center_point[1]
 
             self.sector.add_particle(
@@ -257,14 +260,15 @@ class Ship:
             )
         )
 
+    #TODO fix target arrow positioning
     def draw_target_arrow(self, angle):
         sprite_index = int(round(math.degrees(angle), -1)/10)
         if sprite_index > 35 or sprite_index < 0:
             sprite_index = 0
 
         pointer = self.pointer[sprite_index]
-        startx = self.x-4
-        starty = self.y-4
+        startx = self.x
+        starty = self.y
 
         for y, line in enumerate(pointer):
             for x, cell in enumerate(line):

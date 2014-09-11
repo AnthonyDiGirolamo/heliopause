@@ -122,12 +122,13 @@ class Game:
         else:
             self.add_message("You are not far enough from the nearest planet to jump")
 
+    #TODO Better Collision Detection
     def check_for_collisions(self):
         for asteroid in self.sector.asteroids:
             for p in self.sector.particles:
                 if p.bullet:
                     if asteroid.sector_position_x < p.sector_position_x < asteroid.sector_position_x+asteroid.width and \
-                       asteroid.sector_position_y < p.sector_position_y < asteroid.sector_position_y+asteroid.width:
+                       asteroid.sector_position_y+1 < p.sector_position_y < asteroid.sector_position_y+1+asteroid.width:
                         asteroid.hp -= p.damage
                         if asteroid.hp < 0:
                             for a in range(0, 30):
@@ -168,9 +169,9 @@ class Game:
         for planet in self.sector.planets:
             planet.draw()
 
-        self.check_for_collisions()
         for asteroid in self.sector.asteroids:
             asteroid.draw()
+        self.check_for_collisions()
 
         for particle in self.sector.particles:
             particle.draw()
@@ -396,6 +397,7 @@ class Game:
             player_action = self.handle_keys()
             if player_action == 1:
                 self.add_message("Taking off from {0}".format(planet.name))
+                self.current_screen = 'flight'
                 done = True
 
     def main_loop(self):
@@ -424,8 +426,8 @@ class Game:
 if __name__ == '__main__':
     # libtcod setup
 
-    libtcod.sys_set_fps(30)
-    # libtcod.sys_set_renderer(libtcod.RENDERER_GLSL)
+    libtcod.sys_set_fps(60)
+    libtcod.sys_set_renderer(libtcod.RENDERER_GLSL)
     # libtcod.sys_set_renderer(libtcod.RENDERER_OPENGL)
     # libtcod.sys_set_renderer(libtcod.RENDERER_SDL)
     libtcod.console_set_keyboard_repeat(1, 10)

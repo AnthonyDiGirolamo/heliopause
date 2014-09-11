@@ -12,7 +12,7 @@ from particle import Particle, Fire, ThrustExhaust, BlueBullet, ExplosionFireBal
 class Asteroid(Planet):
     def __init__(self, **kwargs):
         super(Asteroid, self).__init__(**kwargs)
-        self.hp = self.width * 50
+        self.hp = self.width * 80
         self.velocity = random.random() / 10.0
         self.angle = random.randrange(359)
         self.distance_to_star = math.sqrt(self.sector_position_x**2 + self.sector_position_y**2)

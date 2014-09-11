@@ -81,12 +81,12 @@ class Fire(Particle):
         color = self.colormap[self.index]
         character = self.charactermap[self.index]
         self.sector.buffer.set_fore(x,   self.sector.mirror_y_coordinate(y),   color[0], color[1], color[2], character)
-        if self.sector.mirror_y_coordinate(y-1) < self.sector.screen_height-1:
-            self.sector.buffer.set_fore(x,   self.sector.mirror_y_coordinate(y-1), color[0], color[1], color[2], character)
-        if x+1 < self.sector.screen_width-1:
-            self.sector.buffer.set_fore(x+1, self.sector.mirror_y_coordinate(y),   color[0], color[1], color[2], character)
-        if self.sector.mirror_y_coordinate(y-1) < self.sector.screen_height-1 and x+1 < self.sector.screen_width-1:
-            self.sector.buffer.set_fore(x+1, self.sector.mirror_y_coordinate(y-1), color[0], color[1], color[2], character)
+        # if self.sector.mirror_y_coordinate(y-1) < self.sector.screen_height-1:
+        #     self.sector.buffer.set_fore(x,   self.sector.mirror_y_coordinate(y-1), color[0], color[1], color[2], character)
+        # if x+1 < self.sector.screen_width-1:
+        #     self.sector.buffer.set_fore(x+1, self.sector.mirror_y_coordinate(y),   color[0], color[1], color[2], character)
+        # if self.sector.mirror_y_coordinate(y-1) < self.sector.screen_height-1 and x+1 < self.sector.screen_width-1:
+        #     self.sector.buffer.set_fore(x+1, self.sector.mirror_y_coordinate(y-1), color[0], color[1], color[2], character)
 
 
 class BlueBullet(Particle):
@@ -94,12 +94,12 @@ class BlueBullet(Particle):
         self.damage = 10
         self.bullet = True
         self.particle_type = 'bullet'
-        self.index = 20
+        self.index = 30
         self.colormap = libtcod.color_gen_map(
             [ libtcod.Color(0, 144, 255),  libtcod.Color(0, 222, 255) ],
             [ 0,                           self.index ] )
         self.charactermap = [4 for i in range(0, self.index+1)]
-        super(BlueBullet, self).__init__(velocity=2.0, **kwargs)
+        super(BlueBullet, self).__init__(velocity=1.0, **kwargs)
 
     def draw_sprite(self, x, y):
         color = self.colormap[self.index]
@@ -111,11 +111,19 @@ class ExplosionFireBall(Particle):
     def __init__(self, **kwargs):
         self.bullet = False
         self.particle_type = 'explosion_fire_ball'
-        self.index = 12
+        self.index = 16
         self.colormap = libtcod.color_gen_map(
-            [ kwargs.get('sector').background, libtcod.Color(255, 0, 0),  libtcod.Color(255, 255, 255) ],
-            [ 0,                               self.index/3,                self.index] )
-        self.charactermap = [176, 176, 176, 177, 177, 177, 178, 178, 178, 219, 219, 219, 219]
+            [ kwargs.get('sector').background,
+              libtcod.Color(81, 39, 23),
+              libtcod.Color(247, 151, 65),
+              libtcod.Color(255, 255, 149),
+              libtcod.Color(255, 255, 249) ],
+            [ 0,
+              self.index/4,
+              2*self.index/4,
+              3*self.index/4,
+              self.index] )
+        self.charactermap = [176, 176, 176, 177, 177, 177, 177, 177, 178, 178, 178, 178, 178, 219, 219, 219, 219]
         super(ExplosionFireBall, self).__init__(**kwargs)
 
     def draw_sprite(self, x, y):

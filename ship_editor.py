@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import random
+import math
 import libtcodpy as libtcod
 from PIL import Image
 
@@ -32,6 +33,15 @@ class ShipEditor:
         self.sprite_drawing_bottom = self.sprite_drawing_top + self.sprite_size
 
         self.rotation_angle = 0
+
+        self.presets = [
+            0b10100010101010100011011001000110,
+            0b11110110101111101000001011010101,
+            0b11111101110110011110011111011110,
+            0b1000011111101111111111001111110,
+            0b10100001000010111110111001111110,
+            0b100100001111111111001001110111,
+        ]
 
     def create_ship_image(self):
         self.ship_original_image = Image.new("RGBA", (16,16))
@@ -98,10 +108,6 @@ class ShipEditor:
             self.ship_value = value
         else:
             self.ship_value = random.getrandbits(32)
-        # self.ship_value = 0b10100010101010100011011001000110
-        # self.ship_value = 0b11110110101111101000001011010101
-        # self.ship_value = 0b11111101110110011110011111011110
-        # self.ship_value = 0b1000011111101111111111001111110
         print("Ship Value: {0}".format(bin(self.ship_value)))
 
         # Generate Colors
@@ -166,22 +172,27 @@ class ShipEditor:
         for y, row in enumerate(self.generated_ship):
             for x, cell in enumerate(row):
                 body_color = libtcod.Color(0, 0, 255)
+
                 hue = self.ship_hue[0]
                 if 6 <= y < 12:
                     if 4 <= x < 8:
                         hue = self.ship_hue[1]
                     else:
                         hue = self.ship_hue[2]
+
+
                 saturation = 0.6
                 if 2 <= x < 4 or 8 <= x < 10:
                     saturation = 0.8
                 elif 4 <= x < 8:
                     saturation = 1.0
+
                 lightness = 0.6
                 if 2 <= y < 4 or 8 <= y < 10:
                     lightness = 0.8
                 elif 4 <= y < 8:
                     lightness = 1.0
+                # lightness = 1 - (math.sqrt((x-7)**2 + (y-7)**2) / 10.0)
                 libtcod.color_set_hsv(body_color, hue, saturation, lightness)
 
                 # facing up
@@ -278,6 +289,9 @@ class ShipEditor:
                 self.rotate(self.rotation_angle)
             elif key_character == 'L':
                 self.load_frame(self.rotation_angle)
+            elif key_character in [str(i) for i in range(1, 10)]:
+                if int(key_character) < len(self.presets):
+                    self.generate_random_ship(self.presets[int(key_character)])
 
         if self.mouse.lbutton_pressed:
             if self.mouse.cx < 16 and self.mouse.cy < 16:
