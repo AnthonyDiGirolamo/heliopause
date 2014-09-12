@@ -334,16 +334,31 @@ class Game:
             self.buffer.blit(self.console)
             libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
 
+            # Galaxy Map Border/Frame
             libtcod.console_print_frame(self.galaxy_map_console, 0, 0, self.screen_width, self.screen_height,
                     clear=False, flag=libtcod.BKGND_SET, fmt=0)
-            title = "[ Galaxy Map - Seed: {0} - Current Sector: {1} - Target Sector: {2} ]".format(
-                self.galaxy.seed,
+
+            # Title in the center of the top border
+            top_title = "[ Galaxy Map ]"
+            libtcod.console_print_ex(self.galaxy_map_console,
+                    (self.screen_width/2) - (len(top_title)/2),
+                    0, libtcod.BKGND_SET, libtcod.LEFT, top_title)
+
+            # Title in the center of the bottom border
+            bottom_title = "[ Seed: {0} ]".format( self.galaxy.seed )
+            libtcod.console_print_ex(self.galaxy_map_console,
+                    (self.screen_width/2) - (len(bottom_title)/2),
+                    self.screen_height-1, libtcod.BKGND_SET, libtcod.LEFT, bottom_title)
+
+            # Extra info in upper right
+            info = ("Current Sector: {0}\n"
+                    "Target  Sector: {1}\n").format(
                 self.galaxy.sectors[self.galaxy.current_sector].name,
                 self.galaxy.sectors[ self.galaxy.sectors[self.galaxy.current_sector].neighbors[self.galaxy.targeted_sector_index] ].name
             )
             libtcod.console_print_ex(self.galaxy_map_console,
-                    (self.screen_width/2) - (len(title)/2),
-                    0, libtcod.BKGND_SET, libtcod.LEFT, title)
+                    1, 1, libtcod.BKGND_SET, libtcod.LEFT, info)
+
             libtcod.console_blit(self.galaxy_map_console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0, 1.0, 0.25)
             libtcod.console_flush()
 
