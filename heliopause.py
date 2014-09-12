@@ -307,8 +307,7 @@ class Game:
             elif key_character == 'P':
                 self.sector.target_nearest_planet(self.player_ship)
 
-            elif key_character == 'j':
-                self.current_screen = 'flight'
+            elif key_character == 'j' and self.current_screen == 'flight':
                 self.new_sector()
 
             elif key_character == 'S':

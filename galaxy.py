@@ -154,10 +154,18 @@ class Galaxy:
 
         # Draw Connecting Lines
         for index1, index2 in self.one_way_links:
-            if index1 == self.current_sector and index2 == self.sectors[self.current_sector].neighbors[self.targeted_sector_index] or index2 == self.current_sector and index1 == self.sectors[self.current_sector].neighbors[self.targeted_sector_index]:
-                color = libtcod.Color(255, 153, 0)
+            if index1 == self.current_sector and \
+               index2 == self.sectors[self.current_sector].neighbors[self.targeted_sector_index] or \
+               index2 == self.current_sector and \
+               index1 == self.sectors[self.current_sector].neighbors[self.targeted_sector_index]:
+                # if this is a line to the target sector
+                color = libtcod.Color(0, 255, 0)
+            elif self.sectors[index1].discovered() and self.sectors[index2].discovered():
+                # if this is a line between two discovered sectors
+                color = libtcod.Color(87, 186, 255)
             else:
-                color = libtcod.Color(0, 255, 255)
+                # else standard connecting line
+                color = libtcod.Color(150, 150, 150)
 
             libtcod.line_init(
                 self.sectors[index1].galaxy_position_x,
@@ -168,7 +176,7 @@ class Galaxy:
             x,y=libtcod.line_step()
             while x is not None:
                 # if self.sectors[index1].discovered() or self.sectors[index2].discovered():
-                buffer.set_fore(x, y, color[0], color[1], color[2], 4)
+                buffer.set_fore(x, y, color[0], color[1], color[2], 255)
                 x,y=libtcod.line_step()
 
         # Draw Sectors Nodes
