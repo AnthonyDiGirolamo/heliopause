@@ -41,6 +41,7 @@ class ShipEditor:
             0b1000011111101111111111001111110,
             0b10100001000010111110111001111110,
             0b100100001111111111001001110111,
+            0b101110011000110111100110111111,
         ]
 
     def create_ship_image(self):
@@ -162,12 +163,16 @@ class ShipEditor:
         self.generated_ship = ship_mask
         self.render_random_ship()
 
-    def render_random_ship(self):
+    def erase(self):
         for y in range(0, self.sprite_size):
             for x in range(0, self.sprite_size):
                 xcoord = x
                 ycoord = y
                 self.ship_buffer.set(xcoord, ycoord, 64, 64, 64, 0, 0, 0, 32)
+
+
+    def render_random_ship(self):
+        self.erase()
 
         for y, row in enumerate(self.generated_ship):
             for x, cell in enumerate(row):
@@ -219,8 +224,9 @@ class ShipEditor:
         self.create_ship_image()
         self.rotation_angle = 0
 
-    def load_frame(self, angle=0):
-        self.rotate(angle)
+    def load_frame(self, angle=None):
+        if angle:
+            self.rotate(angle)
 
         frame = [[] for i in range(0, self.sprite_size)]
 
@@ -287,8 +293,10 @@ class ShipEditor:
                 if self.rotation_angle > 350:
                     self.rotation_angle = 0
                 self.rotate(self.rotation_angle)
-            elif key_character == 'L':
-                self.load_frame(self.rotation_angle)
+            elif key_character == 'C':
+                self.erase()
+            elif key_character == 'P':
+                pp(self.load_frame(self.rotation_angle))
             elif key_character in [str(i) for i in range(1, 10)]:
                 if int(key_character) < len(self.presets):
                     self.generate_random_ship(self.presets[int(key_character)])

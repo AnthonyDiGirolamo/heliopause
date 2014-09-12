@@ -292,12 +292,12 @@ class Game:
 
             elif key_character == 'G':
                 self.player_ship.load_ship_sprites()
-            elif key_character == 'g':
+            elif self.key.vk == libtcod.KEY_TAB:
                 if self.current_screen == 'flight':
                     self.galaxy_map_loop()
                 else:
                     return 1 # exit galaxy loop
-            elif key_character == 't' and self.current_screen == 'galaxy':
+            elif key_character == '\\' and self.current_screen == 'galaxy':
                 self.galaxy.cycle_sector_target()
 
             elif key_character == 'm':
@@ -310,8 +310,10 @@ class Game:
 
             elif key_character == 'p':
                 self.sector.cycle_planet_target(self.player_ship)
+            elif key_character == 'P':
+                self.sector.target_nearest_planet(self.player_ship)
 
-            elif key_character == 'r':
+            elif key_character == 'j':
                 self.current_screen = 'flight'
                 self.new_sector()
 
@@ -432,13 +434,13 @@ if __name__ == '__main__':
     # libtcod.sys_set_renderer(libtcod.RENDERER_SDL)
     libtcod.console_set_keyboard_repeat(1, 10)
 
-    libtcod.console_set_custom_font('fonts/8x8_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+    # libtcod.console_set_custom_font('fonts/8x8_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
     # game = Game(160, 90)
 
     # libtcod.console_set_custom_font('fonts/10x10_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
     # game = Game(128, 72)
 
-    # libtcod.console_set_custom_font('fonts/12x12_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+    libtcod.console_set_custom_font('fonts/12x12_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
     game = Game(106, 60)
 
     game.main_loop()

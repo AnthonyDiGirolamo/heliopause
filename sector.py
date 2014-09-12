@@ -147,13 +147,16 @@ class Sector:
             y = size + 1 - int(p.sector_position_y / (size_reduction))
             if 0 < x < width-1 and 0 < y < height-1:
                 buffer.set(x, y, 0, 0, 0, p.icon_color[0], p.icon_color[1], p.icon_color[2], p.icon)
-                if self.selected_planet is not None and index == self.selected_planet:
-                    t = time.clock()
-                    if t > self.selected_blink + 0.5:
-                        if t > self.selected_blink + 1.0:
-                            self.selected_blink = t
-                        buffer.set(x+1, y, 0, 0, 0, 255, 255, 255, ord('>'))
-                        buffer.set(x-1, y, 0, 0, 0, 255, 255, 255, ord('<'))
+
+        if self.selected_planet is not None:
+            x = size + 1 + int(self.planets[self.selected_planet].sector_position_x / (size_reduction))
+            y = size + 1 - int(self.planets[self.selected_planet].sector_position_y / (size_reduction))
+            t = time.clock()
+            if t > self.selected_blink + 0.5:
+                if t > self.selected_blink + 1.0:
+                    self.selected_blink = t
+                buffer.set(x+1, y, 0, 0, 0, 0, 255, 0, 175)
+                buffer.set(x-1, y, 0, 0, 0, 0, 255, 0, 174)
 
         x = size + 1 + int(ship.sector_position_x / (size_reduction))
         y = size + 1 - int(ship.sector_position_y / (size_reduction))
@@ -175,13 +178,8 @@ class Sector:
             self.planets[self.selected_planet].selected = True
             self.update_selected_planet_distance(ship)
 
-    # def draw_target_arrow(self, ship):
-    #     x_component = math.cos(self.selected_planet_angle)
-    #     y_component = math.sin(self.selected_planet_angle)
-    #     x = ship.x+3
-    #     y = ship.y+3
-    #     self.buffer.set_fore(
-    #         int(round(x+x_component*8)),
-    #         int(round(y+y_component*-8)),
-    #         64, 255, 64, 219)
-
+    def target_nearest_planet(self, ship):
+        for p in self.planets:
+            p.selected = False
+        self.selected_planet, distance = self.closest_planet(ship)
+        self.planets[self.selected_planet].selected = True
