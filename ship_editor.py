@@ -224,9 +224,31 @@ class ShipEditor:
         self.create_ship_image()
         self.rotation_angle = 0
 
+    def fix_missing_border_pixels(self):
+        for i, cell in enumerate(self.ship_buffer):
+            x = i%self.sprite_size
+            y = int(i/self.sprite_size)
+            if 0 < x < self.sprite_size and 0 < y < self.sprite_size:
+                neighbor_indexes = [
+                    (x - 1) + (self.sprite_size * y),
+                    (x + 1) + (self.sprite_size * y),
+                    x + (self.sprite_size * (y - 1)),
+                    x + (self.sprite_size * (y + 1)),
+                ]
+                back_r, back_g, back_b, fore_r, fore_g, fore_b, c = cell
+                if c == 219 and (fore_r + fore_b + fore_g > 60) and (back_r + back_b + back_g > 60):
+                    for j in neighbor_indexes:
+                        xcoord = j%self.sprite_size
+                        ycoord = int(j/self.sprite_size)
+                        neighbor_cell = self.ship_buffer[j]
+                        if neighbor_cell == [64, 64, 64, 0, 0, 0, 32]:
+                            self.ship_buffer.set_fore(xcoord, ycoord, 0, 0, 0, 219)
+
     def load_frame(self, angle=None):
         if angle:
             self.rotate(angle)
+
+        self.fix_missing_border_pixels()
 
         frame = [[] for i in range(0, self.sprite_size)]
 
@@ -236,7 +258,7 @@ class ShipEditor:
             back_r, back_g, back_b, fore_r, fore_g, fore_b, c = cell
             alpha = 255
             if c == 32:
-                if back_r == 64 and back_b == 64 and back_b == 64:
+                if back_r == 64 and back_b == 64 and back_g == 64:
                     alpha = 0
                 frame[y].append( None )
             else:
@@ -288,11 +310,13 @@ class ShipEditor:
             key_character = chr(self.key.c)
             if key_character == 'G':
                 self.generate_random_ship()
-            elif key_character == 'R':
+            elif key_character == 'r':
                 self.rotation_angle += 10
                 if self.rotation_angle > 350:
                     self.rotation_angle = 0
                 self.rotate(self.rotation_angle)
+            elif key_character == 'b':
+                self.fix_missing_border_pixels()
             elif key_character == 'C':
                 self.erase()
             elif key_character == 'P':
@@ -308,6 +332,7 @@ class ShipEditor:
                  self.sprite_drawing_top <= self.mouse.cy < self.sprite_drawing_bottom:
                 xcoord = self.mouse.cx - self.sprite_drawing_left
                 ycoord = self.mouse.cy - self.sprite_drawing_top
+                pp(self.ship_buffer[ (xcoord) + (self.sprite_size * ycoord) ])
                 self.ship_buffer.set_fore(xcoord, ycoord, 0, 0, 0, self.selected_character)
 
     def main_loop(self):
