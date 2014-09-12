@@ -167,12 +167,16 @@ class Ship:
             self.velocity_component_x = 0.0
             self.velocity_component_y = 0.0
 
-    def point_towards(self, x, y):
-        pass
-        # math.acos((self.sector_position_x - x)*(self.sector_position_y - y))
-
     def face_system_center(self):
-        self.point_towards(0, 0)
+        try:
+            a = math.acos((self.sector_position_x * 1 +
+                self.sector_position_y * 0) / math.sqrt(self.sector_position_x**2 + self.sector_position_y**2))
+        except:
+            a = 0.0
+        if self.sector_position_y < 0:
+            a = (2*math.pi - a)
+
+        self.heading = a
 
     def about_face(self):
         if self.velocity > 0.0:
@@ -190,13 +194,14 @@ class Ship:
             sprite_index = 0
         return sprite_index
 
-    def draw(self):
+    def draw(self, startx=None, starty=None):
         ship = self.ship[ self.current_sprite_index() ]
 
-        self.update_location()
+        if not startx or not starty:
+            startx = self.x
+            starty = self.y
 
-        # threshold = 120*3
-        threshold = 0
+        self.update_location()
 
         for y, line in enumerate(ship):
             for x, cell in enumerate(line):
@@ -204,14 +209,8 @@ class Ship:
                     b = cell[0]
                     f = cell[1]
                     c = cell[2]
-                    b = self.sector.buffer.get_back(self.x + x, self.y + y)
-                    # if b[0] + b[1] + b[2] <= threshold:
-                    #     b = self.sector.buffer.get_back(self.x + x, self.y + y)
-                    # if f[0] + f[1] + f[2] <= threshold:
-                    #     f = self.sector.buffer.get_back(self.x + x, self.y + y)
-
-                    self.sector.buffer.set(self.x + x, self.y + y, b[0], b[1], b[2], f[0], f[1], f[2], c)
-                    # self.sector.buffer.set_fore(self.x + x, self.y + y, f[0], f[1], f[2], c)
+                    b = self.sector.buffer.get_back(startx + x, starty + y)
+                    self.sector.buffer.set(startx + x, starty + y, b[0], b[1], b[2], f[0], f[1], f[2], c)
 
     def fire_laser(self):
         x_component = math.cos(self.heading)

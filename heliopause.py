@@ -104,6 +104,11 @@ class Game:
 
             self.player_ship.sector = self.sector
             self.player_ship.dead_stop()
+            self.player_ship.velocity = int(self.player_ship.speed_limit / 2)
+            self.player_ship.face_system_center()
+            self.player_ship.about_face()
+            self.player_ship.velocity_angle = self.player_ship.heading
+            self.player_ship.apply_thrust()
 
             self.clear_messages()
             self.add_message("Arriving in {0}".format(self.galaxy.sectors[self.galaxy.current_sector].name))
@@ -212,14 +217,6 @@ class Game:
             )
             libtcod.console_blit(self.targeting_console, 0, 0, self.targeting_width, self.targeting_height, 0, 0, 0, 1.0, 0.25)
 
-        try:
-            a = math.degrees(math.acos((self.player_ship.sector_position_x * 1 +
-                self.player_ship.sector_position_y * 0) / math.sqrt(self.player_ship.sector_position_x**2 + self.player_ship.sector_position_y**2)))
-        except:
-            a = 0.0
-        if self.player_ship.sector_position_y < 0:
-            a = (360.0 - a)
-
         # Ship Info
         libtcod.console_print_frame(self.ship_info_console, 0, 0, self.ship_info_width, self.ship_info_height, clear=True, flag=libtcod.BKGND_SET, fmt=0)
         libtcod.console_print_ex(self.ship_info_console, 1, 1, libtcod.BKGND_SET, libtcod.LEFT,
@@ -230,15 +227,12 @@ class Game:
                   "Nebula Position:\n"
                   "l:{4} r:{5}\n"
                   "t:{6} b:{7}\n"
-                  "angle to center:\n"
-                  "{8}\n"
                 ).format(
                     round(math.degrees(self.player_ship.heading),2),
                     round(self.player_ship.velocity,2),
                     round(math.degrees(self.player_ship.velocity_angle),2),
                     len(self.sector.particles),
                     self.nebula.left, self.nebula.right, self.nebula.top, self.nebula.bottom
-                    , a
             ).ljust(self.ship_info_width-2)
         )
         libtcod.console_blit(self.ship_info_console, 0, 0, self.ship_info_width, self.ship_info_height, 0, self.screen_width-self.ship_info_width, self.screen_height-self.ship_info_height-self.message_height, 1.0, 0.25)
