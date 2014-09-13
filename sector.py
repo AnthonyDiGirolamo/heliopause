@@ -142,7 +142,7 @@ class Sector:
         size = int((width-3) / 2.0)
         size_reduction = (zoom*distance)/size
 
-        for index, p in enumerate(self.planets + self.asteroids):
+        for index, p in enumerate(self.asteroids + self.planets):
             x = size + 1 + int(p.sector_position_x / (size_reduction))
             y = size + 1 - int(p.sector_position_y / (size_reduction))
             if 0 < x < width-1 and 0 < y < height-1:

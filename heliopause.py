@@ -203,16 +203,20 @@ class Game:
             libtcod.console_print_ex(self.targeting_console, 1, 16, libtcod.BKGND_SET, libtcod.LEFT,
                 "\n  ".join(name)+"\n"
             )
+
+            planet_class = planet.planet_class.title()
+            if planet.star_class:
+                planet_class += " ({0})".format(planet.star_class)
+
             libtcod.console_print_ex(self.targeting_console, 1, 17+len(name), libtcod.BKGND_SET, libtcod.LEFT,
-                (
-                  " Class: {0}\n\n"
-                  " Distance: {1}\n"
-                  " Seed: {2}\n"
+                ( " Class: {0}\n{1}\n"
+                  " Distance: {2}\n"
+                  " Seed: {3}"
                 ).format(
-                    planet.planet_class.title(),
+                    planet_class,
+                    " Temp: {0} K\n".format(planet.star_temp) if planet.star_temp else "",
                     int(self.sector.selected_planet_distance()),
                     planet.seed,
-                    # round(math.degrees(self.sector.selected_planet_angle))
                 )
             )
             libtcod.console_blit(self.targeting_console, 0, 0, self.targeting_width, self.targeting_height, 0, 0, 0, 1.0, 0.25)

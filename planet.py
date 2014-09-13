@@ -20,9 +20,11 @@ class Planet(object):
         'M': { 'colors': [ libtcod.Color(255, 172, 106), libtcod.Color(255, 128,  75), libtcod.Color(254,  56,  19) ], 'temp': [2500,   3500] },
      }
 
-    def __init__(self, sector, planet_class='terran', position_x=-30, position_y=30, diameter=60, seed=3849058430, name="X"):
+    def __init__(self, sector, planet_class='terran', position_x=-30, position_y=30, diameter=60, seed=3849058430, name="X", star_class=None, star_temp=None):
         self.name = name
         self.planet_class = planet_class
+        self.star_class = star_class
+        self.star_temp = star_temp
         self.seed = seed
         self.sector = sector
         self.sector_position_x = position_x
@@ -245,6 +247,9 @@ class Planet(object):
 
         elif self.planet_class == 'star':
             self.star_class = random.choice(Planet.star_classes.keys())
+            self.star_temp = random.randrange(
+                    Planet.star_classes[self.star_class]['temp'][0],
+                    Planet.star_classes[self.star_class]['temp'][1])
 
             star_colors = Planet.star_classes[self.star_class]['colors']
 
