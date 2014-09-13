@@ -25,7 +25,16 @@ class Planet(object):
         self.planet_class = planet_class
         self.star_class = star_class
         self.star_temp = star_temp
+
         self.seed = seed
+        random.seed(self.seed)
+
+        if self.planet_class == 'star':
+            self.star_class = random.choice(Planet.star_classes.keys())
+            self.star_temp = random.randrange(
+                    Planet.star_classes[self.star_class]['temp'][0],
+                    Planet.star_classes[self.star_class]['temp'][1])
+
         self.sector = sector
         self.sector_position_x = position_x
         self.sector_position_y = position_y
