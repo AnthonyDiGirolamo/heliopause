@@ -327,6 +327,7 @@ class Game:
         done = False
         while not done:
             libtcod.sys_check_for_event(libtcod.KEY_PRESSED|libtcod.KEY_RELEASED|libtcod.EVENT_MOUSE, self.key, self.mouse)
+            libtcod.console_clear(self.galaxy_map_console)
 
             self.starfield.draw()
             self.nebula.draw()

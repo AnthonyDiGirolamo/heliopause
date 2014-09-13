@@ -10,6 +10,15 @@ import libtcodpy as libtcod
 
 class Planet(object):
     classes = [ 'arid', 'artic', 'barren', 'desert', 'gas giant', 'jungle', 'lava', 'ocean', 'tundra', 'terran' ]
+    star_classes = {
+        'O': { 'colors': [ libtcod.Color(214, 208, 255), libtcod.Color(183, 179, 255), libtcod.Color(152, 149, 255) ], 'temp': [28000, 50000] },
+        'B': { 'colors': [ libtcod.Color(254, 254, 254), libtcod.Color(225, 224, 255), libtcod.Color(204, 208, 255) ], 'temp': [10000, 28000] },
+        'F': { 'colors': [ libtcod.Color(255, 255, 255), libtcod.Color(243, 246, 255), libtcod.Color(247, 247, 247) ], 'temp': [6000,  75000] },
+        'A': { 'colors': [ libtcod.Color(255, 255, 255), libtcod.Color(248, 248, 248), libtcod.Color(234, 235, 235) ], 'temp': [7500,  10000] },
+        'G': { 'colors': [ libtcod.Color(254, 249, 166), libtcod.Color(254, 253, 106), libtcod.Color(255, 242,  47) ], 'temp': [5000,   6000] },
+        'K': { 'colors': [ libtcod.Color(255, 231, 135), libtcod.Color(255, 213,  49), libtcod.Color(253, 203,  56) ], 'temp': [3500,   5000] },
+        'M': { 'colors': [ libtcod.Color(255, 172, 106), libtcod.Color(255, 128,  75), libtcod.Color(254,  56,  19) ], 'temp': [2500,   3500] },
+     }
 
     def __init__(self, sector, planet_class='terran', position_x=-30, position_y=30, diameter=60, seed=3849058430, name="X"):
         self.name = name
@@ -235,16 +244,16 @@ class Planet(object):
 
 
         elif self.planet_class == 'star':
-            star_colors = random.choice([
-                [libtcod.Color(255, 222, 0), libtcod.Color(232, 112, 26)],
-                [libtcod.Color(211, 230, 255), libtcod.Color(128, 181, 255)],
-            ])
+            self.star_class = random.choice(Planet.star_classes.keys())
+
+            star_colors = Planet.star_classes[self.star_class]['colors']
+
             self.icon = 8
-            self.icon_color = star_colors[0]
+            self.icon_color = star_colors[2]
 
             self.height_colormap = collections.deque( libtcod.color_gen_map(
                 star_colors * 2 + [star_colors[0]],
-                [ 0, 64, 128, 192, 255] ))
+                [ 0, 42, 84, 126, 168, 210, 255] ))
             self.noise_octaves = 4.0
             self.noise_zoom = 4.0
 
