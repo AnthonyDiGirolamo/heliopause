@@ -15,7 +15,7 @@ from starfield import Starfield
 from asteroid import Asteroid
 
 class Galaxy:
-    def __init__(self, width, height, seed=7654):
+    def __init__(self, width, height, seed=5234):
         self.screen_width = width
         self.screen_height = height
         self.seed = seed
@@ -244,8 +244,14 @@ class SectorMap:
         return self.star_icon != ord('?')
 
     def new_star(self):
+        star_class = random.choice(Planet.star_classes.keys())
+        star_temp = random.randrange(
+                Planet.star_classes[star_class]['temp'][0],
+                Planet.star_classes[star_class]['temp'][1])
         self.planets.append( {
             "planet_class" : "star",
+            "star_class"   : star_class,
+            "star_temp"    : star_temp,
             "position_x"   : 0,
             "position_y"   : 0,
             "diameter"     : 50,

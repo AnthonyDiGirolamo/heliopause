@@ -13,8 +13,8 @@ class Planet(object):
     star_classes = {
         'O': { 'colors': [ libtcod.Color(214, 208, 255), libtcod.Color(183, 179, 255), libtcod.Color(152, 149, 255) ], 'temp': [28000, 50000] },
         'B': { 'colors': [ libtcod.Color(254, 254, 254), libtcod.Color(225, 224, 255), libtcod.Color(204, 208, 255) ], 'temp': [10000, 28000] },
-        'F': { 'colors': [ libtcod.Color(255, 255, 255), libtcod.Color(243, 246, 255), libtcod.Color(247, 247, 247) ], 'temp': [6000,  75000] },
         'A': { 'colors': [ libtcod.Color(255, 255, 255), libtcod.Color(248, 248, 248), libtcod.Color(234, 235, 235) ], 'temp': [7500,  10000] },
+        'F': { 'colors': [ libtcod.Color(255, 255, 255), libtcod.Color(243, 246, 255), libtcod.Color(247, 247, 247) ], 'temp': [6000,  7500] },
         'G': { 'colors': [ libtcod.Color(254, 249, 166), libtcod.Color(254, 253, 106), libtcod.Color(255, 242,  47) ], 'temp': [5000,   6000] },
         'K': { 'colors': [ libtcod.Color(255, 231, 135), libtcod.Color(255, 213,  49), libtcod.Color(253, 203,  56) ], 'temp': [3500,   5000] },
         'M': { 'colors': [ libtcod.Color(255, 172, 106), libtcod.Color(255, 128,  75), libtcod.Color(254,  56,  19) ], 'temp': [2500,   3500] },
