@@ -3,6 +3,7 @@
 
 import libtcodpy as libtcod
 import math
+import time
 import collections
 import textwrap
 from random import randrange, random, shuffle
@@ -28,7 +29,6 @@ class Game:
         self.console = libtcod.console_new(self.screen_width, self.screen_height)
 
         self.galaxy_map_console = libtcod.console_new(self.screen_width, self.screen_height)
-        self.current_screen = 'flight'
 
         self.set_minimap(20)
 
@@ -59,24 +59,88 @@ class Game:
         libtcod.console_set_default_foreground(self.landing_console, libtcod.white)
         libtcod.console_set_default_background(self.landing_console, libtcod.black)
 
+        self.mouse = libtcod.Mouse()
+        self.key = libtcod.Key()
+
+        galaxy_seed = self.title_screen_loop()
+
         # Loading Screen
         libtcod.console_set_default_background(self.console, libtcod.black)
         libtcod.console_clear(self.console)
 
-        self.mouse = libtcod.Mouse()
-        self.key = libtcod.Key()
-
-        self.galaxy = Galaxy(self.screen_width, self.screen_height)
+        self.galaxy = Galaxy(self.screen_width, self.screen_height, seed=galaxy_seed)
         self.sector, self.starfield, self.nebula = self.galaxy.sectors[self.galaxy.current_sector].load_sector(self.console, self.buffer)
 
         starting_planet = self.sector.planets[randrange(1, len(self.sector.planets))]
         self.player_ship = Ship(self.sector, starting_planet.sector_position_x, starting_planet.sector_position_y)
         self.add_message("Taking off from {0}".format(starting_planet.name))
+
+        self.current_screen = 'flight'
+
         # self.add_message("Nebula Colors: r:{0} g:{1} b:{2}".format(
         #     round(self.nebula.r_factor,2),
         #     round(self.nebula.g_factor,2),
         #     round(self.nebula.b_factor,2)))
 
+    def title_screen_loop(self):
+        self.current_screen = 'title'
+        self.sector = Sector(self.screen_width, self.screen_height, self.buffer)
+        self.starfield = Starfield(self.sector, max_stars=50)
+        self.nebula = Nebula(self.sector, r_factor=0.1, g_factor=0.1, b_factor=0.8, seed=123456)
+        self.ships = [ [ Ship(self.sector, 0, 0), [randrange(10) + 17*i, randrange(self.screen_height-16)] ] for i in range(randrange(3, 5)) ]
+        self
+
+        done = False
+        xpos = 0.0
+        speed = 1
+        galaxy_starting_seed = str(randrange(1,1000000))
+        cursor_blinked = 0.0
+        cursor = collections.deque(['|', ''])
+
+        while not done:
+            libtcod.sys_check_for_event(libtcod.KEY_PRESSED|libtcod.KEY_RELEASED|libtcod.EVENT_MOUSE, self.key, self.mouse)
+
+            self.starfield.scroll(0.0, speed)
+            self.starfield.draw()
+
+            self.sector.update_visibility(xpos, 0)
+            xpos += speed
+
+            self.nebula.draw()
+
+            for ship, position in self.ships:
+                ship.draw(startx=position[0], starty=position[1])
+
+            self.buffer.blit(self.console)
+
+            t = time.clock()
+            if t > cursor_blinked + 0.5:
+                cursor_blinked = t
+                cursor.rotate()
+
+            libtcod.console_print_ex(self.console, 1, 1, libtcod.BKGND_SET, libtcod.LEFT, "Heliopause")
+            libtcod.console_print_ex(self.console, 1, 2, libtcod.BKGND_SET, libtcod.LEFT, "Starting Seed: {0}{1}".format(galaxy_starting_seed, cursor[0]))
+            libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
+
+            libtcod.console_flush()
+
+            self.buffer.clear(self.sector.background[0], self.sector.background[1], self.sector.background[2])
+
+            # player_action = self.handle_keys_titlescreen()
+            if self.key.pressed and self.key.vk == libtcod.KEY_ESCAPE:
+                done = True
+            elif self.key.pressed and self.key.vk == libtcod.KEY_ENTER:
+                done = True
+            elif self.key.pressed and self.key.vk == libtcod.KEY_BACKSPACE:
+                if galaxy_starting_seed:
+                    galaxy_starting_seed = galaxy_starting_seed[:-1]
+            elif self.key.pressed:
+                key_character = chr(self.key.c)
+                if key_character in '1234567890':
+                    galaxy_starting_seed += key_character
+
+        del(self.ships)
+        return int(galaxy_starting_seed)
 
     def set_minimap(self, size):
         self.minimap_width  = size+3
@@ -211,12 +275,10 @@ class Game:
             libtcod.console_print_ex(self.targeting_console, 1, 17+len(name), libtcod.BKGND_SET, libtcod.LEFT,
                 ( " Class: {0}\n{1}\n"
                   " Distance: {2}\n"
-                  " Seed: {3}"
                 ).format(
                     planet_class,
                     " Temp: {0} K\n".format(planet.star_temp) if planet.star_temp else "",
                     int(self.sector.selected_planet_distance()),
-                    planet.seed,
                 )
             )
             libtcod.console_blit(self.targeting_console, 0, 0, self.targeting_width, self.targeting_height, 0, 0, 0, 1.0, 0.25)
@@ -317,6 +379,7 @@ class Game:
             elif key_character == 'S':
                 libtcod.sys_save_screenshot()
                 self.add_message("Saved screenshot")
+
 
     def clear_messages(self):
         self.messages.clear()
