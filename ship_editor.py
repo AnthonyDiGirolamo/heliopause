@@ -35,6 +35,9 @@ class ShipEditor:
         self.rotation_angle = 0
 
         self.presets = [
+            0b1010011101000010001010111110111,
+            0x2cd31bf7L,
+            0x50783136L,
             0b10100010101010100011011001000110,
             0b11110110101111101000001011010101,
             0b11111101110110011110011111011110,
@@ -111,7 +114,7 @@ class ShipEditor:
             self.ship_value = value
         else:
             self.ship_value = random.getrandbits(32)
-        print("Ship Value: {0}".format(bin(self.ship_value)))
+        print("Ship Value: {0}".format(hex(self.ship_value)))
 
         # Generate Colors
         self.ship_hue = []

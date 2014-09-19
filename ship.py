@@ -71,7 +71,7 @@ class Ship:
             self.ship.append( ship_editor.load_frame(angle) )
 
         self.engine_locations = []
-        for column in range(2, 4):
+        for column in range(2, 5):
             for y in range(0, ship_editor.sprite_size):
                 if self.ship[0][y][column]:
                     self.engine_locations.append([column, y])
@@ -136,9 +136,15 @@ class Ship:
         for thrust_posx, thrust_posy in self.engine_locations:
             point = [float(self.x + thrust_posx), float(self.y + thrust_posy)]
             h = math.radians(Ship.sprite_index_heading[self.current_sprite_index()])
-            temp_point = point[0]-self.center_point[0] , point[1]-self.center_point[1]
+            temp_point = [ point[0]-self.center_point[0], point[1]-self.center_point[1]]
             temp_point = [ temp_point[0]*math.cos(h)-temp_point[1]*math.sin(h) , temp_point[0]*math.sin(h)+temp_point[1]*math.cos(h) ]
-            temp_point = temp_point[0]+self.center_point[0] , temp_point[1]+self.center_point[1]
+            temp_point = [ temp_point[0]+self.center_point[0] , temp_point[1]+self.center_point[1] ]
+
+            if 2.748893571891069 <= self.heading < 3.5342917352885173:
+                temp_point[0] -= 1.0
+                temp_point[1] -= 1.0
+            elif 1.1780972450961724 <= self.heading < 1.9634954084936207:
+                temp_point[0] -= 1.0
 
             self.sector.add_particle(
                 ThrustExhaust(
