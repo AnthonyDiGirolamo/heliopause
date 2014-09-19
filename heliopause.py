@@ -235,7 +235,7 @@ class Game:
 
         self.sector.update_visibility(self.player_ship.sector_position_x, self.player_ship.sector_position_y)
 
-        # self.nebula.draw()
+        self.nebula.draw()
 
         for planet in self.sector.planets:
             planet.draw()
