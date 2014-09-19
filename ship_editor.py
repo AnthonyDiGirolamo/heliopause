@@ -5,6 +5,7 @@ import random
 import math
 import libtcodpy as libtcod
 from PIL import Image
+from pyhq2x import hq2x
 
 import pprint
 pp = pprint.PrettyPrinter(indent=4, width=200).pprint
@@ -27,10 +28,16 @@ class ShipEditor:
         self.ship_buffer = libtcod.ConsoleBuffer(self.sprite_size, self.sprite_size)
         self.ship_console = libtcod.console_new(self.sprite_size, self.sprite_size)
 
+        self.ship_buffer2x = libtcod.ConsoleBuffer(self.sprite_size*2, self.sprite_size*2)
+        self.ship_console2x = libtcod.console_new(self.sprite_size*2, self.sprite_size*2)
+
         self.sprite_drawing_left   = 16 + 1
         self.sprite_drawing_top    = 1
         self.sprite_drawing_right  = self.sprite_drawing_left + self.sprite_size
         self.sprite_drawing_bottom = self.sprite_drawing_top + self.sprite_size
+
+        self.sprite_drawing_left2x   = 16 + 16 + 2 + 1
+        self.sprite_drawing_top2x    = 1
 
         self.rotation_angle = 0
 
@@ -66,6 +73,21 @@ class ShipEditor:
                 pixels[x, y] = (fore_r, fore_g, fore_b, alpha)
 
         # self.ship_original_image.save("rship_test_000.png")
+        self.render_hq2x()
+
+    def render_hq2x(self, image=None):
+        image = image if image else self.ship_original_image
+        ship_hq2x = hq2x(image)
+        hq2x_pixels = ship_hq2x.load()
+        for y in range(0, self.sprite_size*2):
+            for x in range(0, self.sprite_size*2):
+                self.ship_buffer2x.set(x, y, 64, 64, 64, 0, 0, 0, 32)
+        for i, cell in enumerate(self.ship_buffer2x):
+            x = i%(self.sprite_size*2)
+            y = int(i/(self.sprite_size*2))
+            # if hq2x_pixels[x, y][3] > 0:
+            self.ship_buffer2x.set_fore(x, y, hq2x_pixels[x,y][0], hq2x_pixels[x,y][1], hq2x_pixels[x,y][2], 219)
+            self.ship_buffer2x.set_back(x, y, hq2x_pixels[x,y][0], hq2x_pixels[x,y][1], hq2x_pixels[x,y][2])
 
     def rotate(self, angle=0):
         if angle in [0, 90, 180, 270]:
@@ -92,6 +114,8 @@ class ShipEditor:
             if rotated_pixels[x, y][3] > 0:
                 self.ship_buffer.set_fore(x, y, rotated_pixels[x,y][0], rotated_pixels[x,y][1], rotated_pixels[x,y][2], 219)
                 self.ship_buffer.set_back(x, y, rotated_pixels[x,y][0], rotated_pixels[x,y][1], rotated_pixels[x,y][2])
+
+        self.render_hq2x(rotated_image)
 
     def generate_random_ship(self, value=None):
         ship_frame = []
@@ -174,7 +198,6 @@ class ShipEditor:
                 xcoord = x
                 ycoord = y
                 self.ship_buffer.set(xcoord, ycoord, 64, 64, 64, 0, 0, 0, 32)
-
 
     def render_random_ship(self):
         self.erase()
@@ -284,11 +307,15 @@ class ShipEditor:
         libtcod.console_print_ex(self.console, 0, 17, libtcod.BKGND_SET, libtcod.LEFT,
             "Selected: {0}".format( self.selected_character ))
 
+        # Ship at 1x size
         libtcod.console_print_frame(self.console, self.sprite_size, 0, self.sprite_size+2, self.sprite_size+2, clear=False, flag=libtcod.BKGND_SET, fmt=0)
-
-
         self.ship_buffer.blit(self.ship_console)
         libtcod.console_blit(self.ship_console, 0, 0, self.sprite_size, self.sprite_size, self.console, self.sprite_drawing_left, self.sprite_drawing_top, 1.0, 1.0)
+
+        # Ship at 2x size
+        libtcod.console_print_frame(self.console, self.sprite_size*2+2, 0, self.sprite_size*2+2, self.sprite_size*2+2, clear=False, flag=libtcod.BKGND_SET, fmt=0)
+        self.ship_buffer2x.blit(self.ship_console2x)
+        libtcod.console_blit(self.ship_console2x, 0, 0, self.sprite_size*2, self.sprite_size*2, self.console, self.sprite_drawing_left2x, self.sprite_drawing_top2x, 1.0, 1.0)
 
         libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
         libtcod.console_flush()
