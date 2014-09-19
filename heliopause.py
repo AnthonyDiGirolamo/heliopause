@@ -86,12 +86,12 @@ class Game:
         self.current_screen = 'title'
         self.sector = Sector(self.screen_width, self.screen_height, self.buffer)
         self.starfield = Starfield(self.sector, max_stars=50)
-        self.nebula = Nebula(self.sector, r_factor=0.1, g_factor=0.1, b_factor=0.8, seed=123456)
+        self.nebula = Nebula(self.sector, r_factor=random(), g_factor=random(), b_factor=random(), seed=randrange(1,1000000))
         self.ships = [ [ Ship(self.sector, 0, 0), [self.screen_width/2-16, self.screen_height/2-8] ] for i in range(1) ]
 
         done = False
         xpos = 0.0
-        speed = 1
+        speed = 3
         galaxy_starting_seed = str(randrange(1,1000000))
         cursor_blinked = 0.0
         cursor = collections.deque(['|', ''])
@@ -120,8 +120,8 @@ class Game:
                 cursor_blinked = t
                 cursor.rotate()
 
-            libtcod.console_print_ex(self.console, 1, 1, libtcod.BKGND_SET, libtcod.LEFT, "Heliopause")
-            libtcod.console_print_ex(self.console, 1, 2, libtcod.BKGND_SET, libtcod.LEFT, "Starting Seed: {0}{1}".format(galaxy_starting_seed, cursor[0]))
+            libtcod.console_print_ex(self.console, 1, 1, libtcod.BKGND_NONE, libtcod.LEFT, "Heliopause")
+            libtcod.console_print_ex(self.console, 1, 2, libtcod.BKGND_NONE, libtcod.LEFT, "Starting Seed: {0}{1}".format(galaxy_starting_seed, cursor[0]))
             libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
 
             libtcod.console_flush()
@@ -130,7 +130,7 @@ class Game:
 
             # player_action = self.handle_keys_titlescreen()
             if self.key.pressed and self.key.vk == libtcod.KEY_ESCAPE:
-                done = True
+                exit(0)
             elif self.key.pressed and self.key.vk == libtcod.KEY_ENTER:
                 done = True
             elif self.key.pressed and self.key.vk == libtcod.KEY_BACKSPACE:
@@ -140,6 +140,9 @@ class Game:
                 key_character = chr(self.key.c)
                 if key_character in '1234567890':
                     galaxy_starting_seed += key_character
+                elif key_character == 'G':
+                    for ship, position in self.ships:
+                        ship.load_ship_sprites()
 
         del(self.ships)
         return int(galaxy_starting_seed)

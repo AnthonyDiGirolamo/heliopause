@@ -86,7 +86,7 @@ class ShipEditor:
             x = i%(self.sprite_size*2)
             y = int(i/(self.sprite_size*2))
             r, g, b = [hq2x_pixels[x,y][0], hq2x_pixels[x,y][1], hq2x_pixels[x,y][2]]
-            if [r, g, b] == [16, 16, 16]:
+            if [r, g, b] == [32, 32, 32] or [r, g, b] == [16, 16, 16]:
                 r = 0
                 g = 0
                 b = 0
