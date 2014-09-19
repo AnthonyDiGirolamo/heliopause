@@ -87,8 +87,7 @@ class Game:
         self.sector = Sector(self.screen_width, self.screen_height, self.buffer)
         self.starfield = Starfield(self.sector, max_stars=50)
         self.nebula = Nebula(self.sector, r_factor=0.1, g_factor=0.1, b_factor=0.8, seed=123456)
-        self.ships = [ [ Ship(self.sector, 0, 0), [randrange(10) + 17*i, randrange(self.screen_height-16)] ] for i in range(randrange(3, 5)) ]
-        self
+        self.ships = [ [ Ship(self.sector, 0, 0), [self.screen_width/2-16, self.screen_height/2-8] ] for i in range(1) ]
 
         done = False
         xpos = 0.0
@@ -109,7 +108,10 @@ class Game:
             self.nebula.draw()
 
             for ship, position in self.ships:
-                ship.draw(startx=position[0], starty=position[1])
+                # ship.heading += math.radians(10)
+                # if math.degrees(ship.heading) > 350:
+                #     ship.heading = 0
+                ship.draw(startx=position[0], starty=position[1], hq2x=True)
 
             self.buffer.blit(self.console)
 
@@ -233,7 +235,7 @@ class Game:
 
         self.sector.update_visibility(self.player_ship.sector_position_x, self.player_ship.sector_position_y)
 
-        self.nebula.draw()
+        # self.nebula.draw()
 
         for planet in self.sector.planets:
             planet.draw()
@@ -290,15 +292,15 @@ class Game:
                   " Velocity: {1}\n"
                   " VelAngle: {2}\n"
                   "Particles: {3}\n"
-                  "Nebula Position:\n"
-                  "l:{4} r:{5}\n"
-                  "t:{6} b:{7}\n"
+                  # "Nebula Position:\n"
+                  # "l:{4} r:{5}\n"
+                  # "t:{6} b:{7}\n"
                 ).format(
                     round(math.degrees(self.player_ship.heading),2),
                     round(self.player_ship.velocity,2),
                     round(math.degrees(self.player_ship.velocity_angle),2),
                     len(self.sector.particles),
-                    self.nebula.left, self.nebula.right, self.nebula.top, self.nebula.bottom
+                    # self.nebula.left, self.nebula.right, self.nebula.top, self.nebula.bottom
             ).ljust(self.ship_info_width-2)
         )
         libtcod.console_blit(self.ship_info_console, 0, 0, self.ship_info_width, self.ship_info_height, 0, self.screen_width-self.ship_info_width, self.screen_height-self.ship_info_height-self.message_height, 1.0, 0.25)

@@ -85,11 +85,16 @@ class ShipEditor:
         for i, cell in enumerate(self.ship_buffer2x):
             x = i%(self.sprite_size*2)
             y = int(i/(self.sprite_size*2))
-            # if hq2x_pixels[x, y][3] > 0:
-            self.ship_buffer2x.set_fore(x, y, hq2x_pixels[x,y][0], hq2x_pixels[x,y][1], hq2x_pixels[x,y][2], 219)
-            self.ship_buffer2x.set_back(x, y, hq2x_pixels[x,y][0], hq2x_pixels[x,y][1], hq2x_pixels[x,y][2])
+            r, g, b = [hq2x_pixels[x,y][0], hq2x_pixels[x,y][1], hq2x_pixels[x,y][2]]
+            if [r, g, b] == [16, 16, 16]:
+                r = 0
+                g = 0
+                b = 0
+            if (r == 0 and g == 0 and b == 0) or r != g != b:
+                self.ship_buffer2x.set_fore(x, y, r, g, b, 219)
+                self.ship_buffer2x.set_back(x, y, r, g, b)
 
-    def rotate(self, angle=0):
+    def rotate(self, angle=0, hq2x=False):
         if angle in [0, 90, 180, 270]:
             rotated_image = self.ship_original_image.rotate(angle, resample=Image.NEAREST)
         else:
@@ -115,7 +120,8 @@ class ShipEditor:
                 self.ship_buffer.set_fore(x, y, rotated_pixels[x,y][0], rotated_pixels[x,y][1], rotated_pixels[x,y][2], 219)
                 self.ship_buffer.set_back(x, y, rotated_pixels[x,y][0], rotated_pixels[x,y][1], rotated_pixels[x,y][2])
 
-        self.render_hq2x(rotated_image)
+        if hq2x:
+            self.render_hq2x(image=rotated_image)
 
     def generate_random_ship(self, value=None):
         ship_frame = []
@@ -272,17 +278,21 @@ class ShipEditor:
                         if neighbor_cell == [64, 64, 64, 0, 0, 0, 32]:
                             self.ship_buffer.set_fore(xcoord, ycoord, 0, 0, 0, 219)
 
-    def load_frame(self, angle=None):
+    def load_frame(self, angle=None, hq2x=False):
         if angle:
-            self.rotate(angle)
+            self.rotate(angle, hq2x=hq2x)
 
         self.fix_missing_border_pixels()
 
-        frame = [[] for i in range(0, self.sprite_size)]
+        size = self.sprite_size*2 if hq2x else self.sprite_size
+        b = self.ship_buffer2x if hq2x else self.ship_buffer
+        frame = [[] for i in range(0, size)]
 
-        for i, cell in enumerate(self.ship_buffer):
-            x = i%self.sprite_size
-            y = int(i/self.sprite_size)
+        for i, cell in enumerate(b):
+            x = i%size
+            y = int(i/size)
+            # if hq2x:
+            #     pp(cell)
             back_r, back_g, back_b, fore_r, fore_g, fore_b, c = cell
             alpha = 255
             if c == 32:

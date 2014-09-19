@@ -64,11 +64,16 @@ class Ship:
             return ord('>')
 
     def load_ship_sprites(self):
-        self.ship = []
         ship_editor = ShipEditor()
         ship_editor.generate_random_ship()
+
+        self.ship = []
         for angle in range(0, 360, 10):
             self.ship.append( ship_editor.load_frame(angle) )
+
+        self.ship2x = []
+        for angle in [0, 90, 180, 270]:
+            self.ship2x.append( ship_editor.load_frame(angle, hq2x=True) )
 
         self.engine_locations = []
         for column in range(2, 5):
@@ -200,8 +205,10 @@ class Ship:
             sprite_index = 0
         return sprite_index
 
-    def draw(self, startx=None, starty=None):
+    def draw(self, startx=None, starty=None, hq2x=False):
         ship = self.ship[ self.current_sprite_index() ]
+        if hq2x:
+            ship = self.ship2x[int((self.current_sprite_index()*10)/90)]
 
         if not startx or not starty:
             startx = self.x
