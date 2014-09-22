@@ -30,6 +30,7 @@ class Sector:
         self.particles = []
 
         self.selected_planet = None
+        self.selected_asteroid = None
         self.selected_blink = 0
 
     def mirror_y_coordinate(self, y):
@@ -42,6 +43,7 @@ class Sector:
 
     def add_asteroid(self, **keyword_args):
         self.asteroids.append(Asteroid(sector=self, **keyword_args))
+        self.asteroid_distances = [None for p in self.asteroids]
         return [self.asteroids[-1].icon, self.asteroids[-1].icon_color, len(self.asteroids)]
 
     def update_visibility(self, player_sector_position_x, player_sector_position_y):
@@ -57,8 +59,11 @@ class Sector:
         return math.sqrt(ship.sector_position_x**2 + ship.sector_position_y**2)
 
     def update_selected_planet_distance(self, ship):
-        planet = self.planets[self.selected_planet]
-        self.planet_distances[self.selected_planet] = math.sqrt((ship.sector_position_x - planet.sector_position_x)**2.0 + (ship.sector_position_y - planet.sector_position_y)**2.0)
+        planet = self.get_selected_planet()
+        if self.selected_planet is not None:
+            self.planet_distances[self.selected_planet] = math.sqrt((ship.sector_position_x - planet.sector_position_x)**2.0 + (ship.sector_position_y - planet.sector_position_y)**2.0)
+        elif self.selected_asteroid is not None:
+            self.asteroid_distances[self.selected_asteroid] = math.sqrt((ship.sector_position_x - planet.sector_position_x)**2.0 + (ship.sector_position_y - planet.sector_position_y)**2.0)
 
         newx = planet.sector_position_x - ship.sector_position_x
         newy = planet.sector_position_y - ship.sector_position_y
@@ -73,13 +78,20 @@ class Sector:
             self.selected_planet_angle += math.pi
 
     def get_selected_planet(self):
-        return self.planets[self.selected_planet]
+        if self.selected_planet is not None:
+            return self.planets[self.selected_planet]
+        elif self.selected_asteroid is not None:
+            return self.asteroids[self.selected_asteroid]
 
     def selected_planet_distance(self):
-        return self.planet_distances[self.selected_planet]
+        if self.selected_planet is not None:
+            return self.planet_distances[self.selected_planet]
+        elif self.selected_asteroid is not None:
+            return self.asteroid_distances[self.selected_asteroid]
 
     def update_all_planet_distances(self, ship):
         self.planet_distances = [ math.sqrt((ship.sector_position_x - planet.sector_position_x)**2.0 + (ship.sector_position_y - planet.sector_position_y)**2.0) for planet in self.planets]
+        self.asteroid_distances = [ math.sqrt((ship.sector_position_x - asteroid.sector_position_x)**2.0 + (ship.sector_position_y - asteroid.sector_position_y)**2.0) for asteroid in self.asteroids]
 
     def closest_planet(self, ship):
         self.update_all_planet_distances(ship)
@@ -90,6 +102,16 @@ class Sector:
                 nearest_planet_index = index
                 smallest_distance = distance
         return [nearest_planet_index, smallest_distance]
+
+    def closest_asteroid(self, ship):
+        self.update_all_planet_distances(ship)
+        nearest_asteroid_index = 0
+        smallest_distance = None
+        for index, distance in enumerate(self.asteroid_distances):
+            if smallest_distance is None or distance < smallest_distance:
+                nearest_asteroid_index = index
+                smallest_distance = distance
+        return [nearest_asteroid_index, smallest_distance]
 
     def land_at_closest_planet(self, ship):
         landed = False
@@ -164,6 +186,8 @@ class Sector:
             buffer.set_fore(x, y, 255, 255, 255, ship.icon())
 
     def cycle_planet_target(self, ship):
+        self.deselect_asteroid()
+
         if self.selected_planet == None:
             self.selected_planet = 0
         else:
@@ -178,8 +202,43 @@ class Sector:
             self.planets[self.selected_planet].selected = True
             self.update_selected_planet_distance(ship)
 
+    def deselect_planet(self):
+        if self.selected_planet is not None:
+            self.selected_planet = None
+            for p in self.planets:
+                p.selected = False
+
+    def deselect_asteroid(self):
+        if self.selected_asteroid is not None:
+            self.selected_asteroid = None
+            for p in self.asteroids:
+                p.selected = False
+
+    def cycle_target(self, ship):
+        self.deselect_planet()
+
+        if self.selected_asteroid == None:
+            self.selected_asteroid = 0
+        else:
+            self.selected_asteroid += 1
+
+        if self.selected_asteroid == len(self.asteroids):
+            self.selected_asteroid = None
+
+        if self.selected_asteroid is not None:
+            for p in self.asteroids:
+                p.selected = False
+            self.asteroids[self.selected_asteroid].selected = True
+            self.update_selected_planet_distance(ship)
+            # self.update_selected_asteroid_distance(ship)
+
     def target_nearest_planet(self, ship):
-        for p in self.planets:
-            p.selected = False
+        self.deselect_asteroid()
         self.selected_planet, distance = self.closest_planet(ship)
         self.planets[self.selected_planet].selected = True
+
+    def target_nearest_asteroid(self, ship):
+        self.deselect_planet()
+        self.selected_asteroid, distance = self.closest_asteroid(ship)
+        self.asteroids[self.selected_asteroid].selected = True
+

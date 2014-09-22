@@ -176,7 +176,7 @@ class Galaxy:
             x,y=libtcod.line_step()
             while x is not None:
                 # if self.sectors[index1].discovered() or self.sectors[index2].discovered():
-                buffer.set_fore(x, y, color[0], color[1], color[2], 255)
+                buffer.set_fore(x, y, color[0], color[1], color[2], ord('o'))
                 x,y=libtcod.line_step()
 
         # Draw Sectors Nodes
@@ -260,7 +260,7 @@ class SectorMap:
             "position_y"   : random.randrange(-1000,1001),
             "diameter"     : random.randrange(5, 8),
             "seed"         : random.randrange(1,1000000),
-            "name"         : "Asteroid",
+            "name"         : "A-{0}".format(len(self.asteroids)),
         } )
 
     def new_planet(self):

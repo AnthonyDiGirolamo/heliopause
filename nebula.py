@@ -60,14 +60,12 @@ class Nebula:
         return c
 
     def draw(self):
-        # ops = 0
         self.left   = left   = int((self.size/2) + (self.sector.visible_space_left * self.parallax_speed))
         self.top    = top    = int((self.size/2) + (self.sector.visible_space_top * self.parallax_speed))
         self.right  = right  = left + self.sector.screen_width
         self.bottom = bottom = top + self.sector.screen_height
 
         if self.last_left != left or self.last_top != top:
-            # print(repr([ left, top ]))
             for y in range(0, self.sector.screen_height+2):
                 self.grid[(left-1)%self.size][(top-1+y)%self.size] = None
                 self.grid[(right)%self.size][(top-1+y)%self.size] = None
@@ -87,7 +85,6 @@ class Nebula:
                     g = self.get_color_value(libtcod.noise_get_fbm(self.g_noise, f, self.noise_octaves, libtcod.NOISE_SIMPLEX), self.g_factor)
                     b = self.get_color_value(libtcod.noise_get_fbm(self.b_noise, f, self.noise_octaves, libtcod.NOISE_SIMPLEX), self.b_factor)
                     c = self.exponent_filter( (libtcod.noise_get_fbm(self.c_noise, f, self.noise_octaves, libtcod.NOISE_SIMPLEX) + 1.0) * 255 )
-                    # ops+=4
                     self.grid[(left+x)%self.size][(top+y)%self.size] = [
                         self.blend_colors( self.blend_multiply(r,c), self.blend_multiply(g,c), self.blend_multiply(b,c),
                         self.sector.background[0], self.sector.background[1], self.sector.background[2], 0.5), None ]
@@ -102,11 +99,15 @@ class Nebula:
                         bm = b * random.choice([1, 2, 3, 4, 5]) if b * 5 < 255 else 255
                         self.grid[(left+x)%self.size][(top+y)%self.size][1] = [rm, gm, bm]
 
+                # Set the nebula background color
                 r, g, b = self.grid[(left+x)%self.size][(top+y)%self.size][0]
                 self.sector.buffer.set_back(x, self.sector.mirror_y_coordinate(y), r, g, b)
+
+                # Create a Star
                 if self.grid[(left+x)%self.size][(top+y)%self.size][1]:
                     rm, gm, bm = self.grid[(left+x)%self.size][(top+y)%self.size][1]
                     self.sector.buffer.set_fore(x, self.sector.mirror_y_coordinate(y), rm, gm, bm, ord('.'))
+
         # end draw
 
     def blend_colors(self, r1, g1, b1, r2, g2, b2, alpha):

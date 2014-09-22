@@ -66,6 +66,7 @@ class Ship:
     def load_ship_sprites(self):
         ship_editor = ShipEditor()
         ship_editor.generate_random_ship()
+        self.ship_value = ship_editor.ship_value
 
         self.ship = []
         for angle in range(0, 360, 10):

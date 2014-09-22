@@ -39,8 +39,8 @@ class Game:
         libtcod.console_set_default_foreground(self.targeting_console, libtcod.white)
         libtcod.console_set_default_background(self.targeting_console, libtcod.black)
 
-        self.ship_info_width = 18
-        self.ship_info_height = 18
+        self.ship_info_width = 20
+        self.ship_info_height = 8
         self.ship_info_buffer  = libtcod.ConsoleBuffer(self.ship_info_width, self.ship_info_height)
         self.ship_info_console = libtcod.console_new(self.ship_info_width, self.ship_info_height)
         libtcod.console_set_default_foreground(self.ship_info_console, libtcod.white)
@@ -196,18 +196,19 @@ class Game:
         else:
             self.add_message("You are not far enough from the nearest planet to jump")
 
-    #TODO Better Collision Detection
     def check_for_collisions(self):
-        for asteroid in self.sector.asteroids:
+        asteroid_to_delete = None
+        for index, asteroid in enumerate(self.sector.asteroids):
             for p in self.sector.particles:
                 if p.bullet:
                     if asteroid.sector_position_x < p.sector_position_x < asteroid.sector_position_x+asteroid.width and \
                        asteroid.sector_position_y+1 < p.sector_position_y < asteroid.sector_position_y+1+asteroid.width:
                         asteroid.hp -= p.damage
                         if asteroid.hp < 0:
-                            for a in range(0, 30):
+                            for a in range(0, 60):
                                 self.sector.add_particle(
                                     ExplosionFireBall(
+                                        starting_index       = a/10,
                                         sector               = self.sector,
                                         x                    = p.x,
                                         y                    = p.y,
@@ -215,7 +216,8 @@ class Game:
                                         sector_position_y    = p.sector_position_y,
                                         angle                = randrange(0, 359),
                                         velocity             = random() * randrange(1,3)))
-                            self.sector.asteroids.remove(asteroid)
+                            # self.sector.asteroids.remove(asteroid)
+                            asteroid_to_delete = index
                         else:
                             self.sector.add_particle(
                                 Fire(
@@ -226,6 +228,8 @@ class Game:
                                     sector_position_y    = p.sector_position_y))
                         # delete the bullet that hit
                         self.sector.particles.remove(p)
+        if asteroid_to_delete is not None:
+            self.sector.asteroids.pop(asteroid_to_delete)
 
     def render_all(self):
         if self.player_ship.velocity > 0.0:
@@ -252,16 +256,16 @@ class Game:
 
         self.player_ship.draw()
 
-        if self.sector.selected_planet is not None:
+        if self.sector.selected_planet is not None or self.sector.selected_asteroid is not None:
             self.sector.update_selected_planet_distance(self.player_ship)
-            if self.sector.selected_planet_distance() > (self.screen_height/1.5):
+            if self.sector.selected_planet_distance() > (self.screen_height/2.0):
                 self.player_ship.draw_target_arrow(self.sector.selected_planet_angle)
                 # self.sector.draw_target_arrow(self.player_ship)
 
         self.buffer.blit(self.console)
         libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
 
-        if self.sector.selected_planet is not None:
+        if self.sector.selected_planet is not None or self.sector.selected_asteroid is not None:
             # Target window
             planet = self.sector.get_selected_planet()
             planet.draw_target_picture(self.targeting_buffer, 4, 2)
@@ -277,12 +281,18 @@ class Game:
             if planet.star_class:
                 planet_class += " ({0})".format(planet.star_class)
 
+            extra_info = ""
+            if planet.star_temp:
+                extra_info = "\n Temp: {0} K\n".format(planet.star_temp)
+            elif planet.planet_class == 'asteroid':
+                extra_info = "\n HP: {0} \n".format(planet.hp)
+
             libtcod.console_print_ex(self.targeting_console, 1, 17+len(name), libtcod.BKGND_SET, libtcod.LEFT,
                 ( " Class: {0}\n{1}\n"
                   " Distance: {2}\n"
                 ).format(
                     planet_class,
-                    " Temp: {0} K\n".format(planet.star_temp) if planet.star_temp else "",
+                    extra_info,
                     int(self.sector.selected_planet_distance()),
                 )
             )
@@ -295,6 +305,7 @@ class Game:
                   " Velocity: {1}\n"
                   " VelAngle: {2}\n"
                   "Particles: {3}\n"
+                  "Ship\nSeed: {4}\n"
                   # "Nebula Position:\n"
                   # "l:{4} r:{5}\n"
                   # "t:{6} b:{7}\n"
@@ -303,6 +314,7 @@ class Game:
                     round(self.player_ship.velocity,2),
                     round(math.degrees(self.player_ship.velocity_angle),2),
                     len(self.sector.particles),
+                    hex(self.player_ship.ship_value)
                     # self.nebula.left, self.nebula.right, self.nebula.top, self.nebula.bottom
             ).ljust(self.ship_info_width-2)
         )
@@ -377,6 +389,11 @@ class Game:
                 self.sector.cycle_planet_target(self.player_ship)
             elif key_character == 'P':
                 self.sector.target_nearest_planet(self.player_ship)
+
+            elif key_character == 't':
+                self.sector.cycle_target(self.player_ship)
+            elif key_character == 'T':
+                self.sector.target_nearest_asteroid(self.player_ship)
 
             elif key_character == 'j' and self.current_screen == 'flight':
                 self.new_sector()
@@ -518,10 +535,10 @@ if __name__ == '__main__':
     # libtcod.console_set_custom_font('fonts/8x8_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
     # game = Game(160, 90)
 
-    # libtcod.console_set_custom_font('fonts/10x10_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
-    # game = Game(128, 72)
+    libtcod.console_set_custom_font('fonts/10x10_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+    game = Game(128, 72)
 
-    libtcod.console_set_custom_font('fonts/12x12_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
-    game = Game(106, 60)
+    # libtcod.console_set_custom_font('fonts/12x12_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+    # game = Game(106, 60)
 
     game.main_loop()

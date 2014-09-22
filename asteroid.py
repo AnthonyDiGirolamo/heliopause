@@ -64,6 +64,31 @@ class Asteroid(Planet):
             maskx = start_maskx
             masky += 1
 
+        if self.selected and startingx < endingx and endingy < startingy:
+            self.sector.buffer.set_fore(startingx,   self.sector.mirror_y_coordinate(startingy),   64, 255, 64, 201)#218
+            # self.sector.buffer.set_fore(startingx+1, self.sector.mirror_y_coordinate(startingy),   64, 255, 64, 196)
+            # self.sector.buffer.set_fore(startingx+2, self.sector.mirror_y_coordinate(startingy),   64, 255, 64, 196)
+            # self.sector.buffer.set_fore(startingx,   self.sector.mirror_y_coordinate(startingy-1), 64, 255, 64, 179)
+            # self.sector.buffer.set_fore(startingx,   self.sector.mirror_y_coordinate(startingy-2), 64, 255, 64, 179)
+
+            self.sector.buffer.set_fore(endingx-1,   self.sector.mirror_y_coordinate(endingy+1),   64, 255, 64, 188)#217
+            # self.sector.buffer.set_fore(endingx-1-1, self.sector.mirror_y_coordinate(endingy+1),   64, 255, 64, 196)
+            # self.sector.buffer.set_fore(endingx-1-2, self.sector.mirror_y_coordinate(endingy+1),   64, 255, 64, 196)
+            # self.sector.buffer.set_fore(endingx-1,   self.sector.mirror_y_coordinate(endingy+1+1), 64, 255, 64, 179)
+            # self.sector.buffer.set_fore(endingx-1,   self.sector.mirror_y_coordinate(endingy+1+2), 64, 255, 64, 179)
+
+            self.sector.buffer.set_fore(endingx-1,   self.sector.mirror_y_coordinate(startingy),   64, 255, 64, 187)#191
+            # self.sector.buffer.set_fore(endingx-1-1, self.sector.mirror_y_coordinate(startingy),   64, 255, 64, 196)
+            # self.sector.buffer.set_fore(endingx-1-2, self.sector.mirror_y_coordinate(startingy),   64, 255, 64, 196)
+            # self.sector.buffer.set_fore(endingx-1,   self.sector.mirror_y_coordinate(startingy-1), 64, 255, 64, 179)
+            # self.sector.buffer.set_fore(endingx-1,   self.sector.mirror_y_coordinate(startingy-2), 64, 255, 64, 179)
+
+            self.sector.buffer.set_fore(startingx,   self.sector.mirror_y_coordinate(endingy+1),   64, 255, 64, 200)#192
+            # self.sector.buffer.set_fore(startingx+1, self.sector.mirror_y_coordinate(endingy+1),   64, 255, 64, 196)
+            # self.sector.buffer.set_fore(startingx+2, self.sector.mirror_y_coordinate(endingy+1),   64, 255, 64, 196)
+            # self.sector.buffer.set_fore(startingx,   self.sector.mirror_y_coordinate(endingy+1+1), 64, 255, 64, 179)
+            # self.sector.buffer.set_fore(startingx,   self.sector.mirror_y_coordinate(endingy+1+2), 64, 255, 64, 179)
+
         t = time.clock()
         if t > self.last_terrain_rotation + 0.5:
             self.last_terrain_rotation = t

@@ -108,10 +108,10 @@ class BlueBullet(Particle):
 
 
 class ExplosionFireBall(Particle):
-    def __init__(self, **kwargs):
+    def __init__(self, starting_index=0, **kwargs):
         self.bullet = False
         self.particle_type = 'explosion_fire_ball'
-        self.index = 16
+        self.index = 16 - starting_index
         self.colormap = libtcod.color_gen_map(
             [ kwargs.get('sector').background,
               libtcod.Color(81, 39, 23),
