@@ -9,7 +9,7 @@ from ship_editor import ShipEditor
 class Ship:
     sprite_index_heading = [a for a in range(0, 360, 10)]
 
-    def __init__(self, sector, posx=0.0, posy=0.0):
+    def __init__(self, sector, posx=0.0, posy=0.0, ship_value=None):
         self.sector = sector
         self.x = (self.sector.screen_width / 2) - 8
         self.y = (self.sector.screen_height / 2) - 8
@@ -38,6 +38,7 @@ class Ship:
         self.reversing     = False
         self.laser_firing  = False
 
+        self.ship_value = ship_value
         # self.ship = [libtcod.image_load('images/ship_{0}.png'.format(str(angle).zfill(3))) for angle in range(0, 360, 10)]
         self.load_ship_sprites()
 
@@ -64,7 +65,7 @@ class Ship:
             return ord('>')
 
     def load_ship_sprites(self):
-        ship_editor = ShipEditor()
+        ship_editor = ShipEditor(ship_value=self.ship_value)
         ship_editor.generate_random_ship()
         self.ship_value = ship_editor.ship_value
 
@@ -253,4 +254,3 @@ class Ship:
 
         b = self.sector.buffer.get_back(temp_point[0], temp_point[1])
         self.sector.buffer.set(temp_point[0], temp_point[1], b[0], b[1], b[2], 0, 255, 0, self.icon(angle))
-

@@ -13,6 +13,8 @@ pp = pprint.PrettyPrinter(indent=4, width=200).pprint
 class ShipEditor:
     def __init__(self, ship_value=None, screen_width=106, screen_height=60):
         random.seed()
+
+        self.ship_value = ship_value
         self.screen_width = screen_width
         self.screen_height = screen_height
 
@@ -123,6 +125,10 @@ class ShipEditor:
         if hq2x:
             self.render_hq2x(image=rotated_image)
 
+    def new_ship_seed(self):
+        self.ship_value = random.getrandbits(32)
+        return self.ship_value
+
     def generate_random_ship(self, value=None):
         ship_frame = []
         ship_mask = [
@@ -142,8 +148,8 @@ class ShipEditor:
 
         if value:
             self.ship_value = value
-        else:
-            self.ship_value = random.getrandbits(32)
+        elif self.ship_value is None:
+            self.new_ship_seed()
         print("Ship Value: {0}".format(hex(self.ship_value)))
 
         # Generate Colors
@@ -220,17 +226,20 @@ class ShipEditor:
                         hue = self.ship_hue[2]
 
 
+                # saturation = 0.8
                 saturation = 0.6
                 if 2 <= x < 4 or 8 <= x < 10:
                     saturation = 0.8
                 elif 4 <= x < 8:
                     saturation = 1.0
 
+                # lightness = 0.8
                 lightness = 0.6
                 if 2 <= y < 4 or 8 <= y < 10:
                     lightness = 0.8
                 elif 4 <= y < 8:
                     lightness = 1.0
+
                 # lightness = 1 - (math.sqrt((x-7)**2 + (y-7)**2) / 10.0)
                 libtcod.color_set_hsv(body_color, hue, saturation, lightness)
 
@@ -351,6 +360,7 @@ class ShipEditor:
         elif self.key.pressed:
             key_character = chr(self.key.c)
             if key_character == 'G':
+                self.new_ship_seed()
                 self.generate_random_ship()
             elif key_character == 'r':
                 self.rotation_angle += 10
@@ -398,3 +408,4 @@ if __name__ == '__main__':
     game = ShipEditor()
     libtcod.console_init_root(game.screen_width, game.screen_height, 'Heliopause Ship Editor', False)
     game.main_loop()
+

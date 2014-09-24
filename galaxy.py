@@ -176,7 +176,7 @@ class Galaxy:
             x,y=libtcod.line_step()
             while x is not None:
                 # if self.sectors[index1].discovered() or self.sectors[index2].discovered():
-                buffer.set_fore(x, y, color[0], color[1], color[2], ord('o'))
+                buffer.set_fore(x, y, color[0], color[1], color[2], 4)
                 x,y=libtcod.line_step()
 
         # Draw Sectors Nodes

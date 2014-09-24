@@ -6,7 +6,7 @@ import math
 import time
 import collections
 import textwrap
-from random import randrange, random, shuffle
+from random import randrange, random, shuffle, getrandbits
 import pprint
 pp = pprint.PrettyPrinter(indent=4, width=200).pprint
 
@@ -62,7 +62,7 @@ class Game:
         self.mouse = libtcod.Mouse()
         self.key = libtcod.Key()
 
-        galaxy_seed = self.title_screen_loop()
+        galaxy_seed, ship_value = self.title_screen_loop()
 
         # Loading Screen
         libtcod.console_set_default_background(self.console, libtcod.black)
@@ -72,7 +72,7 @@ class Game:
         self.sector, self.starfield, self.nebula = self.galaxy.sectors[self.galaxy.current_sector].load_sector(self.console, self.buffer)
 
         starting_planet = self.sector.planets[randrange(1, len(self.sector.planets))]
-        self.player_ship = Ship(self.sector, starting_planet.sector_position_x, starting_planet.sector_position_y)
+        self.player_ship = Ship(self.sector, starting_planet.sector_position_x, starting_planet.sector_position_y, ship_value=ship_value)
         self.add_message("Taking off from {0}".format(starting_planet.name))
 
         self.current_screen = 'flight'
@@ -142,10 +142,12 @@ class Game:
                     galaxy_starting_seed += key_character
                 elif key_character == 'G':
                     for ship, position in self.ships:
+                        ship.ship_value = getrandbits(32)
                         ship.load_ship_sprites()
 
+        ship_value = self.ships[0][0].ship_value
         del(self.ships)
-        return int(galaxy_starting_seed)
+        return int(galaxy_starting_seed), ship_value
 
     def set_minimap(self, size):
         self.minimap_width  = size+3
@@ -368,6 +370,7 @@ class Game:
                     self.landed_loop(planet_index)
 
             elif key_character == 'G':
+                self.player_ship.ship_value = getrandbits(32)
                 self.player_ship.load_ship_sprites()
             elif self.key.vk == libtcod.KEY_TAB:
                 if self.current_screen == 'flight':
