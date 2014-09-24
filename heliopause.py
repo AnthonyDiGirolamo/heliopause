@@ -96,6 +96,17 @@ class Game:
         cursor_blinked = 0.0
         cursor = collections.deque(['|', ''])
 
+        title = [
+            ' _    _      _ _',
+            '| |  | |    | (_)',
+            '| |__| | ___| |_  ___  _ __   __ _ _   _ ___  ___',
+            '|  __  |/ _ \\ | |/ _ \\| \'_ \\ / _` | | | / __|/ _ \\',
+            '| |  | |  __/ | | (_) | |_) | (_| | |_| \\__ \\  __/',
+            '|_|  |_|\\___|_|_|\\___/| .__/ \\__,_|\\__,_|___/\\___|',
+            '                      | |',
+            '                      |_|',
+        ]
+
         while not done:
             libtcod.sys_check_for_event(libtcod.KEY_PRESSED|libtcod.KEY_RELEASED|libtcod.EVENT_MOUSE, self.key, self.mouse)
 
@@ -120,8 +131,10 @@ class Game:
                 cursor_blinked = t
                 cursor.rotate()
 
-            libtcod.console_print_ex(self.console, 1, 1, libtcod.BKGND_NONE, libtcod.LEFT, "Heliopause")
-            libtcod.console_print_ex(self.console, 1, 2, libtcod.BKGND_NONE, libtcod.LEFT, "Starting Seed: {0}{1}".format(galaxy_starting_seed, cursor[0]))
+            for index, line in enumerate(title):
+                libtcod.console_print_ex(self.console, (self.screen_width/2)-26, 10+index, libtcod.BKGND_NONE, libtcod.LEFT, line)
+
+            libtcod.console_print_ex(self.console, 1, self.screen_height-2, libtcod.BKGND_NONE, libtcod.LEFT, "Starting Seed: {0}{1}".format(galaxy_starting_seed, cursor[0]))
             libtcod.console_blit(self.console, 0, 0, self.screen_width, self.screen_height, 0, 0, 0)
 
             libtcod.console_flush()
@@ -538,10 +551,10 @@ if __name__ == '__main__':
     # libtcod.console_set_custom_font('fonts/8x8_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
     # game = Game(160, 90)
 
-    libtcod.console_set_custom_font('fonts/10x10_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
-    game = Game(128, 72)
+    # libtcod.console_set_custom_font('fonts/10x10_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+    # game = Game(128, 72)
 
-    # libtcod.console_set_custom_font('fonts/12x12_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
-    # game = Game(106, 60)
+    libtcod.console_set_custom_font('fonts/12x12_limited.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW, nb_char_horiz=16, nb_char_vertic=16)
+    game = Game(106, 60)
 
     game.main_loop()
